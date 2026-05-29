@@ -1,0 +1,9 @@
+node_modules/
+data/
+# Sortie de build Vite (régénérée par `npm run build`).
+public/
+*.db
+*.db-shm
+*.db-wal
+npm-debug.log*
+.DS_Store

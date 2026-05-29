@@ -1,0 +1,314 @@
+// locales/en.js
+// English dictionary. Mirrors the structure of fr.js key-for-key so that any
+// missing key gracefully falls back to French (see i18n.js).
+
+export default {
+  nav: {
+    home: 'Home',
+    dates: 'Upcoming dates',
+    games: 'Our games',
+    infos: 'Practical info',
+    back: '← Back to the site',
+    logout: 'Log out',
+    admin: 'Administration',
+    menu: 'Menu',
+    theme: 'Theme',
+    lang: 'Language',
+  },
+
+  hero: {
+    script: "We're saving you a seat at the table!",
+    title_html: 'The <span class="accent">board game nights</span><br />of MJC Estrablin',
+    subtitle:
+      'Check out the upcoming dates, browse the available games library and come share a good time around the table.',
+    cta_dates: 'See upcoming dates',
+    cta_games: 'Browse the games',
+  },
+
+  dates: {
+    title: 'Upcoming nights',
+    sub: 'Click a night to locate it on the calendar and see the venue. The “See the games for this night” button opens the details.',
+    past_toggle: 'Also show past nights',
+    map_default: 'Select a date to see the venue.',
+    map_none: 'No night on this date.',
+    coords_missing: 'Venue coordinates not set.',
+    none_upcoming: 'No dates scheduled yet. Check back soon!',
+    none_past: 'No past nights.',
+    load_error: 'Could not load the dates ({error}).',
+  },
+
+  gamesPreview: {
+    title: 'Our games library',
+    sub_default: 'A selection from the collection.',
+    sub_count: '{count} games in the collection — here are a few of the best-rated gems.',
+    see_all: 'See all games →',
+    none: 'No games yet.',
+    error: '{error}',
+  },
+
+  infos: {
+    title: 'Practical info',
+    sub: 'Two night formats, two atmospheres. The choice is yours!',
+    types_title: 'Two kinds of nights',
+    types_desc_html:
+      '<p><strong>Big nights</strong> — early in the month, 7-11 pm, festive hall, no sign-up, bring a dish + a drink.</p><p><strong>Small nights</strong> — mid-month, 8-11 pm, MJC venue, sign-up required (14 max), food optional.</p>',
+    locations_title: 'Our venues',
+    locations_soon: 'Coming soon.',
+    location_map_link: 'View on the map ↗',
+    contact_title: 'Contact & sign-up',
+    email_html:
+      'Email: <a href="mailto:mjc.estrablin38@gmail.com">mjc.estrablin38@gmail.com</a>',
+    contact_wa: 'Sign-ups for small nights happen through the WhatsApp group.',
+    wa_main: '“Game Nights” group',
+    wa_mjc: 'MJC Estrablin group',
+    wa_todo: 'WhatsApp links to be configured in the admin area.',
+    faq_title: 'Frequently asked questions',
+  },
+
+  faq: [
+    {
+      q: 'What is the difference between the two kinds of nights?',
+      a: 'Big nights (early in the month) are open to everyone with no sign-up, in the festive hall, where you bring a dish and a drink. Small nights (mid-month) require sign-up (14 seats), at the MJC venue, with food optional.',
+    },
+    {
+      q: 'How do I sign up for the small nights?',
+      a: 'Through the “Game Nights” WhatsApp group or by email at mjc.estrablin38@gmail.com. Seats are limited to 14 people, so sign up early.',
+    },
+    {
+      q: 'Can I come without signing up?',
+      a: 'Yes for the big nights at the start of the month. For the small nights, sign-up is required (limited seats).',
+    },
+    {
+      q: 'Are there games for beginners?',
+      a: 'Of course! The library covers all levels, and the small nights are ideal for learning at your own pace.',
+    },
+    {
+      q: 'Can I come on my own?',
+      a: 'Absolutely, it is the perfect chance to meet other enthusiasts. We form tables based on what everyone feels like playing.',
+    },
+  ],
+
+  eventType: {
+    grande: {
+      label: 'Big night',
+      short: 'Big',
+      sub: 'no sign-up',
+      option: 'Big (no sign-up)',
+    },
+    petite: {
+      label: 'Small night',
+      short: 'Small',
+      sub: 'sign-up required',
+      option: 'Small (sign-up required)',
+    },
+  },
+
+  event: {
+    games_count_one: '{count} game planned',
+    games_count_other: '{count} games planned',
+    time_tbd: 'Time to be confirmed',
+    available: 'Available games ({count})',
+    games_soon: 'The list of games will be announced soon.',
+    see_games: 'See the games for this night',
+    register_wa: 'Sign up via WhatsApp',
+    type_inscription: '{label} — {sub}',
+    loading: 'Loading…',
+    load_error: 'Error: {error}',
+  },
+
+  game: {
+    min: 'min',
+    players_label: 'players',
+    see_full: 'See the full sheet ↗',
+    rating_out_of: '★ {rating} / 10',
+    subtitle: 'Subtitle',
+    players: 'Players',
+    duration: 'Duration',
+    age: 'Age',
+    categories: 'Categories',
+    themes: 'Themes',
+    mechanisms: 'Mechanisms',
+    authors: 'Author(s)',
+    publishers: 'Publisher(s)',
+    owner: 'Brought by',
+    no_preview_1: 'NO',
+    no_preview_2: 'PREVIEW',
+    ext: 'Expansion',
+    ext_short: 'exp.',
+  },
+
+  gamesPage: {
+    hero_title: 'Our games library',
+    intro_default: 'All the games available at our nights.',
+    intro_count: '{count} games available at our nights — click for details.',
+    search_ph: 'Search a game, a category, a theme…',
+    sort_title: 'Sort by title (A→Z)',
+    sort_rating: 'Sort by rating',
+    chip_all: 'All',
+    chip_base: 'Base games',
+    chip_ext: 'Expansions',
+    count_one: '{count} game shown',
+    count_other: '{count} games shown',
+    none: 'No game matches your search.',
+    load_error: 'Could not load the games ({error}).',
+    load_more: 'Scroll to load more games…',
+    all_shown: 'All games are shown ({count}).',
+    footer_data: 'Data from the MyLudo collection of MJC Estrablin.',
+  },
+
+  footer: {
+    tagline: 'Friendly nights to share a passion for board games.',
+    admin_link: 'Administration',
+    back_home: 'Back to home',
+  },
+
+  modal: {
+    event_title: 'Night',
+    game_title: 'Game',
+    close: 'Close',
+  },
+
+  meta: {
+    index_title: 'Game Nights — MJC Estrablin',
+    games_title: 'Our games — Game Nights MJC Estrablin',
+    admin_title: 'Administration — Game Nights MJC Estrablin',
+  },
+
+  admin: {
+    login_title: 'Administration area',
+    login_sub: 'Enter the password to manage the dates and the games library.',
+    login_pwd: 'Password',
+    login_btn: 'Log in',
+    login_bad: 'Incorrect password',
+
+    stat_events: 'nights',
+    stat_games: 'games',
+    stat_locations: 'venues',
+
+    tab_events: '📅 Nights',
+    tab_games: '🎲 Games & import',
+    tab_locations: '📍 Venues',
+    tab_settings: '⚙️ Settings',
+
+    events_title: 'Nights',
+    new_event: '+ New night',
+    th_event: 'Night',
+    th_type: 'Type',
+    th_location: 'Venue',
+    th_games: 'Games',
+    no_events: 'No nights yet. Create one!',
+    games_unit_one: '{count} game',
+    games_unit_other: '{count} games',
+
+    games_import_title: 'Import the MyLudo collection',
+    import_help:
+      'Export your collection from MyLudo (CSV or JSON format) then drop the file here. Images and “brought by” entered manually are kept on update.',
+    dropzone_html: '<strong>Click or drag a file</strong> (.csv or .json)',
+    import_mode: 'Import mode',
+    import_replace: 'Replace the whole collection',
+    import_merge: 'Update / complete (merge)',
+    import_btn: 'Import',
+    games_list_title: 'Games',
+    games_filter_ph: 'Filter…',
+    th_game: 'Game',
+    th_rating: 'Rating',
+    th_image: 'Image',
+    th_owner: 'Brought by',
+    th_dates: 'Created / Updated',
+    no_games: 'No games. Import your MyLudo collection above.',
+    games_limited: 'Display limited to 300 rows. Use the filter.',
+
+    locations_title: 'Venues',
+    new_location: '+ New venue',
+    th_name: 'Name',
+    th_address: 'Address',
+    th_coords: 'Coordinates',
+    no_active_loc: 'No active venue.',
+    archived_title: 'Archived venues',
+    no_archived_loc: 'No archived venue.',
+    coords_undefined: 'not set',
+
+    settings_title: 'Settings',
+    set_wa_main: '“Game Nights” WhatsApp group link',
+    set_wa_mjc: '“MJC Estrablin” WhatsApp group link',
+    set_myludo: 'MyLudo profile (public link)',
+    set_pwd: 'New admin password (leave empty to keep it)',
+    save_settings: 'Save settings',
+
+    ef_new: 'New night',
+    ef_edit: 'Edit the night',
+    ef_title: 'Title *',
+    ef_title_ph: 'Big game night',
+    ef_date: 'Date *',
+    ef_type: 'Type',
+    ef_start: 'Start time',
+    ef_end: 'End time',
+    ef_location: 'Venue',
+    ef_location_none: '— None —',
+    ef_desc: 'Description',
+    ef_wa: 'WhatsApp sign-up link (optional)',
+    ef_wa_ph: 'leave empty to use the default link',
+    ef_games_label: 'Games available that night —',
+    ef_selected: 'selected',
+    ef_filter_ph: 'Filter the games…',
+
+    lf_new: 'New venue',
+    lf_edit: 'Edit the venue',
+    lf_name: 'Name *',
+    lf_name_ph: 'Festive hall',
+    lf_address: 'Address',
+    lf_desc: 'Description',
+    lf_map_label: 'Location on the map *',
+    lf_map_help:
+      'Click on the map to place a marker at the exact spot of the venue. Coordinates are saved automatically.',
+    lf_coords_prompt: 'Click on the map to place the venue.',
+    lf_coords: 'Coordinates: {coords}',
+
+    gf_title: 'Edit a game',
+    gf_image: 'Image URL (optional)',
+    gf_image_ph: 'https://...',
+    gf_image_help:
+      'Paste the address of a cover image (right-click → “Copy image address” on MyLudo for example).',
+    gf_owner: 'Brought by / owner',
+
+    cm_title: 'Confirm',
+    cancel: 'Cancel',
+    save: 'Save',
+    confirm: 'Confirm',
+    edit: 'Edit',
+    delete: 'Delete',
+    details: 'Details',
+    archive: 'Archive',
+    unarchive: 'Unarchive',
+
+    del_event_title: 'Delete the night',
+    del_event_msg: 'Do you really want to delete the night <strong>{label}</strong>?',
+    del_event_done: 'Night deleted',
+    del_game_title: 'Delete the game',
+    del_game_msg: 'Do you really want to delete the game <strong>{label}</strong>?',
+    del_game_done: 'Game deleted',
+    del_loc_title: 'Archive the venue',
+    del_loc_msg:
+      'Do you really want to archive the venue <strong>{label}</strong>? The related nights are kept, and you can unarchive it later.',
+    del_loc_done: 'Venue archived',
+    replace_title: 'Replace the collection',
+    replace_msg:
+      'Do you really want to <strong>replace the whole collection</strong> with the contents of this file? Images and “brought by” entered manually will be kept.',
+    replace_btn: 'Replace',
+
+    saved_event: 'Night saved',
+    saved_location: 'Venue saved',
+    saved_game: 'Game updated',
+    saved_settings: 'Settings saved',
+    unarchived: 'Venue unarchived',
+    imported: '{count} games imported ✓',
+    err_title_date: 'Title and date are required',
+    err_name: 'Name is required',
+    file_prefix: '📄 {name}',
+    dash: '—',
+  },
+
+  cal: {
+    dow: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  },
+};

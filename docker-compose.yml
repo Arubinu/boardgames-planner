@@ -1,0 +1,11 @@
+services:
+  boardgames-planner:
+    build: .
+    container_name: boardgames-planner
+    ports:
+      - 3000:3000
+    volumes:
+      - ./data:/app/data
+    environment:
+      ADMIN_PASSWORD: admin
+    restart: unless-stopped

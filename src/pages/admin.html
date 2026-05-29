@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n="meta.admin_title">Administration — Soirées Jeux MJC Estrablin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&family=Comic+Neue:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" src="../scripts/pages/admin.js"></script>
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="wrap nav-inner">
+        <div class="brand">
+          <span class="logo">🎲</span><span>Administration<small>Soirées Jeux</small></span>
+        </div>
+        <button class="nav-burger" data-i18n-aria="nav.menu" aria-label="Menu">☰</button>
+        <div class="nav-links" id="navlinks">
+          <a href="/index.html" data-i18n="nav.back">← Retour au site</a>
+          <select class="lang-select" data-i18n-aria="nav.lang" aria-label="Langue"></select>
+          <button class="theme-toggle" data-i18n-aria="nav.theme" aria-label="Thème"><span id="themeIcon">🌙</span></button>
+          <button class="btn btn-ghost btn-sm" id="logout-btn" style="display: none" data-i18n="nav.logout">
+            Déconnexion
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Écran de connexion -->
+    <div id="login-screen" class="wrap admin-main">
+      <div class="card card-pad login-box">
+        <h2 class="font-display center" style="margin-top: 0" data-i18n="admin.login_title">Espace administration</h2>
+        <p class="muted center" data-i18n="admin.login_sub">Entrez le mot de passe pour gérer les dates et la ludothèque.</p>
+        <label class="field"
+          ><span data-i18n="admin.login_pwd">Mot de passe</span>
+          <input type="password" id="login-pwd" autofocus
+        /></label>
+        <button class="btn btn-primary" style="width: 100%" id="login-btn" data-i18n="admin.login_btn">Se connecter</button>
+      </div>
+    </div>
+
+    <!-- Tableau de bord -->
+    <main id="dashboard" class="wrap admin-main" style="display: none; padding-bottom: 4rem">
+      <div class="stat-grid">
+        <div class="card card-pad stat">
+          <div class="n" id="stat-events">–</div>
+          <div class="muted" data-i18n="admin.stat_events">soirées</div>
+        </div>
+        <div class="card card-pad stat">
+          <div class="n" id="stat-games">–</div>
+          <div class="muted" data-i18n="admin.stat_games">jeux</div>
+        </div>
+        <div class="card card-pad stat">
+          <div class="n" id="stat-locations">–</div>
+          <div class="muted" data-i18n="admin.stat_locations">lieux</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="events" data-i18n="admin.tab_events">📅 Soirées</button>
+        <button class="tab" data-tab="games" data-i18n="admin.tab_games">🎲 Jeux & import</button>
+        <button class="tab" data-tab="locations" data-i18n="admin.tab_locations">📍 Lieux</button>
+        <button class="tab" data-tab="settings" data-i18n="admin.tab_settings">⚙️ Réglages</button>
+      </div>
+
+      <!-- Onglet Soirées -->
+      <section class="panel active" id="panel-events">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem"
+        >
+          <h2 class="font-display" style="margin: 0" data-i18n="admin.events_title">Soirées</h2>
+          <button class="btn btn-primary" id="new-event-btn" data-i18n="admin.new_event">+ Nouvelle soirée</button>
+        </div>
+        <div class="card card-pad"><div id="events-table"><div class="spinner"></div></div></div>
+      </section>
+
+      <!-- Onglet Jeux & import -->
+      <section class="panel" id="panel-games">
+        <h2 class="font-display" data-i18n="admin.games_import_title">Importer la collection MyLudo</h2>
+        <div class="card card-pad" style="margin-bottom: 2rem">
+          <p class="muted" data-i18n="admin.import_help">
+            Exportez votre collection depuis MyLudo (format CSV ou JSON) puis déposez le fichier
+            ici.
+          </p>
+          <div class="dropzone" id="dropzone">
+            <p style="font-size: 2rem; margin: 0.2rem">📥</p>
+            <p data-i18n-html="admin.dropzone_html"><strong>Cliquez ou glissez un fichier</strong> (.csv ou .json)</p>
+            <p class="help" id="file-name"></p>
+          </div>
+          <input type="file" id="file-input" accept=".csv,.json" style="display: none" />
+          <label class="field" style="margin-top: 1rem"
+            ><span data-i18n="admin.import_mode">Mode d'import</span>
+            <select id="import-mode">
+              <option value="replace" data-i18n="admin.import_replace">Remplacer toute la collection</option>
+              <option value="merge" data-i18n="admin.import_merge">Mettre à jour / compléter (fusion)</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" id="import-btn" disabled data-i18n="admin.import_btn">Importer</button>
+        </div>
+
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem"
+        >
+          <h2 class="font-display" style="margin: 0"><span data-i18n="admin.games_list_title">Jeux</span> (<span id="games-count">0</span>)</h2>
+          <input type="search" id="games-search" data-i18n-ph="admin.games_filter_ph" placeholder="Filtrer…" style="max-width: 240px" />
+        </div>
+        <div class="card card-pad"><div id="games-table"><div class="spinner"></div></div></div>
+      </section>
+
+      <!-- Onglet Lieux -->
+      <section class="panel" id="panel-locations">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem"
+        >
+          <h2 class="font-display" style="margin: 0" data-i18n="admin.locations_title">Lieux</h2>
+          <button class="btn btn-primary" id="new-location-btn" data-i18n="admin.new_location">+ Nouveau lieu</button>
+        </div>
+        <div class="card card-pad" style="margin-bottom: 2rem">
+          <div id="locations-table"><div class="spinner"></div></div>
+        </div>
+
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem"
+        >
+          <h2 class="font-display" style="margin: 0" data-i18n="admin.archived_title">Lieux archivés</h2>
+        </div>
+        <div class="card card-pad"><div id="archived-locations-table"><div class="spinner"></div></div></div>
+      </section>
+
+      <!-- Onglet Réglages -->
+      <section class="panel" id="panel-settings">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem"
+        >
+          <h2 class="font-display" data-i18n="admin.settings_title">Réglages</h2>
+        </div>
+        <div class="card card-pad">
+          <label class="field"
+            ><span data-i18n="admin.set_wa_main">Lien groupe WhatsApp « Soirées Jeux »</span>
+            <input id="set-wa-main" placeholder="https://chat.whatsapp.com/..."
+          /></label>
+          <label class="field"
+            ><span data-i18n="admin.set_wa_mjc">Lien groupe WhatsApp « MJC Estrablin »</span>
+            <input id="set-wa-mjc" placeholder="https://chat.whatsapp.com/..."
+          /></label>
+          <label class="field"
+            ><span data-i18n="admin.set_myludo">Profil MyLudo (lien public)</span>
+            <input id="set-myludo" placeholder="https://www.myludo.fr/#!/profil/..."
+          /></label>
+          <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0" />
+          <label class="field"
+            ><span data-i18n="admin.set_pwd">Nouveau mot de passe admin (laisser vide pour ne pas changer)</span>
+            <input type="password" id="set-pwd" placeholder="••••••"
+          /></label>
+          <button class="btn btn-primary" id="save-settings-btn" data-i18n="admin.save_settings">Enregistrer les réglages</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modale formulaire soirée -->
+    <div class="modal-backdrop" id="event-form-modal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3 id="ef-title" data-i18n="admin.ef_new">Nouvelle soirée</h3>
+          <button class="modal-close" data-close-modal="event-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
+        </div>
+        <input type="hidden" id="ef-id" />
+        <label class="field"
+          ><span data-i18n="admin.ef_title">Titre *</span><input id="ef-title-in" data-i18n-ph="admin.ef_title_ph" placeholder="Grande soirée jeux"
+        /></label>
+        <div class="grid grid-2" style="gap: 1rem">
+          <label class="field"><span data-i18n="admin.ef_date">Date *</span><input type="date" id="ef-date" /></label>
+          <label class="field"
+            ><span data-i18n="admin.ef_type">Type</span
+            ><select id="ef-type"></select></label
+          >
+        </div>
+        <div class="grid grid-2" style="gap: 1rem">
+          <label class="field"><span data-i18n="admin.ef_start">Heure de début</span><input type="time" id="ef-start" /></label>
+          <label class="field"><span data-i18n="admin.ef_end">Heure de fin</span><input type="time" id="ef-end" /></label>
+        </div>
+        <label class="field"><span data-i18n="admin.ef_location">Lieu</span><select id="ef-location"></select></label>
+        <label class="field"><span data-i18n="admin.ef_desc">Description</span><textarea id="ef-desc" rows="2"></textarea></label>
+        <label class="field"
+          ><span data-i18n="admin.ef_wa">Lien WhatsApp d'inscription (optionnel)</span
+          ><input id="ef-wa" data-i18n-ph="admin.ef_wa_ph" placeholder="laisser vide pour utiliser le lien par défaut"
+        /></label>
+
+        <div style="margin-top: 0.5rem">
+          <span style="font-weight: 600; font-size: 0.85rem"
+            ><span data-i18n="admin.ef_games_label">Jeux disponibles ce soir-là —</span> <span class="gp-selected-count" id="gp-count">0</span>
+            <span data-i18n="admin.ef_selected">sélectionné(s)</span></span
+          >
+          <input type="search" id="gp-search" data-i18n-ph="admin.ef_filter_ph" placeholder="Filtrer les jeux…" style="margin: 0.5rem 0" />
+          <div class="game-picker" id="game-picker"></div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1.2rem">
+          <button class="btn btn-ghost" data-close-modal="event-form-modal" data-i18n="admin.cancel">Annuler</button>
+          <button class="btn btn-primary" id="save-event-btn" data-i18n="admin.save">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale formulaire lieu -->
+    <div class="modal-backdrop" id="location-form-modal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3 id="lf-title" data-i18n="admin.lf_new">Nouveau lieu</h3>
+          <button class="modal-close" data-close-modal="location-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
+        </div>
+        <input type="hidden" id="lf-id" />
+        <label class="field"><span data-i18n="admin.lf_name">Nom *</span><input id="lf-name" data-i18n-ph="admin.lf_name_ph" placeholder="Salle festive" /></label>
+        <label class="field"><span data-i18n="admin.lf_address">Adresse</span><input id="lf-address" /></label>
+        <label class="field"><span data-i18n="admin.lf_desc">Description</span><textarea id="lf-desc" rows="2"></textarea></label>
+
+        <!-- Sélection des coordonnées par clic sur la carte (ping). -->
+        <span style="font-weight: 600; font-size: 0.85rem" data-i18n="admin.lf_map_label">Emplacement sur la carte *</span>
+        <p class="help" style="margin-top: 0.2rem" data-i18n="admin.lf_map_help">
+          Cliquez sur la carte pour placer un repère à l'endroit exact du lieu.
+        </p>
+        <div class="coord-map" id="coord-map"></div>
+        <p class="coord-readout" id="lf-coords-readout" data-i18n="admin.lf_coords_prompt">Cliquez sur la carte pour placer le lieu.</p>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.6rem">
+          <button class="btn btn-ghost" data-close-modal="location-form-modal" data-i18n="admin.cancel">Annuler</button>
+          <button class="btn btn-primary" id="save-location-btn" data-i18n="admin.save">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale édition jeu (image / propriétaire) -->
+    <div class="modal-backdrop" id="game-form-modal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3 id="gf-title" data-i18n="admin.gf_title">Modifier un jeu</h3>
+          <button class="modal-close" data-close-modal="game-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
+        </div>
+        <input type="hidden" id="gf-id" />
+        <label class="field"
+          ><span data-i18n="admin.gf_image">URL d'image (optionnel)</span><input id="gf-image" data-i18n-ph="admin.gf_image_ph" placeholder="https://..."
+        /></label>
+        <p class="help" data-i18n="admin.gf_image_help">
+          Collez l'adresse d'une image de couverture.
+        </p>
+        <label class="field"><span data-i18n="admin.gf_owner">Apporté par / propriétaire</span><input id="gf-owner" /></label>
+        <div style="display: flex; justify-content: flex-end; gap: 0.6rem">
+          <button class="btn btn-ghost" data-close-modal="game-form-modal" data-i18n="admin.cancel">Annuler</button>
+          <button class="btn btn-primary" id="save-game-btn" data-i18n="admin.save">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale de confirmation -->
+    <div class="modal-backdrop" id="confirm-modal">
+      <div class="modal" style="max-width: 440px">
+        <div class="modal-head">
+          <h3 id="cm-title" data-i18n="admin.cm_title">Confirmer</h3>
+          <button class="modal-close" data-close-modal="confirm-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
+        </div>
+        <p id="cm-message" style="margin-top: 0"></p>
+        <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1.2rem">
+          <button class="btn btn-ghost" data-close-modal="confirm-modal" data-i18n="admin.cancel">Annuler</button>
+          <button class="btn btn-danger" id="cm-confirm-btn" data-i18n="admin.confirm">Confirmer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </body>
+</html>

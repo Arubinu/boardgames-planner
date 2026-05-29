@@ -1,0 +1,7 @@
+// _core.scss
+// Tronc commun partagé par toutes les pages.
+@forward 'variables';
+@use 'base';
+@use 'nav';
+@use 'buttons';
+@use 'components';

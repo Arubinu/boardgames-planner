@@ -1,0 +1,337 @@
+// _home.scss
+@use 'variables' as v;
+
+.hero {
+  padding: 8rem 0 5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  h1 {
+    font-family: 'Comic Neue', cursive;
+    font-size: 3.2rem;
+    margin: 0 0 1rem;
+    line-height: 1.1;
+  }
+  .accent {
+    color: var(--terracotta);
+  }
+  p {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 620px;
+    margin: 0 auto 2rem;
+  }
+  .script {
+    font-family: 'Caveat', cursive;
+    font-size: 1.6rem;
+    color: var(--olive);
+  }
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+// --- Carte événement ---
+.event-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.25s, box-shadow 0.25s;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+.event-date-chip {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem 1.5rem;
+  background: linear-gradient(135deg, var(--terracotta), var(--terracotta-light));
+  color: #fff;
+
+  &.petite {
+    background: linear-gradient(135deg, var(--olive), var(--olive-light));
+  }
+  .day {
+    font-family: 'Comic Neue', cursive;
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+}
+.event-body {
+  padding: 1.3rem 1.5rem;
+  flex: 1;
+
+  h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1.15rem;
+  }
+}
+.event-meta {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0.2rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+// --- Grille des soirées (prochaines / passées) ---
+// Flex centré plutôt qu'une grille fixe à 3 colonnes : quand il y a moins de
+// trois cartes, elles restent centrées au lieu de s'aligner à gauche. Les
+// cartes conservent la largeur qu'elles auraient en grille à 3 colonnes
+// (gap de 1.5rem → base = (100% - 2 × gap) / 3), plafonnée à 360px.
+.events-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+
+  .event-card {
+    flex: 0 1 calc((100% - 3rem) / 3);
+    max-width: 360px;
+  }
+}
+@include v.below(v.$bp-lg) {
+  .events-grid .event-card {
+    flex-basis: calc((100% - 1.5rem) / 2);
+  }
+}
+@include v.below(620px) {
+  .events-grid .event-card {
+    flex-basis: 100%;
+  }
+}
+
+// --- Aperçu jeux (page d'accueil) ---
+.preview-games {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1rem;
+}
+@include v.below(v.$bp-lg) {
+  .preview-games {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@include v.below(v.$bp-sm) {
+  .preview-games {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.preview-game {
+  text-align: center;
+  cursor: pointer;
+
+  .name {
+    font-size: 0.82rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+  }
+}
+
+// --- Infos pratiques ---
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+@include v.below(v.$bp-lg) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.info-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+
+  &--terracotta {
+    background: rgba(196, 112, 74, 0.15);
+  }
+  &--olive {
+    background: rgba(139, 154, 107, 0.18);
+  }
+  &--blue {
+    background: rgba(80, 130, 200, 0.15);
+  }
+}
+.faq-item {
+  cursor: pointer;
+}
+.faq-q {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  color: var(--muted);
+
+  &.open {
+    max-height: 300px;
+    margin-top: 0.75rem;
+  }
+}
+
+// --- Calendrier + mini-carte ---
+.cal-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 1.5rem;
+  margin: 2.5rem 0;
+}
+@include v.below(820px) {
+  .cal-map {
+    grid-template-columns: 1fr;
+  }
+}
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+
+  strong {
+    font-family: 'Comic Neue', cursive;
+    font-size: 1.15rem;
+    text-transform: capitalize;
+  }
+}
+.cal-nav {
+  background: var(--cream);
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: var(--dark-text);
+  transition: background 0.2s;
+
+  &:hover {
+    background: var(--terracotta);
+    color: #fff;
+  }
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal-dow {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  padding: 0.3rem 0;
+}
+.cal-day {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  position: relative;
+  color: var(--dark-text);
+
+  &.empty {
+    visibility: hidden;
+  }
+  &.past {
+    color: var(--muted);
+    opacity: 0.45;
+  }
+  &.today {
+    outline: 2px solid var(--terracotta);
+    font-weight: 700;
+  }
+  &.has-event {
+    cursor: pointer;
+    font-weight: 700;
+    color: #fff;
+
+    &.past {
+      opacity: 0.6;
+    }
+    &:hover {
+      transform: scale(1.08);
+    }
+  }
+  &.ev-grande {
+    background: var(--terracotta);
+  }
+  &.ev-petite {
+    background: var(--olive);
+  }
+  &.selected {
+    box-shadow: 0 0 0 3px var(--card-bg), 0 0 0 5px var(--dark-text);
+  }
+}
+.cal-legend {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  justify-content: center;
+  flex-wrap: wrap;
+
+  .dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 0.35rem;
+    vertical-align: middle;
+  }
+}
+.dot-grande {
+  background: var(--terracotta);
+}
+.dot-petite {
+  background: var(--olive);
+}
+.map-panel {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.map-embed {
+  flex: 1;
+  min-height: 240px;
+  background: var(--cream);
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    min-height: 240px;
+  }
+}
+.map-info {
+  border-top: 1px solid var(--border);
+
+  h4 {
+    margin: 0 0 0.3rem;
+    font-family: 'Comic Neue', cursive;
+  }
+}

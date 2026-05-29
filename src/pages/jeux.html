@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n="meta.games_title">Nos jeux — Soirées Jeux MJC Estrablin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&family=Comic+Neue:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" src="../scripts/pages/games.js"></script>
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="wrap nav-inner">
+        <div class="brand">
+          <span class="logo">🎲</span><span>Soirées Jeux<small>MJC Estrablin</small></span>
+        </div>
+        <button class="nav-burger" data-i18n-aria="nav.menu" aria-label="Menu">☰</button>
+        <div class="nav-links" id="navlinks">
+          <a href="/index.html" data-i18n="nav.home">Accueil</a>
+          <a href="/index.html#dates" data-i18n="nav.dates">Prochaines dates</a>
+          <a class="active" data-i18n="nav.games">Nos jeux</a>
+          <a href="/index.html#infos" data-i18n="nav.infos">Infos pratiques</a>
+          <select class="lang-select" data-i18n-aria="nav.lang" aria-label="Langue"></select>
+          <button class="theme-toggle" data-i18n-aria="nav.theme" aria-label="Thème"><span id="themeIcon">🌙</span></button>
+        </div>
+      </div>
+    </nav>
+
+    <header class="page-hero">
+      <div class="wrap">
+        <h1 data-i18n="gamesPage.hero_title">Notre ludothèque</h1>
+        <p id="intro" data-i18n="gamesPage.intro_default">Tous les jeux disponibles lors de nos soirées.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="section section--cream">
+        <div class="wrap">
+          <div class="toolbar">
+            <input
+              type="search"
+              id="search"
+              data-i18n-ph="gamesPage.search_ph"
+              placeholder="Rechercher un jeu, une catégorie, un thème…"
+            />
+            <select id="sort">
+              <option value="title" data-i18n="gamesPage.sort_title">Trier par titre (A→Z)</option>
+              <option value="rating" data-i18n="gamesPage.sort_rating">Trier par note</option>
+            </select>
+          </div>
+          <div class="filter-chips" style="margin-bottom: 1.5rem">
+            <span class="chip active" data-type="all" data-i18n="gamesPage.chip_all">Tous</span>
+            <span class="chip" data-type="basegame" data-i18n="gamesPage.chip_base">Jeux de base</span>
+            <span class="chip" data-type="extension" data-i18n="gamesPage.chip_ext">Extensions</span>
+          </div>
+
+          <div class="count-line" id="count"></div>
+          <div class="grid grid-4" id="games"><div class="spinner"></div></div>
+          <div class="infinite-status" id="infinite-status"></div>
+          <div class="infinite-sentinel" id="infinite-sentinel"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">
+        <p style="color: #aaa" data-i18n="gamesPage.footer_data">Données issues de la collection MyLudo de la MJC Estrablin.</p>
+        <p style="color: #777; font-size: 0.85rem">
+          © <span data-year>2025</span> MJC Estrablin · <a href="/index.html" data-i18n="footer.back_home">Retour à l'accueil</a>
+        </p>
+      </div>
+    </footer>
+
+    <div class="modal-backdrop" id="game-modal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3 id="gm-title" data-i18n="modal.game_title">Jeu</h3>
+          <button class="modal-close" data-close-modal="game-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
+        </div>
+        <div id="gm-body"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </body>
+</html>

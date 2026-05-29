@@ -1,0 +1,37 @@
+// _variables.scss
+// Jetons de design (design tokens) du site Soirées Jeux — MJC Estrablin.
+//
+// Deux niveaux :
+//  - Variables Sass ($...) : utilisées à la compilation (breakpoints, helpers).
+//  - Custom properties CSS (--...) : exposées au runtime pour le thème
+//    clair / sombre (voir _base.scss).
+
+// --- Points de rupture (breakpoints) responsives -------------------------
+$bp-sm: 520px;
+$bp-md: 760px;
+$bp-lg: 980px;
+$bp-xl: 1120px;
+
+// --- Palette de base (mode clair) ----------------------------------------
+$terracotta: #c4704a;
+$terracotta-light: #d4845a;
+$terracotta-dark: #a85a38;
+$olive: #8b9a6b;
+$olive-light: #a3b07f;
+$cream: #f5f1e8;
+$dark-text: #2d3436;
+$light-bg: #fefcf8;
+$card-bg: #ffffff;
+$border: #ece6d8;
+$muted: #6b6b6b;
+
+// --- Largeur fixe de la colonne du panneau d'administration --------------
+// (demande explicite : « garder une taille de colonne fixe »).
+$admin-max-width: 1080px;
+
+// --- Mixin breakpoint -----------------------------------------------------
+@mixin below($bp) {
+  @media (max-width: $bp) {
+    @content;
+  }
+}

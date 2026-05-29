@@ -1,0 +1,309 @@
+// _components.scss
+@use 'variables' as v;
+
+// --- Cartes ---------------------------------------------------------------
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+.card-pad {
+  padding: 1.5rem;
+}
+
+// --- Sections -------------------------------------------------------------
+section[id] {
+  scroll-margin-top: 80px;
+}
+.section {
+  padding: 4.5rem 0;
+
+  &--cream {
+    background: var(--cream);
+  }
+}
+.section-title {
+  font-family: 'Comic Neue', cursive;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+.section-sub {
+  color: var(--muted);
+  max-width: 640px;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+}
+
+// --- Vignette de jeu ------------------------------------------------------
+// L'image est toujours en `cover`, centrée horizontalement ET verticalement,
+// afin de gérer proprement tous les ratios d'images.
+.game-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--terracotta), var(--olive));
+  color: #fff;
+  font-family: 'Comic Neue', cursive;
+  font-size: 2.6rem;
+  font-weight: 700;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+  }
+}
+
+// Repli affiché quand l'image ne charge pas : « AUCUN » puis « APERÇU »
+// (retour à la ligne entre les deux mots, demande explicite).
+.game-thumb__noimg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1em;
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+// Pastille « extension » dans le coin supérieur droit de l'image.
+.game-thumb__ext {
+  position: absolute;
+  top: .2rem;
+  right: .25rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+// --- Badges ---------------------------------------------------------------
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.badge-grande {
+  background: rgba(196, 112, 74, 0.15);
+  color: var(--terracotta);
+}
+.badge-petite {
+  background: rgba(139, 154, 107, 0.18);
+  color: #5f6e42;
+}
+
+// --- Icône de Google Maps -------------------------------------------------
+div {
+  &:has(.map-icon) {
+    position: relative;
+
+    .map-icon {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      height: 2rem;
+    }
+  }
+}
+
+#em-body .map-icon {
+  top: -.2rem;
+  right: 0;
+}
+
+// --- Champs de formulaire -------------------------------------------------
+label.field {
+  display: block;
+  margin-bottom: 1rem;
+
+  > span {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--light-bg);
+  color: var(--dark-text);
+  font-family: inherit;
+  font-size: 0.95rem;
+
+  &:focus {
+    outline: 2px solid rgba(196, 112, 74, 0.4);
+    border-color: var(--terracotta);
+  }
+}
+
+// --- Modale ---------------------------------------------------------------
+.modal-backdrop {
+  position: fixed !important;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+
+  &.open {
+    display: flex;
+  }
+}
+.modal {
+  background: var(--card-bg);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.6rem;
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0;
+    font-family: 'Comic Neue', cursive;
+    font-size: 1.4rem;
+  }
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+// --- Grilles --------------------------------------------------------------
+.grid {
+  display: grid;
+  gap: 1.5rem;
+}
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+@include v.below(v.$bp-lg) {
+  .grid-4,
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@include v.below(620px) {
+  .grid-4,
+  .grid-3,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+// --- Animations d'apparition ----------------------------------------------
+.fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// --- Footer ---------------------------------------------------------------
+.footer {
+  margin-top: auto;
+  background: #2b2b2b;
+  color: #ddd;
+  padding: 3rem 0;
+  text-align: center;
+
+  a {
+    color: var(--terracotta);
+  }
+}
+
+// --- Divers ---------------------------------------------------------------
+.spinner {
+  border: 3px solid var(--border);
+  border-top-color: var(--terracotta);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  animation: spin 1s linear infinite;
+  margin: 2rem auto;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  background: var(--dark-text);
+  color: var(--light-bg);
+  padding: 0.8rem 1.3rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+  font-weight: 500;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+
+  &.show {
+    transform: translateX(-50%) translateY(0);
+    visibility: visible;
+    opacity: 1;
+  }
+  &.error {
+    background: #c0392b;
+    color: #fff;
+  }
+}

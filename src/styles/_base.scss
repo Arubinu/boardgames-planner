@@ -1,0 +1,102 @@
+// _base.scss
+// Réinitialisation légère, custom properties runtime + thème sombre.
+@use 'variables' as v;
+
+:root {
+  --terracotta: #{v.$terracotta};
+  --terracotta-light: #{v.$terracotta-light};
+  --terracotta-dark: #{v.$terracotta-dark};
+  --olive: #{v.$olive};
+  --olive-light: #{v.$olive-light};
+  --cream: #{v.$cream};
+  --dark-text: #{v.$dark-text};
+  --light-bg: #{v.$light-bg};
+  --card-bg: #{v.$card-bg};
+  --border: #{v.$border};
+  --muted: #{v.$muted};
+  --shadow: 0 4px 14px rgba(45, 52, 54, 0.06);
+  --shadow-lg: 0 18px 40px rgba(45, 52, 54, 0.12);
+}
+
+body.dark {
+  --cream: #232323;
+  --dark-text: #e8e8e8;
+  --light-bg: #161616;
+  --card-bg: #232323;
+  --border: #383838;
+  --muted: #a5a5a5;
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--terracotta);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--light-bg);
+  color: var(--dark-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .hero,
+  .page-hero {
+    background:
+      linear-gradient(180deg, rgba(254, 252, 248, 0.4), var(--light-bg) 75%),
+      linear-gradient(135deg, rgba(196, 112, 74, 0.12), rgba(139, 154, 107, 0.12));
+    /*background-image: url('/assets/boardgames.webp');*/
+  }
+}
+
+body.dark {
+  .hero,
+  .page-hero {
+    background:
+      linear-gradient(180deg, rgba(22, 22, 22, 0.4), var(--light-bg) 75%),
+      linear-gradient(135deg, rgba(196, 112, 74, 0.15), rgba(139, 154, 107, 0.12));
+    /*background-image: url('/assets/boardgames.webp');*/
+  }
+}
+
+body,
+body.dark {
+  .hero,
+  .page-hero {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+  }
+}
+
+.font-display {
+  font-family: 'Comic Neue', 'Inter', cursive;
+}
+.font-script {
+  font-family: 'Caveat', cursive;
+}
+
+.wrap {
+  max-width: v.$bp-xl;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+.center {
+  text-align: center;
+}
+.empty {
+  text-align: center;
+  color: var(--muted);
+}

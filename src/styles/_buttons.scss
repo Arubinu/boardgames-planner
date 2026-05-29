@@ -1,0 +1,78 @@
+// _buttons.scss
+@use 'variables' as v;
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  padding: 0.7rem 1.3rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--terracotta), var(--terracotta-light));
+  color: #fff;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(196, 112, 74, 0.32);
+  }
+}
+
+.btn-olive {
+  background: var(--olive);
+  color: #fff;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(139, 154, 107, 0.32);
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--dark-text);
+  border: 1px solid var(--border);
+
+  &:hover {
+    border-color: var(--terracotta);
+    color: var(--terracotta);
+  }
+}
+
+.btn-danger {
+  background: #d65745;
+  color: #fff;
+
+  &:hover {
+    background: #bf4736;
+  }
+}
+
+.btn-sm {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  border-radius: 9px;
+}
+
+.btn-icon {
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+
+  img {
+    width: 18px;
+    height: 18px;
+    display: block;
+    pointer-events: none; // le clic remonte au bouton
+  }
+}
