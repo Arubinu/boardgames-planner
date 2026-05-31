@@ -92,8 +92,15 @@ async function loadEvents() {
 // changement de langue.
 function renderEvents() {
   if (!ALL_EVENTS.length && !document.getElementById('events-container')) return;
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  const minPastDate = ymd(oneYearAgo);
+
   const upcoming = ALL_EVENTS.filter((e) => isUpcoming(e.date));
-  const past = ALL_EVENTS.filter((e) => !isUpcoming(e.date)).reverse();
+  const past = ALL_EVENTS.filter(
+    (e) => !isUpcoming(e.date) && e.date >= minPastDate
+  ).reverse();
+
   const cont = document.getElementById('events-container');
   if (cont)
     cont.innerHTML = upcoming.length
