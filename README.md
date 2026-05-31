@@ -1,191 +1,206 @@
-# 🎲 Boardgames Planner - Planificateur de Soirées Jeux de Société
+# 🎲 Boardgames Planner
 
-Site web des soirées jeux de société de la MJC Estrablin : calendrier des prochaines dates, ludothèque consultable (collection MyLudo) et espace d'administration pour gérer les soirées, les lieux et les jeux.
+*__Read this in:__ English | [Français](README.fr.md)*
 
-Aucune base de données externe : tout est stocké dans un simple fichier **SQLite**.
+Website for the board game nights of MJC Estrablin: a calendar of upcoming dates, a browsable game library (MyLudo collection) and an admin area to manage nights, venues and games.
 
-Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass/SCSS** (styles organisés par fichier, sans aucune balise `<style>` dans le HTML). Le serveur **Express** sert ensuite le résultat compilé. Le mot de passe administrateur est stocké **haché avec Argon2id** (recommandation OWASP).
+No external database: everything is stored in a single **SQLite** file.
 
----
-
-## Ce que fait le site
-
-**Côté visiteurs** (page unique avec défilement) :
-- Présentation et prochaines dates de soirées (grandes / petites), avec lieu et liste des jeux prévus.
-- Aperçu de la ludothèque + page dédiée `/jeux.html` avec recherche, filtres (jeux de base / extensions) et tri par note.
-- Fiche de chaque jeu reliée à sa page **MyLudo**.
-- Infos pratiques, lieux, contact et liens d'inscription **WhatsApp** pour les petites soirées.
-- **Calendrier interactif** : la légende est **dynamique** (seuls les types de soirées présents dans le mois affiché y figurent). Cliquer sur une carte de soirée recadre le calendrier sur la date et affiche le lieu ; le bouton « Voir les jeux de cette soirée » ouvre le détail.
-- **Multilingue** (français / anglais) : sélecteur dans la barre de navigation, langue détectée puis mémorisée. Voir la section dédiée plus bas.
-- Thème clair / sombre.
-
-**Côté administration** (`/admin.html`, protégée par mot de passe) :
-- Créer / modifier / supprimer des soirées, choisir leur lieu et cocher les jeux disponibles ce soir-là.
-- Gérer la liste des lieux (choix rapide à la création d'une date). Chaque lieu est **localisé d'un clic sur une carte** (OpenStreetMap) : les coordonnées sont enregistrées et le lien Google Maps en est dérivé automatiquement (plus aucune URL à coller). « Supprimer » un lieu l'**archive** : il disparaît du site public mais reste désarchivable.
-- Importer la collection depuis un export **MyLudo** (CSV ou JSON). La **date de création** de chaque jeu est conservée d'un import à l'autre ; la date de modification est mise à jour.
-- Ajouter une image et un « apporté par » à chaque jeu (conservés lors des ré-imports), ou supprimer un jeu.
-- Régler les liens WhatsApp, le profil MyLudo et le mot de passe.
+The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (styles organized per file, with no `<style>` tags in the HTML). An **Express** server then serves the compiled output. The admin password is stored **hashed with Argon2id** (per OWASP recommendations).
 
 ---
 
-## Démarrage rapide avec Docker (recommandé)
+## What the site does
 
-> Prérequis : Docker et Docker Compose.
+**For visitors** (single scrolling page):
+- Introduction and upcoming night dates (large / small), with venue and the list of planned games.
+- Library preview + a dedicated `/jeux.html` page with search, filters (base games / expansions) and sorting by rating.
+- Each game links to its **MyLudo** page.
+- Practical info, venues, contact and **WhatsApp** sign-up links for the small nights.
+- **Interactive calendar**: the legend is **dynamic** (only the night types present in the displayed month appear). Clicking a night card re-centers the calendar on its date and shows the venue on a **mini-map** (OpenStreetMap); the "See this night's games" button opens the details.
+- **Multilingual** (French / English): a switcher in the navigation bar, language detected then remembered. See the dedicated section below.
+- Light / dark theme.
+
+**For administration** (`/admin.html`, password-protected):
+- Create / edit / delete nights, choose their venue and tick the games available that evening.
+- Manage the list of venues (quick selection when creating a date). Each venue is **located by clicking on a map** (OpenStreetMap): the coordinates are saved and the Google Maps link is derived automatically (no URL to paste). "Deleting" a venue **archives** it: it disappears from the public site but can be unarchived.
+- Import the collection from a **MyLudo** export (CSV or JSON). Each game's **creation date** is preserved across imports; the modification date is updated.
+- Add an image and a "brought by" note to each game (preserved across re-imports), or delete a game.
+- Configure the WhatsApp links, the MyLudo profile and the password.
+
+---
+
+## Quick start with Docker (recommended)
+
+> Requirements: Docker and Docker Compose.
 
 ```bash
-# 1. Choisir un mot de passe admin dans docker-compose.yml (variable ADMIN_PASSWORD)
-# 2. Construire et lancer
+# 1. (Optional) Set an admin password in docker-compose.yml (ADMIN_PASSWORD variable)
+# 2. Build and run
 docker compose up -d --build
 ```
 
-Le site est disponible sur **http://localhost:3000**.
-L'administration est sur **http://localhost:3000/admin.html**.
+The site is available at **http://localhost:3000**.
+Administration is at **http://localhost:3000/admin.html**.
 
-Au tout premier lancement, la base est automatiquement initialisée avec les deux lieux officiels (Salle Festive et Local de la MJC, avec leurs coordonnées), une sélection d'exemple de **12 jeux** (dont quelques extensions) et deux soirées de démonstration. La base est persistée dans le dossier `./data` (monté en volume), elle survit donc aux redémarrages et reconstructions.
+On the very first launch, the database is automatically initialized with the two official venues (Salle Festive and Local de la MJC, with their coordinates), a sample selection of **12 games** (including a few expansions) and two demo nights. The database is persisted in the `./data` folder (mounted as a volume), so it survives restarts and rebuilds.
 
-Pour arrêter : `docker compose down` (les données restent dans `./data`).
+To stop: `docker compose down` (data stays in `./data`).
+
+### Configuration via environment variables
+
+The environment variables defined in `docker-compose.yml` (the `environment` section) are **applied on every startup** of the container:
+
+- a variable that is **set** overwrites the value stored in the database;
+- a variable that is **absent or empty** leaves the stored value **unchanged**.
+
+So if `ADMIN_PASSWORD` is set, the admin password is (re)defined on each launch; if it is absent, the current password (default `admin`, or the one set via the interface) is kept as is.
 
 ---
 
-## Démarrage sans Docker (Node.js)
+## Running without Docker (Node.js)
 
-> Prérequis : Node.js 18 ou plus récent.
+> Requirements: Node.js 18 or newer.
 
 ```bash
-npm install        # installe les dépendances (front + serveur)
-npm run build      # construit le front (Vite + Sass) → dossier public/
-npm run seed       # initialise la base + sélection d'exemple (au 1er lancement)
-npm start          # démarre le serveur sur http://localhost:3000
+npm install        # install dependencies (front + server)
+npm run build      # build the front-end (Vite + Sass) → public/ folder
+npm run seed       # initialize the database + sample selection (first launch)
+npm start          # start the server on http://localhost:3000
 ```
 
-Pour le développement front avec rechargement à chaud, lancez le serveur API
-(`npm run dev:server`) puis Vite (`npm run dev`) : Vite relaie les appels `/api`
-vers Express.
+For front-end development with hot reload, start the API server
+(`npm run dev:server`) then Vite (`npm run dev`): Vite proxies `/api` calls to
+Express.
 
-Variables d'environnement utiles :
-- `PORT` : port d'écoute (défaut `3000`).
-- `ADMIN_PASSWORD` : mot de passe admin initial (défaut `admin`). Il est **haché
-  automatiquement** (Argon2id) au premier démarrage ; même une base existante
-  avec un ancien mot de passe en clair est migrée toute seule.
-- `DATA_DIR` : dossier de la base SQLite (défaut `./data`).
+Useful environment variables (taken into account **on every startup**):
+- `PORT`: listening port (default `3000`).
+- `ADMIN_PASSWORD`: admin password. If it is set, it **(re)defines** the password
+  on each startup (automatically hashed with Argon2id); if it is absent, the
+  stored password stays unchanged. An existing database with an old plaintext
+  password is migrated automatically.
+- `DATA_DIR`: SQLite database folder (default `./data`).
 
-### Moteur SQLite
+### SQLite engine
 
-Le projet utilise **better-sqlite3** (rapide, stable, recommandé). S'il n'est pas
-installable dans votre environnement, le serveur bascule automatiquement sur le
-module natif **`node:sqlite`** (intégré à Node 22+). Aucune action requise de
-votre part — dans Docker, c'est better-sqlite3 qui est utilisé.
-
----
-
-## Identifiants par défaut
-
-- **Mot de passe administration : `admin`**
-
-Changez-le dès la mise en ligne, soit via `ADMIN_PASSWORD` avant le premier
-lancement, soit dans l'onglet **Réglages** de l'administration.
-
-Le mot de passe n'est **jamais stocké en clair** : il est haché avec **Argon2id**
-(paramètres conformes aux recommandations OWASP). La vérification se fait par
-comparaison de hachage, et toute mise à jour du mot de passe est re-hachée avant
-enregistrement.
+The project uses **better-sqlite3** (fast, stable, recommended). If it cannot be
+installed in your environment, the server automatically falls back to the native
+**`node:sqlite`** module (built into Node 22+). No action required on your
+side — inside Docker, better-sqlite3 is used.
 
 ---
 
-## Importer votre collection depuis MyLudo
+## Default credentials
 
-1. Connectez-vous sur [myludo.fr](https://www.myludo.fr) et ouvrez votre ludothèque.
-2. Exportez votre collection au format **CSV** ou **JSON** (fonction d'export de MyLudo).
-3. Dans l'administration → onglet **Jeux & import**, glissez le fichier dans la zone prévue.
-4. Choisissez le mode :
-   - **Remplacer** : efface la collection actuelle et la remplace entièrement.
-   - **Mettre à jour / compléter (fusion)** : ajoute les nouveaux jeux et met à jour
-     les existants, **sans toucher** aux images et « apporté par » que vous avez saisis.
-5. Cliquez sur **Importer**.
+- **Admin password: `admin`**
 
-> Le profil MyLudo public configuré par défaut est `christophe-t-81487`
-> (modifiable dans l'onglet Réglages). MyLudo ne fournit pas d'API d'images :
-> les liens pointent vers la fiche du jeu, et vous pouvez ajouter une image
-> personnalisée par jeu si vous le souhaitez.
+Change it as soon as you go live, either via `ADMIN_PASSWORD` (applied on every
+startup) or in the **Settings** tab of the administration.
+
+The password is **never stored in plaintext**: it is hashed with **Argon2id**
+(parameters following OWASP recommendations). Verification is done by hash
+comparison, and any password update is re-hashed before being saved.
+
+> If `ADMIN_PASSWORD` is set in `docker-compose.yml`, it takes priority on every
+> startup: a password changed via the interface will be overwritten on the next
+> restart. To manage the password only from the interface, leave `ADMIN_PASSWORD`
+> unset (commented out).
 
 ---
 
-## Structure du projet
+## Importing your collection from MyLudo
+
+1. Sign in at [myludo.fr](https://www.myludo.fr) and open your library.
+2. Export your collection as **CSV** or **JSON** (MyLudo's export feature).
+3. In the administration → **Games & import** tab, drop the file into the dedicated area.
+4. Choose the mode:
+   - **Replace**: clears the current collection and replaces it entirely.
+   - **Update / complete (merge)**: adds new games and updates existing ones,
+     **without touching** the images and "brought by" notes you entered.
+5. Click **Import**.
+
+> The default public MyLudo profile is `christophe-t-81487` (editable in the
+> Settings tab). MyLudo does not provide an image API: links point to the game's
+> page, and you can add a custom image per game if you wish.
+
+---
+
+## Project structure
 
 ```
 boardgames-planner/
-├── src/                    # sources front-end (compilées par Vite)
-│   ├── pages/              # index.html, jeux.html, admin.html (sans <style>)
+├── src/                    # front-end sources (compiled by Vite)
+│   ├── pages/              # index.html, jeux.html, admin.html (no <style>)
 │   ├── scripts/
-│   │   ├── shared/         # modules communs (api, dom, cartes, vignettes, modale)
-│   │   │   ├── i18n.js     # moteur de traduction (sans dépendance)
-│   │   │   ├── eventTypes.js  # source unique des types de soirées (classes + libellés)
-│   │   │   └── locales/    # dictionnaires de langue (fr.js, en.js)
-│   │   └── pages/          # logique propre à chaque page (home, games, admin)
-│   ├── styles/             # SCSS organisé en partials (_variables, _base, …)
-├── static/                 # fichiers copiés tels quels (ex. /assets/boardgames.webp)
+│   │   ├── shared/         # shared modules (api, dom, maps, thumbnails, modal)
+│   │   │   ├── i18n.js     # translation engine (dependency-free)
+│   │   │   ├── eventTypes.js  # single source of night types (classes + labels)
+│   │   │   └── locales/    # language dictionaries (fr.js, en.js)
+│   │   └── pages/          # per-page logic (home, games, admin)
+│   ├── styles/             # SCSS organized into partials (_variables, _base, …)
+├── static/                 # files copied as-is (e.g. /assets/boardgames.webp)
 ├── server/
-│   ├── index.js            # serveur Express : API REST + service des pages + helmet
-│   ├── db.js               # base SQLite + schéma + migrations + hachage du mot de passe
-│   ├── password.js         # hachage / vérification Argon2id
-│   ├── myludo.js           # analyse des exports MyLudo (CSV et JSON)
-│   └── seed.js             # initialisation : 2 lieux, sélection de 12 jeux, soirées démo
-├── public/                 # SORTIE du build Vite (générée — non versionnée)
-├── import-data/            # collection MyLudo d'exemple (CSV + JSON)
-├── data/                   # base SQLite (créée au lancement — non versionnée)
-├── vite.config.js          # configuration de build (3 pages, proxy /api en dev)
+│   ├── index.js            # Express server: REST API + page serving + helmet
+│   ├── db.js               # SQLite database + schema + migrations + env config + password hashing
+│   ├── password.js         # Argon2id hashing / verification
+│   ├── myludo.js           # MyLudo export parsing (CSV and JSON)
+│   └── seed.js             # initialization: 2 venues, 12-game selection, demo nights
+├── public/                 # OUTPUT of the Vite build (generated — not versioned)
+├── import-data/            # sample MyLudo collection (CSV + JSON)
+├── data/                   # SQLite database (created at launch — not versioned)
+├── vite.config.js          # build configuration (3 pages, /api proxy in dev)
 ├── Dockerfile
 └── docker-compose.yml
 ```
 
-> Le dossier `public/` est **généré** par `npm run build` ; il n'est pas
-> versionné. Dans Docker, le build est exécuté pendant la construction de
-> l'image, donc rien à faire manuellement.
+> The `public/` folder is **generated** by `npm run build`; it is not versioned.
+> In Docker, the build runs during the image build, so there is nothing to do
+> manually.
 
 ---
 
-## Multilingue (i18n)
+## Multilingual (i18n)
 
-Le site est disponible en **français** (langue par défaut) et en **anglais**, sans
-aucune dépendance externe. Un petit moteur maison (`src/scripts/shared/i18n.js`)
-gère :
-- la **détection** de la langue au premier chargement (préférence enregistrée,
-  sinon langue du navigateur, sinon français) et sa **mémorisation** dans le
-  `localStorage` du visiteur ;
-- la mise à jour de l'attribut `<html lang>` et le formatage **localisé des dates**
-  (`fr-FR` / `en-GB`) ;
-- les textes statiques via des attributs déclaratifs dans le HTML
-  (`data-i18n`, `data-i18n-html`, `data-i18n-ph`, `data-i18n-aria`) ;
-- les textes générés en JavaScript (cartes, tableaux, messages) via les fonctions
-  `t()` (avec interpolation `{var}`) et `tp()` (pluriel via `Intl.PluralRules`) ;
-- un sélecteur de langue dans chaque barre de navigation, qui rafraîchit
-  immédiatement tout le contenu de la page.
+The site is available in **French** (default language) and **English**, with no
+external dependency. A small in-house engine (`src/scripts/shared/i18n.js`)
+handles:
+- **detection** of the language on first load (saved preference, otherwise the
+  browser language, otherwise French) and its **persistence** in the visitor's
+  `localStorage`;
+- updating the `<html lang>` attribute and **localized date formatting**
+  (`fr-FR` / `en-GB`);
+- static texts via declarative attributes in the HTML
+  (`data-i18n`, `data-i18n-html`, `data-i18n-ph`, `data-i18n-aria`);
+- texts generated in JavaScript (cards, tables, messages) via the functions
+  `t()` (with `{var}` interpolation) and `tp()` (plural via `Intl.PluralRules`);
+- a language switcher in each navigation bar, which immediately refreshes all the
+  page content.
 
-Les libellés des **types de soirées** (« Grande / Petite soirée ») ne sont plus
-écrits en dur : leur structure visuelle vit dans `eventTypes.js` et leurs textes
-dans les dictionnaires de langue, garantissant une cohérence entre l'accueil, le
-calendrier et l'administration.
+The **night type** labels ("Large / Small night") are no longer hard-coded: their
+visual structure lives in `eventTypes.js` and their texts in the language
+dictionaries, ensuring consistency across the home page, the calendar and the
+administration.
 
-### Ajouter une langue
+### Adding a language
 
-1. Créez `src/scripts/shared/locales/xx.js` en copiant `fr.js` et traduisez les
-   valeurs (en conservant les clés et les variantes `_one` / `_other`).
-2. Dans `i18n.js`, importez le dictionnaire, ajoutez-le à `DICTS`, à `LANGUAGES`
-   (code + libellé court affiché) et à `LOCALES` (code de formatage des dates).
+1. Create `src/scripts/shared/locales/xx.js` by copying `fr.js` and translate the
+   values (keeping the keys and the `_one` / `_other` variants).
+2. In `i18n.js`, import the dictionary and add it to `DICTS`, to `LANGUAGES`
+   (code + short displayed label) and to `LOCALES` (date formatting code).
 
-C'est tout : le sélecteur, la détection et les pages reprennent automatiquement la
-nouvelle langue.
-
----
-
-## Sauvegarde
-
-Toutes les données tiennent dans le fichier `data/boardgames-planner.db`. Pour
-sauvegarder, copiez simplement ce fichier (idéalement serveur arrêté, ou
-copiez aussi les fichiers `-wal`/`-shm` s'ils existent).
+That's all: the switcher, the detection and the pages automatically pick up the
+new language.
 
 ---
 
-## Licence
+## Backup
+
+All data fits in the `data/boardgames-planner.db` file. To back it up, simply
+copy this file (ideally with the server stopped, or also copy the `-wal`/`-shm`
+files if they exist).
+
+---
+
+## License
 
 [MIT](LICENSE)
