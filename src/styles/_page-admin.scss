@@ -75,6 +75,10 @@ td.cell-actions {
   vertical-align: middle;
 }
 
+body.dark .cell-actions .btn-icon img {
+  filter: invert(1);
+}
+
 #locations-table a {
   text-decoration: none;
 }
