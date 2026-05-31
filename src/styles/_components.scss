@@ -54,11 +54,23 @@ section[id] {
   font-weight: 700;
 
   img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center center;
     display: block;
+  }
+
+  .modal & {
+    img {
+      object-fit: contain;
+    }
+
+    &:has(> img) {
+      background: none;
+    }
   }
 }
 
