@@ -137,29 +137,64 @@ try {
   }
 } catch (e) { /* table vide ou colonne absente */ }
 
+// --- Valeurs par défaut (uniquement au tout premier lancement) ------------
+// ON CONFLICT DO NOTHING : ces valeurs ne servent qu'à amorcer une base
+// vierge. Elles ne sont JAMAIS réappliquées si la clé existe déjà.
 const ensureSetting = db.prepare(
   `INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO NOTHING`
 );
-// Le mot de passe est inséré ici en clair la première fois, puis haché
-// immédiatement ci-dessous (et migré s'il était déjà stocké en clair).
-ensureSetting.run('admin_password', process.env.ADMIN_PASSWORD || 'admin');
+ensureSetting.run('admin_password', 'admin');
 ensureSetting.run('whatsapp_main', '');
 ensureSetting.run('whatsapp_mjc', '');
 ensureSetting.run('myludo_profile', 'https://www.myludo.fr/#!/profil/christophe-t-81487');
 
-// --- Sécurité : hachage du mot de passe administrateur (Argon2id) ----------
-// Au premier démarrage (ou après une mise à jour depuis une version qui
-// stockait le mot de passe en clair), on remplace la valeur stockée par un
-// hash Argon2id. Idempotent : si la valeur commence déjà par "$argon2", on
-// n'y touche pas.
+// --- Configuration par variables d'environnement --------------------------
+// Appliquée à CHAQUE démarrage du conteneur :
+//   - variable renseignée (non vide) -> écrase la valeur stockée ;
+//   - variable absente ou vide       -> la valeur stockée reste inchangée.
+// Pour exposer une nouvelle option plus tard, il suffit d'ajouter une ligne
+// à ce tableau (la variable d'environnement -> la clé en base).
+const ENV_SETTINGS = [
+  { env: 'WHATSAPP_MAIN',  key: 'whatsapp_main' },
+  { env: 'WHATSAPP_MJC',   key: 'whatsapp_mjc' },
+  { env: 'MYLUDO_PROFILE', key: 'myludo_profile' },
+];
+
+// Upsert générique : insère la clé si absente, sinon met à jour sa valeur.
+const setSetting = db.prepare(
+  `INSERT INTO settings (key, value) VALUES (?, ?)
+   ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+);
+for (const { env, key } of ENV_SETTINGS) {
+  const value = process.env[env];
+  if (value !== undefined && value !== '') {
+    setSetting.run(key, value);
+    console.log(`[db] réglage « ${key} » défini depuis ${env}`);
+  }
+}
+
+// --- Sécurité : mot de passe administrateur (Argon2id) --------------------
+// Cas particulier car la valeur doit être hachée avant stockage.
+//   - ADMIN_PASSWORD renseigné -> (re)définit le mot de passe à CHAQUE
+//     démarrage (haché Argon2id) ;
+//   - ADMIN_PASSWORD absent/vide -> conserve la valeur déjà stockée, et la
+//     hache si elle était encore en clair (migration / valeur par défaut).
 {
   const { hashPassword, isHashed } = await import('./password.js');
-  const row = db.prepare("SELECT value FROM settings WHERE key = 'admin_password'").get();
-  const current = row ? row.value : '';
-  if (current && !isHashed(current)) {
-    const hash = await hashPassword(current);
-    db.prepare("UPDATE settings SET value = ? WHERE key = 'admin_password'").run(hash);
-    console.log('[db] mot de passe administrateur haché (Argon2id)');
+  const fromEnv = process.env.ADMIN_PASSWORD;
+
+  if (fromEnv !== undefined && fromEnv !== '') {
+    const hash = await hashPassword(fromEnv);
+    setSetting.run('admin_password', hash);
+    console.log('[db] mot de passe administrateur défini depuis ADMIN_PASSWORD');
+  } else {
+    const row = db.prepare("SELECT value FROM settings WHERE key = 'admin_password'").get();
+    const current = row ? row.value : '';
+    if (current && !isHashed(current)) {
+      const hash = await hashPassword(current);
+      setSetting.run('admin_password', hash);
+      console.log('[db] mot de passe administrateur haché (Argon2id)');
+    }
   }
 }
 
