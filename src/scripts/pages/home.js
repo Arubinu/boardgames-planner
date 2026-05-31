@@ -97,7 +97,7 @@ function renderEvents() {
   const cont = document.getElementById('events-container');
   if (cont)
     cont.innerHTML = upcoming.length
-      ? `<div class="events-grid">${upcoming.map(eventCardHtml).join('')}</div>`
+      ? `<div class="events-grid">${upcoming.slice(0, 3).map(eventCardHtml).join('')}</div>`
       : `<div class="empty">${esc(t('dates.none_upcoming'))}</div>`;
   const pastEl = document.getElementById('past-events');
   if (pastEl)

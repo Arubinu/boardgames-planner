@@ -253,7 +253,7 @@ export default {
     ef_location_none: '— Aucun —',
     ef_desc: 'Description',
     ef_wa: "Lien WhatsApp d'inscription (optionnel)",
-    ef_wa_ph: 'laisser vide pour utiliser le lien par défaut',
+    ef_wa_ph: 'Laisser vide pour utiliser le lien par défaut',
     ef_games_label: 'Jeux disponibles ce soir-là —',
     ef_selected: 'sélectionné(s)',
     ef_filter_ph: 'Filtrer les jeux…',

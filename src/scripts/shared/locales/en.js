@@ -247,7 +247,7 @@ export default {
     ef_location_none: '— None —',
     ef_desc: 'Description',
     ef_wa: 'WhatsApp sign-up link (optional)',
-    ef_wa_ph: 'leave empty to use the default link',
+    ef_wa_ph: 'Leave empty to use the default link',
     ef_games_label: 'Games available that night —',
     ef_selected: 'selected',
     ef_filter_ph: 'Filter the games…',
