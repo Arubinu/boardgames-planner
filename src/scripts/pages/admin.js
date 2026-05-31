@@ -514,6 +514,8 @@ function setupCoordMap(initialCoords) {
       maxZoom: 19,
       attribution: '© OpenStreetMap',
     }).addTo(coordMap);
+    coordMap.attributionControl.setPrefix(false); // retire le lien « Leaflet »
+
     // Clic sur la carte = placement du marqueur + enregistrement des coords.
     coordMap.on('click', (e) => placeCoordMarker(e.latlng.lat, e.latlng.lng));
   } else {

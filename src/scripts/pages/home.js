@@ -20,13 +20,30 @@ import {
 import { EVENT_TYPE_ORDER, typeKey, typeLabel, typeSub, badgeClass, calClass, dotClass } from '../shared/eventTypes.js';
 import { gameThumb, wireThumbFallbacks } from '../shared/gameThumb.js';
 import { openGameModal } from '../shared/gameModal.js';
-import { parseCoords, osmEmbedUrl, googleMapsUrl } from '../shared/maps.js';
+import { parseCoords, googleMapsUrl } from '../shared/maps.js';
+// Mini-carte en Leaflet (remplace l'ancien iframe d'embed OpenStreetMap, dont
+// le pied de page n'était pas personnalisable car servi en cross-origin).
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+// Correctif des icônes de marqueur Leaflet sous bundler (Vite).
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 let SETTINGS = {};
 let ALL_EVENTS = [];
 let LOCS = [];
 let GAMES_COUNT = null;
 const GAMES_BY_ID = {};
+
+// Instance Leaflet de la mini-carte (réutilisée d'un événement à l'autre).
+let homeMap = null;
+let homeMarker = null;
 
 // --- Navigation interne ---
 function goto(id) {
@@ -182,12 +199,52 @@ function focusEventInCalendar(ev) {
   document.getElementById('cal-map')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+// Détruit proprement la mini-carte Leaflet (avant d'afficher un message ou de
+// vider le panneau), pour éviter conteneurs orphelins et fuites mémoire.
+function destroyLocationMap() {
+  if (homeMap) {
+    homeMap.remove();
+    homeMap = null;
+    homeMarker = null;
+  }
+}
+
+// Affiche la mini-carte Leaflet sur les coordonnées du lieu. La carte est
+// créée une seule fois puis recentrée d'un événement à l'autre. L'attribution
+// est réduite à un court « © OpenStreetMap » et le lien « Leaflet » est retiré
+// (voir le complément SCSS pour réduire encore la taille de ce texte).
+function renderLocationMap(embed, coords) {
+  // Si le panneau contenait autre chose (message « coordonnées manquantes »
+  // ou panneau vidé), on recrée le conteneur de carte.
+  if (!document.getElementById('map-leaflet')) {
+    destroyLocationMap();
+    embed.innerHTML =
+      '<div id="map-leaflet" style="width:100%;height:100%;min-height:240px"></div>';
+  }
+  const center = [coords.lat, coords.lon];
+  if (!homeMap) {
+    homeMap = L.map('map-leaflet').setView(center, 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap',
+    }).addTo(homeMap);
+    homeMap.attributionControl.setPrefix(false); // retire le lien « Leaflet »
+  } else {
+    homeMap.setView(center, 15);
+  }
+  if (homeMarker) homeMap.removeLayer(homeMarker);
+  homeMarker = L.marker(center).addTo(homeMap);
+  // Le panneau a pu être masqué/redimensionné : Leaflet doit recalculer.
+  setTimeout(() => homeMap && homeMap.invalidateSize(), 0);
+}
+
 function updateMap(date) {
   const ev = eventByDate(date);
   const embed = document.getElementById('map-embed');
   const info = document.getElementById('map-info');
   if (!embed || !info) return;
   if (!ev) {
+    destroyLocationMap();
     info.innerHTML = `<p class="muted">${esc(t('dates.map_none'))}</p>`;
     embed.innerHTML = '';
     return;
@@ -195,10 +252,9 @@ function updateMap(date) {
   // La carte est centrée sur les coordonnées du lieu enregistrées en base.
   const coords = parseCoords(ev.location_coords);
   if (coords) {
-    embed.innerHTML = `<iframe loading="lazy" title="Carte du lieu" src="${osmEmbedUrl(
-      coords
-    )}"></iframe>`;
+    renderLocationMap(embed, coords);
   } else {
+    destroyLocationMap();
     embed.innerHTML = `<div class="empty" style="padding:2rem">${esc(
       t('dates.coords_missing')
     )}</div>`;
