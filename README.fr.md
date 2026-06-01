@@ -13,17 +13,17 @@ Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass
 ## Ce que fait le site
 
 **Côté visiteurs** (page unique avec défilement) :
-- Présentation et prochaines dates de soirées (grandes / petites), avec lieu et liste des jeux prévus.
 - Aperçu de la ludothèque + page dédiée `/jeux.html` avec recherche, filtres (jeux de base / extensions) et tri par note.
-- Fiche de chaque jeu reliée à sa page **MyLudo**.
-- Infos pratiques, lieux, contact et liens d'inscription **WhatsApp** pour les petites soirées.
-- **Calendrier interactif** : la légende est **dynamique** (seuls les types de soirées présents dans le mois affiché y figurent). Cliquer sur une carte de soirée recadre le calendrier sur la date et affiche le lieu sur une **mini-carte** (OpenStreetMap) ; le bouton « Voir les jeux de cette soirée » ouvre le détail.
+- Infos pratiques, lieux, contact et liens d'inscription **WhatsApp** pour les soirées qui le proposent.
+- **Section adhésion** : téléchargement du bulletin d'adhésion (PDF) à remplir et à régler sur place.
+- **Calendrier interactif** : la légende est **dynamique** (seuls les types de soirées présents dans le mois affiché y figurent, avec leur couleur). Cliquer sur une carte de soirée recadre le calendrier sur la date et affiche le lieu sur une **mini-carte** (OpenStreetMap) ; le bouton « Voir les jeux de cette soirée » ouvre le détail.
 - **Multilingue** (français / anglais) : sélecteur dans la barre de navigation, langue détectée puis mémorisée. Voir la section dédiée plus bas.
 - Thème clair / sombre.
 
 **Côté administration** (`/admin.html`, protégée par mot de passe) :
-- Créer / modifier / supprimer des soirées, choisir leur lieu et cocher les jeux disponibles ce soir-là.
-- Gérer la liste des lieux (choix rapide à la création d'une date). Chaque lieu est **localisé d'un clic sur une carte** (OpenStreetMap) : les coordonnées sont enregistrées et le lien Google Maps en est dérivé automatiquement (plus aucune URL à coller). « Supprimer » un lieu l'**archive** : il disparaît du site public mais reste désarchivable.
+- Créer / modifier / supprimer des soirées (présentées en **deux tableaux** : à venir et passées), choisir leur lieu et cocher les jeux disponibles ce soir-là.
+- Gérer les **types de soirées** depuis un onglet dédié : libellé, mention (« sur inscription »…), **couleur** et proposition d'inscription WhatsApp. Les types alimentent le formulaire de soirée, le calendrier et les badges.
+- Gérer la liste des lieux (choix rapide à la création d'une date). Chaque lieu est **localisé d'un clic sur une carte Leaflet** (OpenStreetMap) : les coordonnées sont enregistrées et le lien Google Maps en est dérivé automatiquement (plus aucune URL à coller). « Supprimer » un lieu l'**archive** : il disparaît du site public mais reste désarchivable.
 - Importer la collection depuis un export **MyLudo** (CSV ou JSON). La **date de création** de chaque jeu est conservée d'un import à l'autre ; la date de modification est mise à jour.
 - Ajouter une image et un « apporté par » à chaque jeu (conservés lors des ré-imports), ou supprimer un jeu.
 - Régler les liens WhatsApp, le profil MyLudo et le mot de passe.
@@ -136,14 +136,14 @@ boardgames-planner/
 │   ├── scripts/
 │   │   ├── shared/         # modules communs (api, dom, cartes, vignettes, modale)
 │   │   │   ├── i18n.js     # moteur de traduction (sans dépendance)
-│   │   │   ├── eventTypes.js  # source unique des types de soirées (classes + libellés)
+│   │   │   ├── eventTypes.js  # registre runtime des types de soirées (chargé depuis l'API)
 │   │   │   └── locales/    # dictionnaires de langue (fr.js, en.js)
 │   │   └── pages/          # logique propre à chaque page (home, games, admin)
 │   ├── styles/             # SCSS organisé en partials (_variables, _base, …)
-├── static/                 # fichiers copiés tels quels (ex. /assets/boardgames.webp)
+├── static/                 # copiés à la racine du site (favicons, manifeste, /assets/…)
 ├── server/
 │   ├── index.js            # serveur Express : API REST + service des pages + helmet
-│   ├── db.js               # base SQLite + schéma + migrations + config d'environnement + hachage du mot de passe
+│   ├── db.js               # base SQLite + schéma + migrations + types de soirées + config d'environnement + hachage du mot de passe
 │   ├── password.js         # hachage / vérification Argon2id
 │   ├── myludo.js           # analyse des exports MyLudo (CSV et JSON)
 │   └── seed.js             # initialisation : 2 lieux, sélection de 12 jeux, soirées démo
@@ -177,11 +177,6 @@ gère :
   `t()` (avec interpolation `{var}`) et `tp()` (pluriel via `Intl.PluralRules`) ;
 - un sélecteur de langue dans chaque barre de navigation, qui rafraîchit
   immédiatement tout le contenu de la page.
-
-Les libellés des **types de soirées** (« Grande / Petite soirée ») ne sont plus
-écrits en dur : leur structure visuelle vit dans `eventTypes.js` et leurs textes
-dans les dictionnaires de langue, garantissant une cohérence entre l'accueil, le
-calendrier et l'administration.
 
 ### Ajouter une langue
 

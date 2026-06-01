@@ -13,17 +13,17 @@ The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (sty
 ## What the site does
 
 **For visitors** (single scrolling page):
-- Introduction and upcoming night dates (large / small), with venue and the list of planned games.
 - Library preview + a dedicated `/jeux.html` page with search, filters (base games / expansions) and sorting by rating.
-- Each game links to its **MyLudo** page.
-- Practical info, venues, contact and **WhatsApp** sign-up links for the small nights.
-- **Interactive calendar**: the legend is **dynamic** (only the night types present in the displayed month appear). Clicking a night card re-centers the calendar on its date and shows the venue on a **mini-map** (OpenStreetMap); the "See this night's games" button opens the details.
+- Practical info, venues, contact and **WhatsApp** sign-up links for the nights that offer it.
+- **Membership section**: download the membership form (PDF) to fill in and pay on site.
+- **Interactive calendar**: the legend is **dynamic** (only the night types present in the displayed month appear, with their color). Clicking a night card re-centers the calendar on its date and shows the venue on a **mini-map** (OpenStreetMap); the "See this night's games" button opens the details.
 - **Multilingual** (French / English): a switcher in the navigation bar, language detected then remembered. See the dedicated section below.
 - Light / dark theme.
 
 **For administration** (`/admin.html`, password-protected):
-- Create / edit / delete nights, choose their venue and tick the games available that evening.
-- Manage the list of venues (quick selection when creating a date). Each venue is **located by clicking on a map** (OpenStreetMap): the coordinates are saved and the Google Maps link is derived automatically (no URL to paste). "Deleting" a venue **archives** it: it disappears from the public site but can be unarchived.
+- Create / edit / delete nights (shown in **two tables**: upcoming and past), choose their venue and tick the games available that evening.
+- Manage **night types** from a dedicated tab: label, mention ("sign-up required"…), **color** and whether they offer WhatsApp sign-up. Types feed the night form, the calendar and the badges.
+- Manage the list of venues (quick selection when creating a date). Each venue is **located by clicking on a Leaflet map** (OpenStreetMap): the coordinates are saved and the Google Maps link is derived automatically (no URL to paste). "Deleting" a venue **archives** it: it disappears from the public site but can be unarchived.
 - Import the collection from a **MyLudo** export (CSV or JSON). Each game's **creation date** is preserved across imports; the modification date is updated.
 - Add an image and a "brought by" note to each game (preserved across re-imports), or delete a game.
 - Configure the WhatsApp links, the MyLudo profile and the password.
@@ -134,14 +134,14 @@ boardgames-planner/
 │   ├── scripts/
 │   │   ├── shared/         # shared modules (api, dom, maps, thumbnails, modal)
 │   │   │   ├── i18n.js     # translation engine (dependency-free)
-│   │   │   ├── eventTypes.js  # single source of night types (classes + labels)
+│   │   │   ├── eventTypes.js  # runtime registry of night types (loaded from the API)
 │   │   │   └── locales/    # language dictionaries (fr.js, en.js)
 │   │   └── pages/          # per-page logic (home, games, admin)
 │   ├── styles/             # SCSS organized into partials (_variables, _base, …)
-├── static/                 # files copied as-is (e.g. /assets/boardgames.webp)
+├── static/                 # copied to the site root (favicons, manifest, /assets/…)
 ├── server/
 │   ├── index.js            # Express server: REST API + page serving + helmet
-│   ├── db.js               # SQLite database + schema + migrations + env config + password hashing
+│   ├── db.js               # SQLite database + schema + migrations + night types + env config + password hashing
 │   ├── password.js         # Argon2id hashing / verification
 │   ├── myludo.js           # MyLudo export parsing (CSV and JSON)
 │   └── seed.js             # initialization: 2 venues, 12-game selection, demo nights
@@ -175,11 +175,6 @@ handles:
   `t()` (with `{var}` interpolation) and `tp()` (plural via `Intl.PluralRules`);
 - a language switcher in each navigation bar, which immediately refreshes all the
   page content.
-
-The **night type** labels ("Large / Small night") are no longer hard-coded: their
-visual structure lives in `eventTypes.js` and their texts in the language
-dictionaries, ensuring consistency across the home page, the calendar and the
-administration.
 
 ### Adding a language
 
