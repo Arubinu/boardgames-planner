@@ -27,7 +27,8 @@ export default {
 
   dates: {
     title: 'Upcoming nights',
-    sub: 'Click a night to locate it on the calendar and see the venue. The “See the games for this night” button opens the details.',
+    sub_1: 'Click a night to locate it on the calendar and see the venue.',
+    sub_2_html: 'The <u>“See the games for this night”</u> button opens the details.',
     past_toggle: 'Also show past nights',
     map_default: 'Select a date to see the venue.',
     map_none: 'No night on this date.',
@@ -88,19 +89,11 @@ export default {
     },
   ],
 
-  eventType: {
-    grande: {
-      label: 'Big night',
-      short: 'Big',
-      sub: 'no sign-up',
-      option: 'Big (no sign-up)',
-    },
-    petite: {
-      label: 'Small night',
-      short: 'Small',
-      sub: 'sign-up required',
-      option: 'Small (sign-up required)',
-    },
+  join: {
+    title: 'Join the MJC',
+    desc_1: 'Membership to the MJC gives access to all activities, including the board game nights.',
+    desc_2: 'Download the form, fill it out and submit it on-site with your payment.',
+    cta: 'Download the membership form (PDF)',
   },
 
   event: {
@@ -169,7 +162,7 @@ export default {
   },
 
   meta: {
-    index_title: 'Game Nights — MJC Estrablin',
+    index_title: 'Game Nights — Game Nights MJC Estrablin',
     games_title: 'Our games — Game Nights MJC Estrablin',
     admin_title: 'Administration — Game Nights MJC Estrablin',
   },
@@ -188,6 +181,7 @@ export default {
     tab_events: '📅 Nights',
     tab_games: '🎲 Games & import',
     tab_locations: '📍 Venues',
+    tab_types: '🏷️ Night types',
     tab_settings: '⚙️ Settings',
 
     events_title: 'Nights',
@@ -228,6 +222,32 @@ export default {
     no_archived_loc: 'No archived venue.',
     coords_undefined: 'not set',
 
+    // Night types
+    types_title: 'Night types',
+    new_type: '+ New type',
+    types_help:
+      'Each type defines a label, a mention, a color and whether it offers WhatsApp sign-up.',
+    th_type_label: 'Label',
+    th_type_sub: 'Mention',
+    th_type_signup: 'Sign-up',
+    no_types: 'No night type.',
+    yes: 'Yes',
+    no: 'No',
+    tf_new: 'New type',
+    tf_edit: 'Edit type',
+    tf_label: 'Label *',
+    tf_label_ph: 'Large night',
+    tf_sub: 'Mention',
+    tf_sub_ph: 'sign-up required',
+    tf_color: 'Color',
+    tf_signup: 'Offers WhatsApp sign-up',
+    err_type_label: 'Label required',
+    saved_type: 'Type saved',
+    del_type_title: 'Delete type',
+    del_type_msg:
+      'Do you really want to delete the type <strong>{label}</strong>? (refused if nights use it)',
+    del_type_done: 'Type deleted',
+
     settings_title: 'Settings',
     set_wa_main: '“Game Nights” WhatsApp group link',
     set_wa_mjc: '“MJC Estrablin” WhatsApp group link',
@@ -247,7 +267,7 @@ export default {
     ef_location_none: '— None —',
     ef_desc: 'Description',
     ef_wa: 'WhatsApp sign-up link (optional)',
-    ef_wa_ph: 'Leave empty to use the default link',
+    ef_wa_ph: 'leave empty to use the default link',
     ef_games_label: 'Games available that night —',
     ef_selected: 'selected',
     ef_filter_ph: 'Filter the games…',

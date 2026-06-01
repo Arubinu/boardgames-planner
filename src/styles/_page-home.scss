@@ -57,9 +57,6 @@
   background: linear-gradient(135deg, var(--terracotta), var(--terracotta-light));
   color: #fff;
 
-  &.petite {
-    background: linear-gradient(135deg, var(--olive), var(--olive-light));
-  }
   .day {
     font-family: 'Comic Neue', cursive;
     font-size: 2.4rem;
@@ -285,9 +282,6 @@
   &.ev-grande {
     background: var(--terracotta);
   }
-  &.ev-petite {
-    background: var(--olive);
-  }
   &.selected {
     box-shadow: 0 0 0 3px var(--card-bg), 0 0 0 5px var(--dark-text);
   }
@@ -309,12 +303,6 @@
     margin-right: 0.35rem;
     vertical-align: middle;
   }
-}
-.dot-grande {
-  background: var(--terracotta);
-}
-.dot-petite {
-  background: var(--olive);
 }
 .map-panel {
   overflow: hidden;

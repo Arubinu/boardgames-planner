@@ -59,8 +59,10 @@
         <div class="wrap">
           <div class="center">
             <h2 class="section-title" data-i18n="dates.title">Prochaines soirées</h2>
-            <p class="section-sub" data-i18n="dates.sub">
-              Cliquez sur une soirée pour la situer dans le calendrier et voir le lieu.
+            <p class="section-sub">
+              <span data-i18n="dates.sub_1">Cliquez sur une soirée pour la situer dans le calendrier et voir le lieu.</span>
+              <br />
+              <span data-i18n-html="dates.sub_2_html">Le bouton <u>« Voir les jeux de cette soirée »</u> en ouvre le détail.</span>
             </p>
           </div>
           <div id="events-container"><div class="spinner"></div></div>
@@ -144,6 +146,21 @@
               Questions fréquentes
             </h3>
             <div class="grid" style="gap: 0.85rem" id="faq"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="container section" id="adhesion">
+        <div class="wrap">
+          <div class="center">
+            <h2 class="section-title" data-i18n="join.title">Adhérer à la MJC</h2>
+            <p class="section-sub">
+              <span data-i18n="join.desc_1">L'adhésion à la MJC donne accès à l'ensemble des activités, dont les soirées jeux de société.</span>
+              <br />
+              <span data-i18n="join.desc_2">Téléchargez le bulletin, remplissez-le et remettez-le sur place avec votre règlement.</span>
+            </p>
+            <a class="btn btn-primary" href="/assets/bulletin-adhesion.pdf" download
+              data-i18n="join.cta">Télécharger le bulletin d'adhésion (PDF)</a>
           </div>
         </div>
       </section>

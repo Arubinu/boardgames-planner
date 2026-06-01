@@ -84,6 +84,13 @@ app.get('/api/locations', async (req, res) => {
   res.json(db.prepare(sql).all());
 });
 
+// Types de soirées (publics) : utilisés par l'accueil et l'administration.
+app.get('/api/event-types', (req, res) => {
+  res.json(
+    db.prepare('SELECT * FROM event_types ORDER BY sort_order, id').all()
+  );
+});
+
 // Liste des jeux (avec recherche/tri optionnels).
 app.get('/api/games', (req, res) => {
   const { q, type, sort } = req.query;
@@ -172,6 +179,60 @@ app.delete('/api/admin/locations/:id', requireAdmin, (req, res) => {
 // Désarchiver un lieu.
 app.post('/api/admin/locations/:id/unarchive', requireAdmin, (req, res) => {
   db.prepare('UPDATE locations SET archived = 0 WHERE id = ?').run(req.params.id);
+  res.json({ ok: true });
+});
+
+// --- Types de soirées -----------------------------------------------------
+// Génère une clé stable (slug) à partir du libellé, en garantissant l'unicité.
+// La clé est ce qui est stocké dans events.type ; elle ne change pas lors d'une
+// édition du libellé, pour ne pas « casser » les soirées existantes.
+function makeTypeKey(label) {
+  const base =
+    String(label || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40) || 'type';
+  let key = base;
+  let n = 2;
+  const exists = db.prepare('SELECT 1 FROM event_types WHERE key = ?');
+  while (exists.get(key)) key = `${base}-${n++}`;
+  return key;
+}
+
+app.post('/api/admin/event-types', requireAdmin, (req, res) => {
+  const { label, sub = '', color = '#8b9a6b', signup = 0 } = req.body || {};
+  if (!label || !label.trim()) return res.status(400).json({ error: 'Libellé requis' });
+  const max = db.prepare('SELECT COALESCE(MAX(sort_order),0) AS m FROM event_types').get().m;
+  const info = db.prepare(
+    `INSERT INTO event_types (key, label, sub, color, signup, sort_order)
+     VALUES (?,?,?,?,?,?)`
+  ).run(makeTypeKey(label), label.trim(), sub, color, signup ? 1 : 0, max + 1);
+  res.json(db.prepare('SELECT * FROM event_types WHERE id = ?').get(info.lastInsertRowid));
+});
+
+app.put('/api/admin/event-types/:id', requireAdmin, (req, res) => {
+  const { label, sub = '', color = '#8b9a6b', signup = 0 } = req.body || {};
+  if (!label || !label.trim()) return res.status(400).json({ error: 'Libellé requis' });
+  // On ne modifie pas la clé (référencée par les soirées existantes).
+  db.prepare('UPDATE event_types SET label=?, sub=?, color=?, signup=? WHERE id=?')
+    .run(label.trim(), sub, color, signup ? 1 : 0, req.params.id);
+  res.json(db.prepare('SELECT * FROM event_types WHERE id = ?').get(req.params.id));
+});
+
+// Suppression refusée si des soirées utilisent encore ce type (sécurité).
+app.delete('/api/admin/event-types/:id', requireAdmin, (req, res) => {
+  const row = db.prepare('SELECT key FROM event_types WHERE id = ?').get(req.params.id);
+  if (!row) return res.status(404).json({ error: 'Type introuvable' });
+  const used = db.prepare('SELECT COUNT(*) AS c FROM events WHERE type = ?').get(row.key).c;
+  if (used > 0) {
+    return res.status(409).json({
+      error: `Ce type est utilisé par ${used} soirée(s). Réaffectez-les avant de le supprimer.`,
+    });
+  }
+  db.prepare('DELETE FROM event_types WHERE id = ?').run(req.params.id);
   res.json({ ok: true });
 });
 

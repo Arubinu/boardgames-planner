@@ -69,6 +69,7 @@
         <button class="tab active" data-tab="events" data-i18n="admin.tab_events">📅 Soirées</button>
         <button class="tab" data-tab="games" data-i18n="admin.tab_games">🎲 Jeux & import</button>
         <button class="tab" data-tab="locations" data-i18n="admin.tab_locations">📍 Lieux</button>
+        <button class="tab" data-tab="types" data-i18n="admin.tab_types">🏷️ Types de soirées</button>
         <button class="tab" data-tab="settings" data-i18n="admin.tab_settings">⚙️ Réglages</button>
       </div>
 
@@ -134,6 +135,20 @@
           <h2 class="font-display" style="margin: 0" data-i18n="admin.archived_title">Lieux archivés</h2>
         </div>
         <div class="card card-pad"><div id="archived-locations-table"><div class="spinner"></div></div></div>
+      </section>
+
+      <!-- Onglet Types de soirées -->
+      <section class="panel" id="panel-types">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem"
+        >
+          <h2 class="font-display" style="margin: 0" data-i18n="admin.types_title">Types de soirées</h2>
+          <button class="btn btn-primary" id="new-type-btn" data-i18n="admin.new_type">+ Nouveau type</button>
+        </div>
+        <p class="help" data-i18n="admin.types_help">
+          Chaque type définit un libellé, une mention, une couleur et s'il propose une inscription WhatsApp.
+        </p>
+        <div class="card card-pad"><div id="types-table"><div class="spinner"></div></div></div>
       </section>
 
       <!-- Onglet Réglages -->
@@ -234,6 +249,29 @@
         <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.6rem">
           <button class="btn btn-ghost" data-close-modal="location-form-modal" data-i18n="admin.cancel">Annuler</button>
           <button class="btn btn-primary" id="save-location-btn" data-i18n="admin.save">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale formulaire type de soirée -->
+    <div class="modal-backdrop" id="type-form-modal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3 id="tf-title" data-i18n="admin.tf_new">Nouveau type</h3>
+          <button class="modal-close" data-close-modal="type-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
+        </div>
+        <input type="hidden" id="tf-id" />
+        <label class="field"><span data-i18n="admin.tf_label">Libellé *</span><input id="tf-label" data-i18n-ph="admin.tf_label_ph" placeholder="Grande soirée" /></label>
+        <label class="field"><span data-i18n="admin.tf_sub">Mention</span><input id="tf-sub" data-i18n-ph="admin.tf_sub_ph" placeholder="sur inscription" /></label>
+        <div class="grid grid-2" style="gap: 1rem">
+          <label class="field"><span data-i18n="admin.tf_color">Couleur</span><input type="color" id="tf-color" value="#8b9a6b" style="height: 42px; padding: 2px" /></label>
+          <label class="field" style="justify-content: flex-end">
+            <span class="checkbox-line"><input type="checkbox" id="tf-signup" /> <span data-i18n="admin.tf_signup">Propose une inscription WhatsApp</span></span>
+          </label>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.6rem">
+          <button class="btn btn-ghost" data-close-modal="type-form-modal" data-i18n="admin.cancel">Annuler</button>
+          <button class="btn btn-primary" id="save-type-btn" data-i18n="admin.save">Enregistrer</button>
         </div>
       </div>
     </div>

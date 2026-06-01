@@ -22,13 +22,14 @@ import {
   getLocale,
 } from '../shared/i18n.js';
 import {
-  EVENT_TYPE_ORDER,
-  DEFAULT_TYPE,
+  setEventTypes,
+  eventTypeOrder,
+  defaultType,
   typeKey,
   typeLabel,
   typeShort,
   typeOption,
-  badgeClass,
+  typeColor,
 } from '../shared/eventTypes.js';
 
 // Correctif des icônes de marqueur Leaflet sous bundler (Vite).
@@ -46,6 +47,7 @@ let GAMES = [];
 let LOCATIONS = [];
 let ALL_LOCATIONS = [];
 let EVENTS = [];
+let EVENT_TYPES = [];
 let pickerSelected = new Set();
 let pendingFile = null;
 
@@ -92,6 +94,19 @@ const DELETE_CONFIG = {
       loadLocations().then(
         () => (document.getElementById('stat-locations').textContent = LOCATIONS.length)
       ),
+  },
+  eventType: {
+    title: () => t('admin.del_type_title'),
+    msg: (label) => t('admin.del_type_msg', { label: esc(label) }),
+    confirmKey: 'admin.delete',
+    url: (id) => '/api/admin/event-types/' + id,
+    method: 'DELETE',
+    done: () => t('admin.del_type_done'),
+    reload: () =>
+      loadEventTypes().then(() => {
+        populateTypeSelect();
+        renderEventsTable();
+      }),
   },
 };
 
@@ -150,6 +165,7 @@ function dashboardVisible() {
 }
 
 async function loadAll() {
+  await loadEventTypes();
   await Promise.all([loadEvents(), loadGames(), loadLocations()]);
   loadSettings();
   document.getElementById('stat-events').textContent = EVENTS.length;
@@ -168,9 +184,9 @@ function renderEventsTable() {
       <td data-label="${t('admin.th_event')}"><strong>${esc(e.title)}</strong><br><span class="muted" style="font-size:.82rem">${esc(
         e.date
       )}</span></td>
-      <td data-label="${t('admin.th_type')}"><span class="badge ${badgeClass(e.type)}">${esc(
-      typeShort(e.type)
-    )}</span></td>
+      <td data-label="${t('admin.th_type')}"><span class="badge" style="background:${typeColor(
+      e.type
+    )};color:#fff">${esc(typeShort(e.type))}</span></td>
       <td data-label="${t('admin.th_location')}">${esc(e.location_name || t('admin.dash'))}</td>
       <td data-label="${t('admin.th_games')}">${tp('admin.games_unit', e.games_count)}</td>
       <td class="cell-actions"><div class="row-actions">
@@ -193,14 +209,14 @@ function renderEventsTable() {
     : `<div class="empty">${t('admin.no_events')}</div>`;
 }
 
-// Remplit le sélecteur de type à partir de la source unique (traduit).
+// Remplit le sélecteur de type à partir du registre chargé depuis l'API.
 function populateTypeSelect() {
   const sel = document.getElementById('ef-type');
   if (!sel) return;
-  const cur = sel.value || DEFAULT_TYPE;
-  sel.innerHTML = EVENT_TYPE_ORDER.map(
-    (type) => `<option value="${type}">${esc(typeOption(type))}</option>`
-  ).join('');
+  const cur = sel.value || defaultType();
+  sel.innerHTML = eventTypeOrder()
+    .map((type) => `<option value="${type}">${esc(typeOption(type))}</option>`)
+    .join('');
   sel.value = typeKey(cur);
 }
 
@@ -230,7 +246,7 @@ async function openEventForm(id) {
     ['ef-id', 'ef-title-in', 'ef-date', 'ef-start', 'ef-end', 'ef-desc', 'ef-wa'].forEach(
       (i) => (document.getElementById(i).value = '')
     );
-    document.getElementById('ef-type').value = DEFAULT_TYPE;
+    document.getElementById('ef-type').value = defaultType();
   }
   document.getElementById('gp-search').value = '';
   renderPicker();
@@ -514,8 +530,6 @@ function setupCoordMap(initialCoords) {
       maxZoom: 19,
       attribution: '© OpenStreetMap',
     }).addTo(coordMap);
-    coordMap.attributionControl.setPrefix(false); // retire le lien « Leaflet »
-
     // Clic sur la carte = placement du marqueur + enregistrement des coords.
     coordMap.on('click', (e) => placeCoordMarker(e.latlng.lat, e.latlng.lng));
   } else {
@@ -599,6 +613,82 @@ async function saveLocation() {
   }
 }
 
+// --- Types de soirées -----------------------------------------------------
+async function loadEventTypes() {
+  EVENT_TYPES = await API.get('/api/event-types');
+  setEventTypes(EVENT_TYPES);
+  renderEventTypesTable();
+}
+
+function renderEventTypesTable() {
+  const el = document.getElementById('types-table');
+  if (!el) return;
+  const rows = EVENT_TYPES.map(
+    (ty) => `<tr>
+      <td data-label="${t('admin.th_type_label')}">
+        <span class="badge" style="background:${ty.color};color:#fff">${esc(ty.label)}</span>
+      </td>
+      <td data-label="${t('admin.th_type_sub')}">${esc(ty.sub || t('admin.dash'))}</td>
+      <td data-label="${t('admin.th_type_signup')}">${
+        ty.signup ? t('admin.yes') : t('admin.no')
+      }</td>
+      <td class="cell-actions"><div class="row-actions">
+        <button class="btn btn-ghost btn-icon" data-edit-type="${ty.id}"
+          title="${t('admin.edit')}" aria-label="${t('admin.edit')}">
+          <img src="/assets/icons/edit.svg" alt="" />
+        </button>
+        <button class="btn btn-ghost btn-icon" data-del-type="${ty.id}"
+          title="${t('admin.delete')}" data-label-text="${esc(ty.label)}">
+          <img src="/assets/icons/delete.svg" alt="" />
+        </button>
+      </div></td>
+    </tr>`
+  ).join('');
+  el.innerHTML = EVENT_TYPES.length
+    ? `<table class="responsive"><thead><tr><th>${t('admin.th_type_label')}</th><th>${t(
+        'admin.th_type_sub'
+      )}</th><th>${t('admin.th_type_signup')}</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+    : `<div class="empty">${t('admin.no_types')}</div>`;
+}
+
+function openEventTypeForm(id) {
+  const ty = id ? EVENT_TYPES.find((x) => x.id === id) : null;
+  document.getElementById('tf-title').textContent = ty
+    ? t('admin.tf_edit')
+    : t('admin.tf_new');
+  document.getElementById('tf-id').value = ty ? ty.id : '';
+  document.getElementById('tf-label').value = ty ? ty.label : '';
+  document.getElementById('tf-sub').value = ty ? ty.sub : '';
+  document.getElementById('tf-color').value = ty ? ty.color : '#8b9a6b';
+  document.getElementById('tf-signup').checked = ty ? !!ty.signup : false;
+  openModal('type-form-modal');
+}
+
+async function saveEventType() {
+  const payload = {
+    label: document.getElementById('tf-label').value.trim(),
+    sub: document.getElementById('tf-sub').value.trim(),
+    color: document.getElementById('tf-color').value,
+    signup: document.getElementById('tf-signup').checked ? 1 : 0,
+  };
+  if (!payload.label) {
+    toast(t('admin.err_type_label'), true);
+    return;
+  }
+  const id = document.getElementById('tf-id').value;
+  try {
+    if (id) await API.send('/api/admin/event-types/' + id, 'PUT', payload, PWD);
+    else await API.send('/api/admin/event-types', 'POST', payload, PWD);
+    closeModal('type-form-modal');
+    toast(t('admin.saved_type'));
+    await loadEventTypes();
+    populateTypeSelect();
+    renderEventsTable();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
 // --- Réglages -------------------------------------------------------------
 async function loadSettings() {
   try {
@@ -636,6 +726,7 @@ function onLanguageChanged() {
   renderEventsTable();
   renderGamesTable();
   renderLocationsTables();
+  renderEventTypesTable();
 }
 
 // --- Câblage des événements (aucun handler inline) -----------------------
@@ -662,6 +753,8 @@ function wireHandlers() {
 
   document.getElementById('new-event-btn').addEventListener('click', () => openEventForm());
   document.getElementById('new-location-btn').addEventListener('click', () => openLocationForm());
+  document.getElementById('new-type-btn')?.addEventListener('click', () => openEventTypeForm());
+  document.getElementById('save-type-btn')?.addEventListener('click', saveEventType);
   document.getElementById('ef-type').addEventListener('change', onTypeChange);
   document.getElementById('gp-search').addEventListener('input', renderPicker);
   document.getElementById('save-event-btn').addEventListener('click', saveEvent);
@@ -712,7 +805,7 @@ function wireHandlers() {
   // Délégation pour les tableaux (générés dynamiquement).
   document.getElementById('dashboard').addEventListener('click', (e) => {
     const el = e.target.closest(
-      '[data-edit-event],[data-del-event],[data-edit-game],[data-del-game],[data-edit-loc],[data-del-loc],[data-unarchive-loc]'
+      '[data-edit-event],[data-del-event],[data-edit-game],[data-del-game],[data-edit-loc],[data-del-loc],[data-unarchive-loc],[data-edit-type],[data-del-type]'
     );
     if (!el) return;
     if (el.dataset.editEvent) return openEventForm(Number(el.dataset.editEvent));
@@ -725,6 +818,9 @@ function wireHandlers() {
     if (el.dataset.delLoc)
       return confirmDelete('location', Number(el.dataset.delLoc), el.dataset.labelText);
     if (el.dataset.unarchiveLoc) return unarchiveLocation(Number(el.dataset.unarchiveLoc));
+    if (el.dataset.editType) return openEventTypeForm(Number(el.dataset.editType));
+    if (el.dataset.delType)
+      return confirmDelete('eventType', Number(el.dataset.delType), el.dataset.labelText);
   });
 }
 

@@ -17,7 +17,15 @@ import {
   formatMonthYear,
   formatMonthShort,
 } from '../shared/i18n.js';
-import { EVENT_TYPE_ORDER, typeKey, typeLabel, typeSub, badgeClass, calClass, dotClass } from '../shared/eventTypes.js';
+import {
+  eventTypeOrder,
+  setEventTypes,
+  typeKey,
+  typeLabel,
+  typeSub,
+  typeColor,
+  typeSignup,
+} from '../shared/eventTypes.js';
 import { gameThumb, wireThumbFallbacks } from '../shared/gameThumb.js';
 import { openGameModal } from '../shared/gameModal.js';
 import { parseCoords, googleMapsUrl } from '../shared/maps.js';
@@ -58,13 +66,11 @@ function eventCardHtml(e) {
   const month = formatMonthShort(e.date);
   const time = e.start_time ? `${e.start_time}${e.end_time ? '–' + e.end_time : ''}` : '';
   return `<div class="card event-card fade-in" data-event="${e.id}">
-    <div class="event-date-chip ${typeKey(e.type) === 'petite' ? 'petite' : ''}">
+    <div class="event-date-chip" style="background:${typeColor(e.type)}">
       <div><div class="day">${day}</div><div style="text-transform:uppercase;font-size:.8rem">${esc(
     month
   )}</div></div>
-      <div><span class="badge ${badgeClass(
-        e.type
-      )}" style="background:rgba(255,255,255,.25);color:#fff">${esc(typeLabel(e.type))}</span></div>
+      <div><span class="badge" style="background:rgba(255,255,255,.25);color:#fff">${esc(typeLabel(e.type))}</span></div>
     </div>
     <div class="event-body">
       <h3>${esc(e.title)}</h3>
@@ -92,19 +98,21 @@ async function loadEvents() {
 // changement de langue.
 function renderEvents() {
   if (!ALL_EVENTS.length && !document.getElementById('events-container')) return;
+  const upcoming = ALL_EVENTS.filter((e) => isUpcoming(e.date));
+  // Soirées passées : on ne garde qu'un an en arrière (borne basse).
   const oneYearAgo = new Date();
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
   const minPastDate = ymd(oneYearAgo);
-
-  const upcoming = ALL_EVENTS.filter((e) => isUpcoming(e.date));
   const past = ALL_EVENTS.filter(
     (e) => !isUpcoming(e.date) && e.date >= minPastDate
   ).reverse();
-
   const cont = document.getElementById('events-container');
   if (cont)
     cont.innerHTML = upcoming.length
-      ? `<div class="events-grid">${upcoming.slice(0, 3).map(eventCardHtml).join('')}</div>`
+      ? `<div class="events-grid">${upcoming
+          .slice(0, 3)
+          .map(eventCardHtml)
+          .join('')}</div>`
       : `<div class="empty">${esc(t('dates.none_upcoming'))}</div>`;
   const pastEl = document.getElementById('past-events');
   if (pastEl)
@@ -162,15 +170,17 @@ function renderCalendar() {
     const ev = eventByDate(date);
     const isPast = date < today;
     const cls = ['cal-day'];
+    let dayStyle = '';
     if (ev) {
-      cls.push('has-event', calClass(ev.type));
+      cls.push('has-event');
+      dayStyle = ` style="background:${typeColor(ev.type)}"`;
       typesInMonth.add(typeKey(ev.type));
     }
     if (isPast) cls.push('past');
     if (date === today) cls.push('today');
     if (date === selectedDate) cls.push('selected');
     const attr = ev ? ` data-date="${date}"` : '';
-    html += `<div class="${cls.join(' ')}"${attr} title="${ev ? esc(ev.title) : ''}">${day}</div>`;
+    html += `<div class="${cls.join(' ')}"${attr}${dayStyle} title="${ev ? esc(ev.title) : ''}">${day}</div>`;
   }
   grid.innerHTML = html;
   renderLegend(typesInMonth);
@@ -181,9 +191,12 @@ function renderCalendar() {
 function renderLegend(typesInMonth) {
   const legend = document.getElementById('cal-legend');
   if (!legend) return;
-  const types = EVENT_TYPE_ORDER.filter((tp) => typesInMonth.has(tp));
+  const types = eventTypeOrder().filter((tp) => typesInMonth.has(tp));
   legend.innerHTML = types
-    .map((tp) => `<span><i class="dot ${dotClass(tp)}"></i> ${esc(typeLabel(tp))}</span>`)
+    .map(
+      (tp) =>
+        `<span><i class="dot" style="background:${typeColor(tp)}"></i> ${esc(typeLabel(tp))}</span>`
+    )
     .join('');
   legend.style.display = types.length ? '' : 'none';
 }
@@ -274,9 +287,9 @@ function updateMap(date) {
   info.innerHTML = `
     <h4>${esc(ev.title)}</h4>
     ${gmaps}
-    <p style="margin:.2rem 0"><span class="badge ${badgeClass(ev.type)}">${esc(
-    typeLabel(ev.type)
-  )}</span></p>
+    <p style="margin:.2rem 0"><span class="badge" style="background:${typeColor(
+      ev.type
+    )};color:#fff">${esc(typeLabel(ev.type))}</span></p>
     <p style="margin:.3rem 0" class="muted">📅 ${esc(formatDate(ev.date))}${
     time ? ' · 🕐 ' + esc(time) : ''
   }</p>
@@ -318,7 +331,7 @@ async function openEvent(id) {
     const time = e.start_time
       ? `${e.start_time}${e.end_time ? ' – ' + e.end_time : ''}`
       : t('event.time_tbd');
-    const wa = e.whatsapp_url || (typeKey(e.type) === 'petite' ? SETTINGS.whatsapp_main : '');
+    const wa = e.whatsapp_url || (typeSignup(e.type) ? SETTINGS.whatsapp_main : '');
     const coords = parseCoords(e.location_coords);
     const gamesHtml = e.games.length
       ? `<div class="grid grid-4" style="gap:.8rem;margin-top:.6rem">${e.games
@@ -327,7 +340,7 @@ async function openEvent(id) {
       : `<p class="muted">${esc(t('event.games_soon'))}</p>`;
     const body = document.getElementById('em-body');
     body.innerHTML = `
-      <span class="badge ${badgeClass(e.type)}">${esc(
+      <span class="badge" style="background:${typeColor(e.type)};color:#fff">${esc(
       t('event.type_inscription', { label: typeLabel(e.type), sub: typeSub(e.type) })
     )}</span>
       ${
@@ -349,7 +362,7 @@ async function openEvent(id) {
       }
       ${e.description ? `<p>${esc(e.description)}</p>` : ''}
       ${
-        typeKey(e.type) === 'petite' && wa
+        typeSignup(e.type) && wa
           ? `<a class="btn btn-olive" href="${esc(
               wa
             )}" target="_blank" rel="noopener" style="margin:.5rem 0">${esc(
@@ -549,7 +562,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   wireGlobalHandlers();
   onLangChange(onLanguageChanged);
   try {
-    SETTINGS = await API.get('/api/public-settings');
+    const [settings, types] = await Promise.all([
+      API.get('/api/public-settings'),
+      API.get('/api/event-types'),
+    ]);
+    SETTINGS = settings;
+    setEventTypes(types);
   } catch {}
   loadEvents();
   loadGamesPreview();

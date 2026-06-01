@@ -96,6 +96,15 @@ db.exec(`
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
     FOREIGN KEY (game_id)  REFERENCES games(id)  ON DELETE CASCADE
   );
+  CREATE TABLE IF NOT EXISTS event_types (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    key        TEXT NOT NULL UNIQUE,
+    label      TEXT NOT NULL,
+    sub        TEXT DEFAULT '',
+    color      TEXT NOT NULL DEFAULT '#8b9a6b',
+    signup     INTEGER DEFAULT 0,
+    sort_order INTEGER DEFAULT 0
+  );
   CREATE TABLE IF NOT EXISTS settings (
     key   TEXT PRIMARY KEY,
     value TEXT DEFAULT ''
@@ -195,6 +204,22 @@ for (const { env, key } of ENV_SETTINGS) {
       setSetting.run('admin_password', hash);
       console.log('[db] mot de passe administrateur haché (Argon2id)');
     }
+  }
+}
+
+// --- Types de soirées : amorçage au premier lancement ---------------------
+// Reprend les deux types historiques (Grande / Petite) avec leur couleur et
+// leur comportement. Ensuite, tout est géré depuis l'administration.
+{
+  const count = db.prepare('SELECT COUNT(*) AS c FROM event_types').get().c;
+  if (count === 0) {
+    const ins = db.prepare(
+      `INSERT INTO event_types (key, label, sub, color, signup, sort_order)
+       VALUES (?,?,?,?,?,?)`
+    );
+    ins.run('grande', 'Grande soirée', 'sans inscription', '#c4704a', 0, 1);
+    ins.run('petite', 'Petite soirée', 'sur inscription', '#8b9a6b', 1, 2);
+    console.log('[db] types de soirées initialisés (Grande, Petite)');
   }
 }
 

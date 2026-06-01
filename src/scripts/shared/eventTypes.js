@@ -1,51 +1,65 @@
 // scripts/shared/eventTypes.js
-// Source unique des « types de soirées ».
-//
-// La structure visuelle (classes CSS de badge, de pastille de calendrier et de
-// légende) est définie ici ; les libellés affichés proviennent de l'i18n
-// (clés `eventType.<type>.*`). Plus aucun « Grande soirée » / « Petite soirée »
-// écrit en dur dans les pages : tout passe par ces helpers.
+// Registre runtime des « types de soirées », alimenté depuis l'API
+// (table event_types, gérée dans l'administration). Plus aucun type, libellé
+// ou couleur écrit en dur : tout vient de la base. Chaque page appelle
+// setEventTypes(...) au démarrage, AVANT le moindre rendu d'événement.
 
-import { t } from './i18n.js';
+let REGISTRY = {}; // key -> { key, label, sub, color, signup }
+let ORDER = []; // clés dans l'ordre d'affichage (sort_order)
 
-// Ordre d'affichage canonique (utilisé pour la légende et le formulaire admin).
-export const EVENT_TYPE_ORDER = ['grande', 'petite'];
+export function setEventTypes(list) {
+  REGISTRY = {};
+  ORDER = [];
+  for (const it of list || []) {
+    REGISTRY[it.key] = {
+      key: it.key,
+      label: it.label || '',
+      sub: it.sub || '',
+      color: it.color || '#888888',
+      signup: !!it.signup,
+    };
+    ORDER.push(it.key);
+  }
+}
 
-const META = {
-  grande: { badge: 'badge-grande', cal: 'ev-grande', dot: 'dot-grande' },
-  petite: { badge: 'badge-petite', cal: 'ev-petite', dot: 'dot-petite' },
-};
+export function eventTypeList() {
+  return ORDER.map((k) => REGISTRY[k]);
+}
+export function eventTypeOrder() {
+  return ORDER.slice();
+}
+export function defaultType() {
+  return ORDER[0] || '';
+}
 
-export const DEFAULT_TYPE = 'petite';
-
-// Normalise un type inconnu vers le type par défaut.
+// Normalise un type inconnu (ou supprimé) vers le premier type disponible.
 export function typeKey(type) {
-  return META[type] ? type : DEFAULT_TYPE;
+  return REGISTRY[type] ? type : defaultType();
 }
 function meta(type) {
-  return META[typeKey(type)];
+  return (
+    REGISTRY[typeKey(type)] || { label: '', sub: '', color: '#888888', signup: false }
+  );
 }
 
-export function badgeClass(type) {
-  return meta(type).badge;
-}
-export function calClass(type) {
-  return meta(type).cal;
-}
-export function dotClass(type) {
-  return meta(type).dot;
-}
-
-// Libellés traduits.
 export function typeLabel(type) {
-  return t(`eventType.${typeKey(type)}.label`);
-}
-export function typeShort(type) {
-  return t(`eventType.${typeKey(type)}.short`);
+  return meta(type).label;
 }
 export function typeSub(type) {
-  return t(`eventType.${typeKey(type)}.sub`);
+  return meta(type).sub;
 }
+export function typeColor(type) {
+  return meta(type).color;
+}
+export function typeSignup(type) {
+  return meta(type).signup;
+}
+// Libellé court (plus de variante distincte : on réutilise le libellé).
+export function typeShort(type) {
+  return meta(type).label;
+}
+// Texte d'option de menu déroulant : « Libellé (mention) » si une mention existe.
 export function typeOption(type) {
-  return t(`eventType.${typeKey(type)}.option`);
+  const m = meta(type);
+  return m.sub ? `${m.label} (${m.sub})` : m.label;
 }

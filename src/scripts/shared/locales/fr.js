@@ -30,7 +30,8 @@ export default {
 
   dates: {
     title: 'Prochaines soirées',
-    sub: 'Cliquez sur une soirée pour la situer dans le calendrier et voir le lieu. Le bouton « Voir les jeux de cette soirée » en ouvre le détail.',
+    sub_1: 'Cliquez sur une soirée pour la situer dans le calendrier et voir le lieu.',
+    sub_2_html: 'Le bouton <u>« Voir les jeux de cette soirée »</u> en ouvre le détail.',
     past_toggle: 'Voir aussi les soirées passées',
     map_default: 'Sélectionnez une date pour voir le lieu.',
     map_none: 'Aucune soirée à cette date.',
@@ -92,20 +93,11 @@ export default {
     },
   ],
 
-  // Libellés des types de soirées (source unique avec eventTypes.js).
-  eventType: {
-    grande: {
-      label: 'Grande soirée',
-      short: 'Grande',
-      sub: 'sans inscription',
-      option: 'Grande (sans inscription)',
-    },
-    petite: {
-      label: 'Petite soirée',
-      short: 'Petite',
-      sub: 'sur inscription',
-      option: 'Petite (sur inscription)',
-    },
+  join: {
+    title: 'Adhérer à la MJC',
+    desc_1: "L'adhésion à la MJC donne accès à l'ensemble des activités, dont les soirées jeux de société.",
+    desc_2: 'Téléchargez le bulletin, remplissez-le et remettez-le sur place avec votre règlement.',
+    cta: 'Télécharger le bulletin d\'adhésion (PDF)',
   },
 
   event: {
@@ -175,7 +167,7 @@ export default {
   },
 
   meta: {
-    index_title: 'Soirées Jeux — MJC Estrablin',
+    index_title: 'Soirées Jeux — Soirées Jeux MJC Estrablin',
     games_title: 'Nos jeux — Soirées Jeux MJC Estrablin',
     admin_title: 'Administration — Soirées Jeux MJC Estrablin',
   },
@@ -194,6 +186,7 @@ export default {
     tab_events: '📅 Soirées',
     tab_games: '🎲 Jeux & import',
     tab_locations: '📍 Lieux',
+    tab_types: '🏷️ Types de soirées',
     tab_settings: '⚙️ Réglages',
 
     events_title: 'Soirées',
@@ -234,6 +227,32 @@ export default {
     no_archived_loc: 'Aucun lieu archivé.',
     coords_undefined: 'non définies',
 
+    // Types de soirées
+    types_title: 'Types de soirées',
+    new_type: '+ Nouveau type',
+    types_help:
+      "Chaque type définit un libellé, une mention, une couleur et s'il propose une inscription WhatsApp.",
+    th_type_label: 'Libellé',
+    th_type_sub: 'Mention',
+    th_type_signup: 'Inscription',
+    no_types: 'Aucun type de soirée.',
+    yes: 'Oui',
+    no: 'Non',
+    tf_new: 'Nouveau type',
+    tf_edit: 'Modifier le type',
+    tf_label: 'Libellé *',
+    tf_label_ph: 'Grande soirée',
+    tf_sub: 'Mention',
+    tf_sub_ph: 'sur inscription',
+    tf_color: 'Couleur',
+    tf_signup: 'Propose une inscription WhatsApp',
+    err_type_label: 'Libellé obligatoire',
+    saved_type: 'Type enregistré',
+    del_type_title: 'Supprimer le type',
+    del_type_msg:
+      'Voulez-vous vraiment supprimer le type <strong>{label}</strong> ? (refusé si des soirées l\'utilisent)',
+    del_type_done: 'Type supprimé',
+
     settings_title: 'Réglages',
     set_wa_main: 'Lien groupe WhatsApp « Soirées Jeux »',
     set_wa_mjc: 'Lien groupe WhatsApp « MJC Estrablin »',
@@ -253,7 +272,7 @@ export default {
     ef_location_none: '— Aucun —',
     ef_desc: 'Description',
     ef_wa: "Lien WhatsApp d'inscription (optionnel)",
-    ef_wa_ph: 'Laisser vide pour utiliser le lien par défaut',
+    ef_wa_ph: 'laisser vide pour utiliser le lien par défaut',
     ef_games_label: 'Jeux disponibles ce soir-là —',
     ef_selected: 'sélectionné(s)',
     ef_filter_ph: 'Filtrer les jeux…',
