@@ -179,8 +179,7 @@ async function loadEvents() {
   renderEventsTable();
 }
 function renderEventsTable() {
-  const rows = EVENTS.map(
-    (e) => `<tr>
+  const eventRow = (e) => `<tr>
       <td data-label="${t('admin.th_event')}"><strong>${esc(e.title)}</strong><br><span class="muted" style="font-size:.82rem">${esc(
         e.date
       )}</span></td>
@@ -198,15 +197,25 @@ function renderEventsTable() {
           title="${t('admin.delete')}" data-label-text="${esc(e.title)}">
           <img src="/assets/icons/delete.svg" alt="" />
         </button>
-      </div></td></tr>`
-  ).join('');
-  document.getElementById('events-table').innerHTML = EVENTS.length
-    ? `<table class="responsive"><thead><tr><th>${t('admin.th_event')}</th><th>${t(
-        'admin.th_type'
-      )}</th><th>${t('admin.th_location')}</th><th>${t(
-        'admin.th_games'
-      )}</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
-    : `<div class="empty">${t('admin.no_events')}</div>`;
+      </div></td></tr>`;
+
+  const table = (list, emptyKey) =>
+    list.length
+      ? `<table class="responsive"><thead><tr><th>${t('admin.th_event')}</th><th>${t(
+          'admin.th_type'
+        )}</th><th>${t('admin.th_location')}</th><th>${t(
+          'admin.th_games'
+        )}</th><th></th></tr></thead><tbody>${list.map(eventRow).join('')}</tbody></table>`
+      : `<div class="empty">${t(emptyKey)}</div>`;
+
+  // EVENTS est trié par date croissante (API). On sépare à venir / passées.
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = EVENTS.filter((e) => e.date >= today);
+  const past = EVENTS.filter((e) => e.date < today).reverse(); // plus récentes d'abord
+
+  document.getElementById('events-table').innerHTML = table(upcoming, 'admin.no_events');
+  const pastEl = document.getElementById('past-events-table');
+  if (pastEl) pastEl.innerHTML = table(past, 'admin.no_past_events');
 }
 
 // Remplit le sélecteur de type à partir du registre chargé depuis l'API.

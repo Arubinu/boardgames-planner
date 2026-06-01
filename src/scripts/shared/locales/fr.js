@@ -190,12 +190,15 @@ export default {
     tab_settings: '⚙️ Réglages',
 
     events_title: 'Soirées',
+    upcoming_events_title: 'À venir',
+    past_events_title: 'Soirées passées',
     new_event: '+ Nouvelle soirée',
     th_event: 'Soirée',
     th_type: 'Type',
     th_location: 'Lieu',
     th_games: 'Jeux',
     no_events: 'Aucune soirée. Créez-en une !',
+    no_past_events: 'Aucune soirée passée.',
     games_unit_one: '{count} jeu',
     games_unit_other: '{count} jeux',
 

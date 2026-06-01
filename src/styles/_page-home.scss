@@ -279,9 +279,6 @@
       transform: scale(1.08);
     }
   }
-  &.ev-grande {
-    background: var(--terracotta);
-  }
   &.selected {
     box-shadow: 0 0 0 3px var(--card-bg), 0 0 0 5px var(--dark-text);
   }

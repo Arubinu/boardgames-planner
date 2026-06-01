@@ -185,12 +185,15 @@ export default {
     tab_settings: '⚙️ Settings',
 
     events_title: 'Nights',
+    upcoming_events_title: 'Upcoming',
+    past_events_title: 'Past nights',
     new_event: '+ New night',
     th_event: 'Night',
     th_type: 'Type',
     th_location: 'Venue',
     th_games: 'Games',
     no_events: 'No nights yet. Create one!',
+    no_past_events: 'No past nights.',
     games_unit_one: '{count} game',
     games_unit_other: '{count} games',
 
