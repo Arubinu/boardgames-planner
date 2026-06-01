@@ -1,0 +1,25 @@
+{
+  "name": "Soirées Jeux — MJC Estrablin",
+  "short_name": "Soirées Jeux",
+  "description": "Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#c4704a",
+  "background_color": "#f5f1e8",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
