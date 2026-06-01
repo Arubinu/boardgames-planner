@@ -30,18 +30,49 @@ The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (sty
 
 ---
 
-## Quick start with Docker (recommended)
+## Installing with Docker (recommended)
 
 > Requirements: Docker and Docker Compose.
 
+### Method A — a single `docker-compose.yml` (Dockge, Portainer, Komodo…)
+
+**No need to clone the repository**: Docker can build the image directly from the
+Git URL. In your stack manager (Dockge, Portainer…), create a new stack and paste
+this `docker-compose.yml`:
+
+```yaml
+services:
+  boardgames-planner:
+    build: https://github.com/Arubinu/boardgames-planner.git
+    container_name: boardgames-planner
+    ports:
+      - 3001:3000 # the site will be on http://IP:3001 (change the left number)
+    volumes:
+      - ./data:/app/data # persisted SQLite database
+    environment:
+      #ADMIN_PASSWORD: admin
+      LOGIN_RETRY_DELAY: 10
+      #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
+      #WHATSAPP_MAIN: https://chat.whatsapp.com/[...]
+      #WHATSAPP_MJC: https://chat.whatsapp.com/[...]
+    restart: unless-stopped
+```
+
+The tool builds the image from the repository's `Dockerfile`, then starts the
+container. To **update** to the latest version, trigger a rebuild (a "rebuild"
+button, or `docker compose up -d --build` in a terminal): Docker re-clones the Git
+URL and rebuilds the image.
+
+### Method B — locally (cloned repository)
+
 ```bash
-# 1. (Optional) Set an admin password in docker-compose.yml (ADMIN_PASSWORD variable)
-# 2. Build and run
+git clone https://github.com/Arubinu/boardgames-planner.git
+cd boardgames-planner
 docker compose up -d --build
 ```
 
-The site is available at **http://localhost:3000**.
-Administration is at **http://localhost:3000/admin.html**.
+The site is available on the port you mapped (e.g. **http://localhost:3001**).
+Administration is at **…/admin.html**.
 
 On the very first launch, the database is automatically initialized with the two official venues (Salle Festive and Local de la MJC, with their coordinates), a sample selection of **12 games** (including a few expansions) and two demo nights. The database is persisted in the `./data` folder (mounted as a volume), so it survives restarts and rebuilds.
 
@@ -49,12 +80,27 @@ To stop: `docker compose down` (data stays in `./data`).
 
 ### Configuration via environment variables
 
-The environment variables defined in `docker-compose.yml` (the `environment` section) are **applied on every startup** of the container:
+Two families of variables, all taken into account **on every startup** of the container.
 
-- a variable that is **set** overwrites the value stored in the database;
-- a variable that is **absent or empty** leaves the stored value **unchanged**.
+**Operational** (read directly from the environment):
 
-So if `ADMIN_PASSWORD` is set, the admin password is (re)defined on each launch; if it is absent, the current password (default `admin`, or the one set via the interface) is kept as is.
+| Variable | Role | Default |
+| --- | --- | --- |
+| `LOGIN_RETRY_DELAY` | Minimum delay (in seconds) before retrying after a **failed** admin login, per IP address. `0` = disabled. | `0` |
+| `PORT` | Server's internal listening port (in Docker, you usually map the host port instead). | `3000` |
+| `DATA_DIR` | SQLite database folder. | `./data` |
+
+**Settings** (overwrite the value stored in the database when set; absent or empty → value **unchanged**):
+
+| Variable | Role |
+| --- | --- |
+| `ADMIN_PASSWORD` | (Re)defines the admin password, hashed with Argon2id. |
+| `MYLUDO_PROFILE` | Public MyLudo profile. |
+| `WHATSAPP_MAIN` / `WHATSAPP_MJC` | WhatsApp sign-up links. |
+
+> `ADMIN_PASSWORD` is active by default. To enable `MYLUDO_PROFILE`,
+> `WHATSAPP_MAIN` or `WHATSAPP_MJC`, uncomment the matching entry in the
+> `ENV_SETTINGS` table in `server/db.js`.
 
 ---
 
@@ -80,6 +126,8 @@ Useful environment variables (taken into account **on every startup**):
   stored password stays unchanged. An existing database with an old plaintext
   password is migrated automatically.
 - `DATA_DIR`: SQLite database folder (default `./data`).
+- `LOGIN_RETRY_DELAY`: delay (in seconds) before retrying after a failed admin
+  login (`0` = disabled, default = `10`).
 
 ### SQLite engine
 

@@ -30,18 +30,49 @@ Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass
 
 ---
 
-## Démarrage rapide avec Docker (recommandé)
+## Installation avec Docker (recommandé)
 
 > Prérequis : Docker et Docker Compose.
 
+### Méthode A — un simple `docker-compose.yml` (Dockge, Portainer, Komodo…)
+
+**Aucun clone du dépôt n'est nécessaire** : Docker sait construire l'image
+directement depuis l'URL Git. Dans ton gestionnaire de stacks (Dockge,
+Portainer…), crée une nouvelle stack et colle ce `docker-compose.yml` :
+
+```yaml
+services:
+  boardgames-planner:
+    build: https://github.com/Arubinu/boardgames-planner.git
+    container_name: boardgames-planner
+    ports:
+      - 3001:3000 # le site sera sur http://IP:3001 (modifie le nombre de gauche)
+    volumes:
+      - ./data:/app/data # base SQLite persistée
+    environment:
+      #ADMIN_PASSWORD: admin
+      LOGIN_RETRY_DELAY: 10
+      #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
+      #WHATSAPP_MAIN: https://chat.whatsapp.com/[...]
+      #WHATSAPP_MJC: https://chat.whatsapp.com/[...]
+    restart: unless-stopped
+```
+
+L'outil construit l'image à partir du `Dockerfile` du dépôt, puis démarre le
+conteneur. Pour **mettre à jour** vers la dernière version, relance une
+construction (bouton « rebuild », ou `docker compose up -d --build` en terminal) :
+Docker re-clone l'URL Git et reconstruit l'image.
+
+### Méthode B — en local (dépôt cloné)
+
 ```bash
-# 1. (Optionnel) Définir un mot de passe admin dans docker-compose.yml (variable ADMIN_PASSWORD)
-# 2. Construire et lancer
+git clone https://github.com/Arubinu/boardgames-planner.git
+cd boardgames-planner
 docker compose up -d --build
 ```
 
-Le site est disponible sur **http://localhost:3000**.
-L'administration est sur **http://localhost:3000/admin.html**.
+Le site est disponible sur le port que tu as mappé (par ex. **http://localhost:3001**).
+L'administration est sur **…/admin.html**.
 
 Au tout premier lancement, la base est automatiquement initialisée avec les deux lieux officiels (Salle Festive et Local de la MJC, avec leurs coordonnées), une sélection d'exemple de **12 jeux** (dont quelques extensions) et deux soirées de démonstration. La base est persistée dans le dossier `./data` (monté en volume), elle survit donc aux redémarrages et reconstructions.
 
@@ -49,12 +80,27 @@ Pour arrêter : `docker compose down` (les données restent dans `./data`).
 
 ### Configuration par variables d'environnement
 
-Les variables d'environnement définies dans `docker-compose.yml` (section `environment`) sont **appliquées à chaque démarrage** du conteneur :
+Deux familles de variables, toutes prises en compte **à chaque démarrage** du conteneur.
 
-- une variable **renseignée** écrase la valeur stockée en base ;
-- une variable **absente ou vide** laisse la valeur stockée **inchangée**.
+**Opérationnelles** (lues directement depuis l'environnement) :
 
-Ainsi, si `ADMIN_PASSWORD` est renseigné, le mot de passe administrateur est (re)défini à chaque lancement ; s'il est absent, le mot de passe actuel (par défaut `admin`, ou celui défini via l'interface) est conservé tel quel.
+| Variable | Rôle | Défaut |
+| --- | --- | --- |
+| `LOGIN_RETRY_DELAY` | Délai minimal (en secondes) avant de pouvoir réessayer après une connexion admin **échouée**, par adresse IP. `0` = désactivé. | `0` |
+| `PORT` | Port d'écoute interne du serveur (dans Docker, on mappe plutôt le port côté hôte). | `3000` |
+| `DATA_DIR` | Dossier de la base SQLite. | `./data` |
+
+**De réglage** (écrasent la valeur stockée en base si renseignées ; absentes ou vides → valeur **inchangée**) :
+
+| Variable | Rôle |
+| --- | --- |
+| `ADMIN_PASSWORD` | (Re)définit le mot de passe administrateur, haché en Argon2id. |
+| `MYLUDO_PROFILE` | Profil MyLudo public. |
+| `WHATSAPP_MAIN` / `WHATSAPP_MJC` | Liens d'inscription WhatsApp. |
+
+> `ADMIN_PASSWORD` est actif par défaut. Pour activer `MYLUDO_PROFILE`,
+> `WHATSAPP_MAIN` ou `WHATSAPP_MJC`, décommente l'entrée correspondante du tableau
+> `ENV_SETTINGS` dans `server/db.js`.
 
 ---
 
@@ -80,6 +126,8 @@ Variables d'environnement utiles (prises en compte **à chaque démarrage**) :
   absent, le mot de passe stocké reste inchangé. Une base existante avec un ancien
   mot de passe en clair est migrée toute seule.
 - `DATA_DIR` : dossier de la base SQLite (défaut `./data`).
+- `LOGIN_RETRY_DELAY` : délai (en secondes) avant de réessayer après une connexion
+  admin échouée (`0` = désactivé, défaut = `10`).
 
 ### Moteur SQLite
 
