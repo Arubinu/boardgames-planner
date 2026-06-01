@@ -138,8 +138,12 @@ async function doLogin() {
     PWD = pwd;
     sessionStorage.setItem('admin_pwd', pwd);
     showDashboard();
-  } catch {
-    toast(t('admin.login_bad'), true);
+  } catch (e) {
+    if (e.status === 429) {
+      toast(t('admin.login_wait', { n: e.retryAfter ?? '' }), true);
+    } else {
+      toast(t('admin.login_bad'), true);
+    }
   }
 }
 function logout() {

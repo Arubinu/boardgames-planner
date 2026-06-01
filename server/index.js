@@ -48,12 +48,55 @@ const setSetting = db.prepare(
 );
 function setting(key) { return getSetting.get(key)?.value ?? ''; }
 
+// --- Limitation des tentatives de connexion échouées ----------------------
+// LOGIN_RETRY_DELAY : délai minimal (en secondes) avant de pouvoir réessayer
+// APRÈS une tentative échouée, par adresse IP. 0 (défaut) = désactivé.
+const LOGIN_RETRY_DELAY = Math.max(
+  0,
+  parseInt(process.env.LOGIN_RETRY_DELAY || '10', 10) || 0
+);
+const lastFailedLogin = new Map(); // ip -> timestamp (ms) du dernier échec
+
+// Secondes restantes à patienter (0 = tentative autorisée).
+function loginCooldownRemaining(ip) {
+  if (!LOGIN_RETRY_DELAY) return 0;
+  const last = lastFailedLogin.get(ip);
+  if (!last) return 0;
+  const remaining = LOGIN_RETRY_DELAY - (Date.now() - last) / 1000;
+  if (remaining <= 0) {
+    lastFailedLogin.delete(ip); // purge l'entrée expirée
+    return 0;
+  }
+  return Math.ceil(remaining);
+}
+
+// Mémorise le résultat : un succès efface le verrou, un échec (re)démarre le délai.
+function recordLoginResult(ip, success) {
+  if (!LOGIN_RETRY_DELAY) return;
+  if (success) lastFailedLogin.delete(ip);
+  else lastFailedLogin.set(ip, Date.now());
+}
+
+// Refuse la requête si l'IP est en période d'attente. Renvoie true si bloquée.
+function blockedByCooldown(req, res) {
+  const wait = loginCooldownRemaining(req.ip);
+  if (wait > 0) {
+    res.set('Retry-After', String(wait));
+    res.status(429).json({ error: 'Trop de tentatives, réessayez plus tard', retryAfter: wait });
+    return true;
+  }
+  return false;
+}
+
 // --- Authentification admin (par en-tête, mot de passe haché Argon2id) ----
 // Le front envoie le mot de passe dans l'en-tête "x-admin-password".
 // La valeur stockée en base est un hash Argon2id : on vérifie via argon2.verify.
 async function requireAdmin(req, res, next) {
+  if (blockedByCooldown(req, res)) return;
   const provided = req.get('x-admin-password') || req.query.pwd || '';
-  if (provided && await verifyPassword(setting('admin_password'), provided)) return next();
+  const ok = !!provided && (await verifyPassword(setting('admin_password'), provided));
+  recordLoginResult(req.ip, ok);
+  if (ok) return next();
   return res.status(401).json({ error: 'Non autorisé' });
 }
 
@@ -143,8 +186,11 @@ app.get('/api/events/:id', (req, res) => {
 
 // Vérification du mot de passe (pour le formulaire de connexion admin).
 app.post('/api/admin/login', async (req, res) => {
+  if (blockedByCooldown(req, res)) return;
   const { password } = req.body || {};
-  if (password && await verifyPassword(setting('admin_password'), password)) return res.json({ ok: true });
+  const ok = !!password && (await verifyPassword(setting('admin_password'), password));
+  recordLoginResult(req.ip, ok);
+  if (ok) return res.json({ ok: true });
   return res.status(401).json({ error: 'Mot de passe incorrect' });
 });
 

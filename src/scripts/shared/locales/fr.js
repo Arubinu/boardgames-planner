@@ -73,7 +73,7 @@ export default {
   faq: [
     {
       q: 'Quelle est la différence entre les deux types de soirées ?',
-      a: "Les grandes soirées (début du mois) sont ouvertes à tous sans inscription, en salle festive, avec un plat et une boisson à apporter. Les petites soirées (mi-mois) sont sur inscription (14 places), au local de la MJC, nourriture facultative.",
+      a: "Les grandes soirées (début du mois) sont ouvertes à tous sans inscription, en salle festive, avec un plat et une boisson à apporter. Les petites soirées (mi-mois) sont pour adultes et sur inscription (14 places), au local de la MJC, nourriture facultative.",
     },
     {
       q: "Comment s'inscrire aux petites soirées ?",
@@ -178,6 +178,7 @@ export default {
     login_pwd: 'Mot de passe',
     login_btn: 'Se connecter',
     login_bad: 'Mot de passe incorrect',
+    login_wait: 'Trop de tentatives. Réessayez dans {n} s.',
 
     stat_events: 'soirées',
     stat_games: 'jeux',

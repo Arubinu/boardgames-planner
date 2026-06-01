@@ -173,6 +173,7 @@ export default {
     login_pwd: 'Password',
     login_btn: 'Log in',
     login_bad: 'Incorrect password',
+    login_wait: 'Too many attempts. Try again in {n}s.',
 
     stat_events: 'nights',
     stat_games: 'games',

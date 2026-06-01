@@ -19,7 +19,12 @@ export const API = {
       body: body ? JSON.stringify(body) : undefined,
     });
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.error || r.statusText);
+    if (!r.ok) {
+      const err = new Error(data.error || r.statusText);
+      err.status = r.status;
+      if (data.retryAfter != null) err.retryAfter = data.retryAfter;
+      throw err;
+    }
     return data;
   },
 };
