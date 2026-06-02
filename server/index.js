@@ -134,6 +134,9 @@ app.get('/api/event-types', (req, res) => {
   );
 });
 
+// Sonde de santé (pour Docker / Dockge / supervision).
+app.get('/healthz', (req, res) => res.json({ ok: true }));
+
 // Liste des jeux (avec recherche/tri optionnels).
 app.get('/api/games', (req, res) => {
   const { q, type, sort } = req.query;
