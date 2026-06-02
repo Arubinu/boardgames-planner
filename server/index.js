@@ -5,6 +5,7 @@ import multer from 'multer';
 import helmet from 'helmet';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import fs from 'node:fs';
 import db from './db.js';
 import { parseMyludo, detailsUrlFromId } from './myludo.js';
 import { hashPassword, verifyPassword } from './password.js';
@@ -14,6 +15,21 @@ const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+
+// Derrière un reverse proxy (HTTPS terminé par le proxy → conteneur en HTTP),
+// on fait confiance aux en-têtes X-Forwarded-* pour que req.protocol/req.ip
+// reflètent la requête d'origine (URL absolues OpenGraph en https, throttle de
+// connexion par IP réelle). En local sans proxy, ces en-têtes sont absents.
+// TRUST_PROXY : nombre de proxies (défaut 1), 'true'/'false', ou une valeur
+// Express (ex. 'loopback', '10.0.0.0/8').
+function parseTrustProxy(v) {
+  if (v === undefined) return 1;
+  if (v === 'true') return true;
+  if (v === 'false') return false;
+  if (/^\d+$/.test(v)) return Number(v);
+  return v;
+}
+app.set('trust proxy', parseTrustProxy(process.env.TRUST_PROXY));
 
 // --- Sécurité : en-têtes HTTP (helmet) ------------------------------------
 // CSP adaptée : on autorise les tuiles OpenStreetMap (cartes Leaflet) et les
@@ -136,6 +152,85 @@ app.get('/api/event-types', (req, res) => {
 
 // Sonde de santé (pour Docker / Dockge / supervision).
 app.get('/healthz', (req, res) => res.json({ ok: true }));
+
+// --- Flux iCalendar (.ics) ------------------------------------------------
+// Permet d'ajouter les soirées à un agenda (Google/Apple/Outlook), en
+// téléchargement ponctuel ou en abonnement (URL en webcal://).
+function icsStamp(d) {
+  return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+function icsNextDay(ymd) {
+  const d = new Date(ymd + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10).replace(/-/g, '');
+}
+function icsEscape(s) {
+  return String(s)
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\r?\n/g, '\\n');
+}
+// Pliage des lignes à 75 caractères (RFC 5545) : continuation par CRLF + espace.
+function icsFold(line) {
+  if (line.length <= 75) return line;
+  let out = line.slice(0, 75);
+  let i = 75;
+  while (i < line.length) {
+    out += '\r\n ' + line.slice(i, i + 74);
+    i += 74;
+  }
+  return out;
+}
+
+app.get('/events.ics', (req, res) => {
+  const rows = db
+    .prepare(
+      `SELECT e.*, l.name AS location_name, l.address AS location_address,
+              t.label AS type_label
+       FROM events e
+       LEFT JOIN locations l ON l.id = e.location_id
+       LEFT JOIN event_types t ON t.key = e.type
+       ORDER BY e.date`
+    )
+    .all();
+
+  const stamp = icsStamp(new Date());
+  const calName = setting('site_name') || 'Boardgames Planner';
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    icsFold(`PRODID:-//${icsEscape(calName)}//Boardgames Planner//FR`),
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    icsFold(`X-WR-CALNAME:${icsEscape(calName)}`),
+  ];
+  for (const e of rows) {
+    const ymd = e.date.replace(/-/g, '');
+    lines.push('BEGIN:VEVENT');
+    lines.push(`UID:event-${e.id}@boardgames-planner`);
+    lines.push(`DTSTAMP:${stamp}`);
+    if (e.start_time) {
+      // Heure « flottante » (interprétée comme heure locale par l'agenda).
+      lines.push(`DTSTART:${ymd}T${e.start_time.replace(':', '')}00`);
+      if (e.end_time) lines.push(`DTEND:${ymd}T${e.end_time.replace(':', '')}00`);
+    } else {
+      lines.push(`DTSTART;VALUE=DATE:${ymd}`);
+      lines.push(`DTEND;VALUE=DATE:${icsNextDay(e.date)}`);
+    }
+    const summary = e.type_label ? `${e.title} (${e.type_label})` : e.title;
+    lines.push(icsFold(`SUMMARY:${icsEscape(summary)}`));
+    const loc = [e.location_name, e.location_address].filter(Boolean).join(', ');
+    if (loc) lines.push(icsFold(`LOCATION:${icsEscape(loc)}`));
+    if (e.description) lines.push(icsFold(`DESCRIPTION:${icsEscape(e.description)}`));
+    lines.push('END:VEVENT');
+  }
+  lines.push('END:VCALENDAR');
+
+  res.set('Content-Type', 'text/calendar; charset=utf-8');
+  res.set('Content-Disposition', 'inline; filename="soirees-jeux.ics"');
+  res.send(lines.join('\r\n') + '\r\n');
+});
 
 // Liste des jeux (avec recherche/tri optionnels).
 app.get('/api/games', (req, res) => {
@@ -414,7 +509,15 @@ app.get('/api/admin/settings', requireAdmin, (req, res) => {
 });
 
 app.put('/api/admin/settings', requireAdmin, async (req, res) => {
-  const allowed = ['whatsapp_main', 'whatsapp_mjc', 'myludo_profile', 'admin_password'];
+  const allowed = [
+    'whatsapp_main',
+    'whatsapp_mjc',
+    'myludo_profile',
+    'site_name',
+    'site_description',
+    'og_image',
+    'admin_password',
+  ];
   for (const [k, v] of Object.entries(req.body || {})) {
     if (!allowed.includes(k) || v === undefined || v === '') continue;
     if (k === 'admin_password') {
@@ -428,7 +531,66 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
 });
 
 // =====================  STATIQUE  =========================================
-app.use(express.static(PUBLIC_DIR));
+// --- OpenGraph / Twitter : injection des balises depuis les réglages -------
+// Les pages publiques sont servies en injectant les balises de partage à la
+// volée (les robots de WhatsApp/Facebook ne lisent que le HTML brut, pas le JS).
+function htmlEscapeAttr(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+function injectOpenGraph(html, req) {
+  const name = setting('site_name');
+  const desc = setting('site_description');
+  let image = setting('og_image');
+  const host = req.get('x-forwarded-host') || req.get('host');
+  const origin = `${req.protocol}://${host}`;
+  if (image && image.startsWith('/')) image = origin + image; // chemin → URL absolue
+  const url = origin + req.originalUrl;
+  const e = htmlEscapeAttr;
+  const tags = [
+    '<meta property="og:type" content="website" />',
+    name && `<meta property="og:site_name" content="${e(name)}" />`,
+    name && `<meta property="og:title" content="${e(name)}" />`,
+    desc && `<meta property="og:description" content="${e(desc)}" />`,
+    `<meta property="og:url" content="${e(url)}" />`,
+    image && `<meta property="og:image" content="${e(image)}" />`,
+    `<meta name="twitter:card" content="${image ? 'summary_large_image' : 'summary'}" />`,
+    name && `<meta name="twitter:title" content="${e(name)}" />`,
+    desc && `<meta name="twitter:description" content="${e(desc)}" />`,
+    image && `<meta name="twitter:image" content="${e(image)}" />`,
+  ]
+    .filter(Boolean)
+    .join('\n    ');
+  return html.replace('</head>', `    ${tags}\n  </head>`);
+}
+function servePublicHtml(file) {
+  return (req, res, next) => {
+    try {
+      const html = fs.readFileSync(path.join(PUBLIC_DIR, file), 'utf8');
+      res.set('Content-Type', 'text/html; charset=utf-8');
+      res.send(injectOpenGraph(html, req));
+    } catch {
+      next(); // en dev (pas de build), on laisse passer
+    }
+  };
+}
+app.get(['/', '/index.html'], servePublicHtml('index.html'));
+app.get('/jeux.html', servePublicHtml('jeux.html'));
+
+app.use(
+  express.static(PUBLIC_DIR, {
+    setHeaders(res) {
+      // Autorise le chargement cross-origin des fichiers publics (image
+      // OpenGraph, favicons, images…). Sinon CORP:same-origin (posé par
+      // helmet) bloque les aperçus de partage et les tests OpenGraph
+      // chargés depuis une autre origine dans le navigateur.
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    },
+  })
+);
 
 // Démarrage.
 app.listen(PORT, () => {

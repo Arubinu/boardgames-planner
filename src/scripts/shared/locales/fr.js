@@ -67,6 +67,8 @@ export default {
     wa_main: 'Groupe « Soirées Jeux »',
     wa_mjc: 'Groupe MJC Estrablin',
     wa_todo: 'Liens WhatsApp à configurer en administration.',
+    calendar_desc: 'Ajoutez les prochaines soirées à votre agenda :',
+    calendar_ics: '📅 Ajouter au calendrier (.ics)',
     faq_title: 'Questions fréquentes',
   },
 
@@ -258,6 +260,9 @@ export default {
     del_type_done: 'Type supprimé',
 
     settings_title: 'Réglages',
+    set_site_name: 'Nom du site (partage social, .ics)',
+    set_site_desc: 'Description (aperçu de partage)',
+    set_og_image: 'Image de partage (URL ou chemin /assets/…)',
     set_wa_main: 'Lien groupe WhatsApp « Soirées Jeux »',
     set_wa_mjc: 'Lien groupe WhatsApp « MJC Estrablin »',
     set_myludo: 'Profil MyLudo (lien public)',

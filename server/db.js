@@ -156,6 +156,13 @@ ensureSetting.run('admin_password', 'admin');
 ensureSetting.run('whatsapp_main', '');
 ensureSetting.run('whatsapp_mjc', '');
 ensureSetting.run('myludo_profile', 'https://www.myludo.fr/#!/profil/christophe-t-81487');
+// Identité du site (réutilisée par les balises OpenGraph et le flux .ics).
+ensureSetting.run('site_name', 'Soirées Jeux — MJC Estrablin');
+ensureSetting.run(
+  'site_description',
+  'Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.'
+);
+ensureSetting.run('og_image', '/assets/boardgames.webp');
 
 // --- Configuration par variables d'environnement --------------------------
 // Appliquée à CHAQUE démarrage du conteneur :

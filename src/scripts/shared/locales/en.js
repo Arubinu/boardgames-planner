@@ -63,6 +63,8 @@ export default {
     wa_main: '“Game Nights” group',
     wa_mjc: 'MJC Estrablin group',
     wa_todo: 'WhatsApp links to be configured in the admin area.',
+    calendar_desc: 'Add the upcoming nights to your calendar:',
+    calendar_ics: '📅 Add to calendar (.ics)',
     faq_title: 'Frequently asked questions',
   },
 
@@ -253,6 +255,9 @@ export default {
     del_type_done: 'Type deleted',
 
     settings_title: 'Settings',
+    set_site_name: 'Site name (social sharing, .ics)',
+    set_site_desc: 'Description (share preview)',
+    set_og_image: 'Share image (URL or /assets/… path)',
     set_wa_main: '“Game Nights” WhatsApp group link',
     set_wa_mjc: '“MJC Estrablin” WhatsApp group link',
     set_myludo: 'MyLudo profile (public link)',
