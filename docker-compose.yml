@@ -8,7 +8,7 @@ services:
       - ./data:/app/data
     environment:
       TRUST_PROXY: 1
-      ADMIN_PASSWORD: admin
+      #ADMIN_PASSWORD: admin
       LOGIN_RETRY_DELAY: 10
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
       #WHATSAPP_MAIN: https://chat.whatsapp.com/[...]

@@ -16,17 +16,18 @@ The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (sty
 - Library preview + a dedicated `/jeux.html` page with search, filters (base games / expansions) and sorting by rating.
 - Practical info, venues, contact and **WhatsApp** sign-up links for the nights that offer it.
 - **Membership section**: download the membership form (PDF) to fill in and pay on site.
+- **Add to calendar**: download the upcoming nights as an `.ics` file (also subscribable via `webcal://`), from the practical info section.
 - **Interactive calendar**: the legend is **dynamic** (only the night types present in the displayed month appear, with their color). Clicking a night card re-centers the calendar on its date and shows the venue on a **mini-map** (OpenStreetMap); the "See this night's games" button opens the details.
 - **Multilingual** (French / English): a switcher in the navigation bar, language detected then remembered. See the dedicated section below.
 - Light / dark theme.
 
 **For administration** (`/admin.html`, password-protected):
-- Create / edit / delete nights (shown in **two tables**: upcoming and past), choose their venue and tick the games available that evening.
+- Create / edit / duplicate / delete nights (shown in **two tables**: upcoming and past), choose their venue and tick the games available that evening.
 - Manage **night types** from a dedicated tab: label, mention ("sign-up required"…), **color** and whether they offer WhatsApp sign-up. Types feed the night form, the calendar and the badges.
 - Manage the list of venues (quick selection when creating a date). Each venue is **located by clicking on a Leaflet map** (OpenStreetMap): the coordinates are saved and the Google Maps link is derived automatically (no URL to paste). "Deleting" a venue **archives** it: it disappears from the public site but can be unarchived.
 - Import the collection from a **MyLudo** export (CSV or JSON). Each game's **creation date** is preserved across imports; the modification date is updated.
 - Add an image and a "brought by" note to each game (preserved across re-imports), or delete a game.
-- Configure the WhatsApp links, the MyLudo profile and the password.
+- Configure the **site identity** (name, description and share image, used for social link previews via OpenGraph and for the calendar feed name), the WhatsApp links, the MyLudo profile and the password.
 
 ---
 
@@ -50,11 +51,18 @@ services:
     volumes:
       - ./data:/app/data # persisted SQLite database
     environment:
+      TRUST_PROXY: 1
       #ADMIN_PASSWORD: admin
       LOGIN_RETRY_DELAY: 10
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
       #WHATSAPP_MAIN: https://chat.whatsapp.com/[...]
       #WHATSAPP_MJC: https://chat.whatsapp.com/[...]
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/healthz']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     restart: unless-stopped
 ```
 

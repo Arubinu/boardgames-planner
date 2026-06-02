@@ -16,17 +16,18 @@ Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass
 - Aperçu de la ludothèque + page dédiée `/jeux.html` avec recherche, filtres (jeux de base / extensions) et tri par note.
 - Infos pratiques, lieux, contact et liens d'inscription **WhatsApp** pour les soirées qui le proposent.
 - **Section adhésion** : téléchargement du bulletin d'adhésion (PDF) à remplir et à régler sur place.
+- **Ajout à l'agenda** : téléchargement des prochaines soirées au format `.ics` (abonnement possible via `webcal://`), depuis les infos pratiques.
 - **Calendrier interactif** : la légende est **dynamique** (seuls les types de soirées présents dans le mois affiché y figurent, avec leur couleur). Cliquer sur une carte de soirée recadre le calendrier sur la date et affiche le lieu sur une **mini-carte** (OpenStreetMap) ; le bouton « Voir les jeux de cette soirée » ouvre le détail.
 - **Multilingue** (français / anglais) : sélecteur dans la barre de navigation, langue détectée puis mémorisée. Voir la section dédiée plus bas.
 - Thème clair / sombre.
 
 **Côté administration** (`/admin.html`, protégée par mot de passe) :
-- Créer / modifier / supprimer des soirées (présentées en **deux tableaux** : à venir et passées), choisir leur lieu et cocher les jeux disponibles ce soir-là.
+- Créer / modifier / dupliquer / supprimer des soirées (présentées en **deux tableaux** : à venir et passées), choisir leur lieu et cocher les jeux disponibles ce soir-là.
 - Gérer les **types de soirées** depuis un onglet dédié : libellé, mention (« sur inscription »…), **couleur** et proposition d'inscription WhatsApp. Les types alimentent le formulaire de soirée, le calendrier et les badges.
 - Gérer la liste des lieux (choix rapide à la création d'une date). Chaque lieu est **localisé d'un clic sur une carte Leaflet** (OpenStreetMap) : les coordonnées sont enregistrées et le lien Google Maps en est dérivé automatiquement (plus aucune URL à coller). « Supprimer » un lieu l'**archive** : il disparaît du site public mais reste désarchivable.
 - Importer la collection depuis un export **MyLudo** (CSV ou JSON). La **date de création** de chaque jeu est conservée d'un import à l'autre ; la date de modification est mise à jour.
 - Ajouter une image et un « apporté par » à chaque jeu (conservés lors des ré-imports), ou supprimer un jeu.
-- Régler les liens WhatsApp, le profil MyLudo et le mot de passe.
+- Régler l'**identité du site** (nom, description et image de partage, utilisés pour les aperçus de liens via OpenGraph et pour le nom du flux d'agenda), les liens WhatsApp, le profil MyLudo et le mot de passe.
 
 ---
 
@@ -50,11 +51,18 @@ services:
     volumes:
       - ./data:/app/data # base SQLite persistée
     environment:
+      TRUST_PROXY: 1
       #ADMIN_PASSWORD: admin
       LOGIN_RETRY_DELAY: 10
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
       #WHATSAPP_MAIN: https://chat.whatsapp.com/[...]
       #WHATSAPP_MJC: https://chat.whatsapp.com/[...]
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/healthz']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     restart: unless-stopped
 ```
 
