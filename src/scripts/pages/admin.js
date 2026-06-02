@@ -197,6 +197,10 @@ function renderEventsTable() {
           title="${t('admin.edit')}" aria-label="${t('admin.edit')}">
           <img src="/assets/icons/edit.svg" alt="" />
         </button>
+        <button class="btn btn-ghost btn-icon" data-dup-event="${e.id}"
+          title="${t('admin.duplicate')}" aria-label="${t('admin.duplicate')}">
+          <img src="/assets/icons/copy.svg" alt="" />
+        </button>
         <button class="btn btn-ghost btn-icon" data-del-event="${e.id}"
           title="${t('admin.delete')}" data-label-text="${esc(e.title)}">
           <img src="/assets/icons/delete.svg" alt="" />
@@ -233,7 +237,8 @@ function populateTypeSelect() {
   sel.value = typeKey(cur);
 }
 
-async function openEventForm(id) {
+async function openEventForm(id, opts = {}) {
+  const duplicate = !!opts.duplicate;
   const locSel = document.getElementById('ef-location');
   locSel.innerHTML =
     `<option value="">${t('admin.ef_location_none')}</option>` +
@@ -243,10 +248,12 @@ async function openEventForm(id) {
 
   if (id) {
     const e = await API.get('/api/events/' + id);
-    document.getElementById('ef-title').textContent = t('admin.ef_edit');
-    document.getElementById('ef-id').value = e.id;
+    document.getElementById('ef-title').textContent = duplicate
+      ? t('admin.ef_duplicate')
+      : t('admin.ef_edit');
+    document.getElementById('ef-id').value = duplicate ? '' : e.id;
     document.getElementById('ef-title-in').value = e.title;
-    document.getElementById('ef-date').value = e.date;
+    document.getElementById('ef-date').value = duplicate ? '' : e.date;
     document.getElementById('ef-type').value = typeKey(e.type);
     document.getElementById('ef-start').value = e.start_time;
     document.getElementById('ef-end').value = e.end_time;
@@ -818,10 +825,11 @@ function wireHandlers() {
   // Délégation pour les tableaux (générés dynamiquement).
   document.getElementById('dashboard').addEventListener('click', (e) => {
     const el = e.target.closest(
-      '[data-edit-event],[data-del-event],[data-edit-game],[data-del-game],[data-edit-loc],[data-del-loc],[data-unarchive-loc],[data-edit-type],[data-del-type]'
+      '[data-edit-event],[data-dup-event],[data-del-event],[data-edit-game],[data-del-game],[data-edit-loc],[data-del-loc],[data-unarchive-loc],[data-edit-type],[data-del-type]'
     );
     if (!el) return;
     if (el.dataset.editEvent) return openEventForm(Number(el.dataset.editEvent));
+    if (el.dataset.dupEvent) return openEventForm(Number(el.dataset.dupEvent), { duplicate: true });
     if (el.dataset.delEvent)
       return confirmDelete('event', Number(el.dataset.delEvent), el.dataset.labelText);
     if (el.dataset.editGame) return openGameForm(Number(el.dataset.editGame));

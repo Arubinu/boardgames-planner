@@ -261,6 +261,8 @@ export default {
 
     ef_new: 'New night',
     ef_edit: 'Edit the night',
+    ef_duplicate: 'Duplicate the night',
+    duplicate: 'Duplicate',
     ef_title: 'Title *',
     ef_title_ph: 'Big game night',
     ef_date: 'Date *',

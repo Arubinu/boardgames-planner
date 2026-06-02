@@ -266,6 +266,8 @@ export default {
 
     ef_new: 'Nouvelle soirée',
     ef_edit: 'Modifier la soirée',
+    ef_duplicate: 'Dupliquer la soirée',
+    duplicate: 'Dupliquer',
     ef_title: 'Titre *',
     ef_title_ph: 'Grande soirée jeux',
     ef_date: 'Date *',
