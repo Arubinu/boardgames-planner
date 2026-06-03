@@ -8,6 +8,8 @@ Aucune base de données externe : tout est stocké dans un simple fichier **SQLi
 
 Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass/SCSS** (styles organisés par fichier, sans aucune balise `<style>` dans le HTML). Le serveur **Express** sert ensuite le résultat compilé. Le mot de passe administrateur est stocké **haché avec Argon2id** (recommandation OWASP).
 
+<img width="1124" height="2220" alt="screenshot" src="https://github.com/user-attachments/assets/2025a33d-3cea-4e69-9dfe-2ec065d452ba" />
+
 ---
 
 ## Ce que fait le site
@@ -94,7 +96,7 @@ Deux familles de variables, toutes prises en compte **à chaque démarrage** du 
 
 | Variable | Rôle | Défaut |
 | --- | --- | --- |
-| `LOGIN_RETRY_DELAY` | Délai minimal (en secondes) avant de pouvoir réessayer après une connexion admin **échouée**, par adresse IP. `0` = désactivé. | `0` |
+| `LOGIN_RETRY_DELAY` | Délai minimal (en secondes) avant de pouvoir réessayer après une connexion admin **échouée**, par adresse IP. `0` = désactivé. | `10` |
 | `PORT` | Port d'écoute interne du serveur (dans Docker, on mappe plutôt le port côté hôte). | `3000` |
 | `DATA_DIR` | Dossier de la base SQLite. | `./data` |
 

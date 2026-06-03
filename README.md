@@ -8,6 +8,8 @@ No external database: everything is stored in a single **SQLite** file.
 
 The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (styles organized per file, with no `<style>` tags in the HTML). An **Express** server then serves the compiled output. The admin password is stored **hashed with Argon2id** (per OWASP recommendations).
 
+<img width="1124" height="2220" alt="screenshot" src="https://github.com/user-attachments/assets/af015741-b199-4a8e-ae41-2fbf1f8af605" />
+
 ---
 
 ## What the site does
@@ -94,7 +96,7 @@ Two families of variables, all taken into account **on every startup** of the co
 
 | Variable | Role | Default |
 | --- | --- | --- |
-| `LOGIN_RETRY_DELAY` | Minimum delay (in seconds) before retrying after a **failed** admin login, per IP address. `0` = disabled. | `0` |
+| `LOGIN_RETRY_DELAY` | Minimum delay (in seconds) before retrying after a **failed** admin login, per IP address. `0` = disabled. | `10` |
 | `PORT` | Server's internal listening port (in Docker, you usually map the host port instead). | `3000` |
 | `DATA_DIR` | SQLite database folder. | `./data` |
 
