@@ -215,6 +215,11 @@ boardgames-planner/
 > In Docker, the build runs during the image build, so there is nothing to do
 > manually.
 
+> The PWA manifest (`static/site.webmanifest`) and the favicons are plain files,
+> not managed by the app: edit `site.webmanifest` in a text editor (app name,
+> theme/background colors, icons) and replace the favicon images to match your
+> own branding.
+
 ---
 
 ## Multilingual (i18n)

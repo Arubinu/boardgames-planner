@@ -263,6 +263,8 @@ export default {
     del_type_done: 'Type supprimé',
 
     settings_title: 'Réglages',
+    settings_help:
+      'Le manifeste PWA (static/site.webmanifest) et les favicons ne se règlent pas ici : éditez le fichier dans un éditeur de texte (nom de l\'application, couleurs, icônes) et remplacez les images pour correspondre à votre identité.',
     set_site_name: 'Nom du site (partage social, .ics)',
     set_site_desc: 'Description (aperçu de partage)',
     set_og_image: 'Image de partage (URL ou chemin /assets/…)',

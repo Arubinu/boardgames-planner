@@ -260,6 +260,8 @@ export default {
     del_type_done: 'Type deleted',
 
     settings_title: 'Settings',
+    settings_help:
+      'The PWA manifest (static/site.webmanifest) and the favicons are not configured here: edit the file in a text editor (app name, colors, icons) and replace the images to match your own branding.',
     set_site_name: 'Site name (social sharing, .ics)',
     set_site_desc: 'Description (sharing preview)',
     set_og_image: 'Sharing image (URL or /assets/… path)',

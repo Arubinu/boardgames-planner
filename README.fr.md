@@ -217,6 +217,11 @@ boardgames-planner/
 > versionné. Dans Docker, le build est exécuté pendant la construction de
 > l'image, donc rien à faire manuellement.
 
+> Le manifeste PWA (`static/site.webmanifest`) et les favicons sont de simples
+> fichiers, non gérés par l'application : éditez `site.webmanifest` dans un
+> éditeur de texte (nom de l'app, couleurs de thème/fond, icônes) et remplacez
+> les images de favicon pour correspondre à votre identité.
+
 ---
 
 ## Multilingue (i18n)
