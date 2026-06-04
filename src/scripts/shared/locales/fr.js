@@ -111,6 +111,7 @@ export default {
     time_tbd: 'Horaire à confirmer',
     available: 'Jeux disponibles ({count})',
     games_soon: 'La liste des jeux sera précisée prochainement.',
+    games_none_past: 'Les jeux de cette soirée n\'ont pas été renseignés.',
     see_games: 'Voir les jeux de cet évènement',
     register_wa: "S'inscrire via WhatsApp",
     type_inscription: '{label} — {sub}',

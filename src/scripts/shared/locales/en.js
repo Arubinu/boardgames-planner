@@ -108,6 +108,7 @@ export default {
     time_tbd: 'Time to be confirmed',
     available: 'Available games ({count})',
     games_soon: 'The list of games will be confirmed soon.',
+    games_none_past: 'The games for this night were not recorded.',
     see_games: "See this event's games",
     register_wa: 'Register via WhatsApp',
     type_inscription: '{label} — {sub}',

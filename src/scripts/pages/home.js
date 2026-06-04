@@ -337,7 +337,9 @@ async function openEvent(id) {
       ? `<div class="grid grid-4" style="gap:.8rem;margin-top:.6rem">${e.games
           .map(gamePreviewHtml)
           .join('')}</div>`
-      : `<p class="muted">${esc(t('event.games_soon'))}</p>`;
+      : `<p class="muted">${esc(
+          t(isUpcoming(e.date) ? 'event.games_soon' : 'event.games_none_past')
+        )}</p>`;
     const body = document.getElementById('em-body');
     body.innerHTML = `
       <span class="badge" style="background:${typeColor(e.type)};color:#fff">${esc(
