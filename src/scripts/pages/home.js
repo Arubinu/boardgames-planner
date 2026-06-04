@@ -157,10 +157,18 @@ function renderCalendar() {
   const year = calCursor.getFullYear();
   const month = calCursor.getMonth();
   const first = new Date(year, month, 1);
-  const startCol = (first.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const dow = tRaw('cal.dow') || [];
+  // Début de semaine configurable par langue : 0 = dimanche, 1 = lundi (défaut).
+  // `cal.dow` est stocké en ordre canonique dimanche→samedi ; on le fait pivoter
+  // selon weekStart pour que l'en-tête et la grille restent toujours synchronisés.
+  const weekStart = Number(tRaw('cal.weekStart') ?? 1);
+  const dowRaw = tRaw('cal.dow') || [];
+  const dow =
+    dowRaw.length === 7
+      ? Array.from({ length: 7 }, (_, i) => dowRaw[(i + weekStart) % 7])
+      : dowRaw;
+  const startCol = (first.getDay() - weekStart + 7) % 7;
   const typesInMonth = new Set();
 
   let html = dow.map((d) => `<div class="cal-dow">${esc(d)}</div>`).join('');

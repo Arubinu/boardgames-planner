@@ -348,6 +348,7 @@ export default {
   },
 
   cal: {
-    dow: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    dow: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], // canonical Sunday→Saturday order
+    weekStart: 0, // 0 = Sunday, 1 = Monday
   },
 };

@@ -351,6 +351,7 @@ export default {
   },
 
   cal: {
-    dow: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+    dow: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'], // ordre canonique dimanche→samedi
+    weekStart: 1, // 0 = dimanche, 1 = lundi
   },
 };
