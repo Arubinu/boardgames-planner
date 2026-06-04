@@ -21,7 +21,7 @@ export default {
 
   hero: {
     script: "On vous attend autour d'une table !",
-    title_html: 'Les <span class="accent">soirées jeux</span><br />de la MJC Estrablin',
+    title_html: 'Les <span class="accent">rendez-vous jeux</span><br />de la MJC Estrablin',
     subtitle:
       'Retrouvez les prochaines dates, découvrez la ludothèque disponible et venez partager un bon moment autour des jeux de société.',
     cta_dates: 'Voir les prochaines dates',
@@ -29,16 +29,16 @@ export default {
   },
 
   dates: {
-    title: 'Prochaines soirées',
-    sub_1: 'Cliquez sur une soirée pour la situer dans le calendrier et voir le lieu.',
-    sub_2_html: 'Le bouton <u>« Voir les jeux de cette soirée »</u> en ouvre le détail.',
-    past_toggle: 'Voir aussi les soirées passées',
-    map_default: 'Sélectionnez une date pour voir le lieu.',
-    map_none: 'Aucune soirée à cette date.',
+    title: 'Prochaines dates',
+    sub_1: 'Cliquez sur une date pour situer l\'évènement dans le calendrier et voir le lieu.',
+    sub_2_html: 'Le bouton <u>« Voir les jeux de cet évènement »</u> en ouvre les détails.',
+    past_toggle: 'Voir aussi les évènements passés',
+    map_default: 'Sélectionnez une date pour voir l\'évènement.',
+    map_none: 'Aucun évènement à cette date.',
     coords_missing: 'Coordonnées du lieu non renseignées.',
-    none_upcoming: 'Aucune date programmée pour le moment. Revenez bientôt !',
-    none_past: 'Aucune soirée passée.',
-    load_error: 'Impossible de charger les dates ({error}).',
+    none_upcoming: 'Aucun évènement programmé pour le moment. Revenez bientôt !',
+    none_past: 'Aucun évènement passé.',
+    load_error: 'Impossible de charger les évènements ({error}).',
   },
 
   gamesPreview: {
@@ -53,8 +53,8 @@ export default {
 
   infos: {
     title: 'Infos pratiques',
-    sub: 'Deux formats de soirées, deux ambiances. À vous de choisir !',
-    types_title: 'Deux types de soirées',
+    sub: 'Deux formats d\'évènements, deux ambiances. À vous de choisir !',
+    types_title: 'Deux types d\'évènements',
     types_desc_html:
       '<p><strong>Grandes soirées</strong> — début du mois, 19h-23h, salle festive, sans inscription, plat + boisson à apporter.</p><p><strong>Petites soirées</strong> — mi-mois, 20h-23h, local de la MJC, sur inscription (14 max), nourriture facultative.</p>',
     locations_title: 'Nos lieux',
@@ -67,8 +67,11 @@ export default {
     wa_main: 'Groupe « Soirées Jeux »',
     wa_mjc: 'Groupe MJC Estrablin',
     wa_todo: 'Liens WhatsApp à configurer en administration.',
-    calendar_desc: 'Ajoutez les prochaines soirées à votre agenda :',
-    calendar_ics: '📅 Ajouter au calendrier (.ics)',
+    calendar_desc: 'Ajoutez les prochains évènements à votre agenda :',
+    calendar_ics: '📅 Télécharger (.ics)',
+    calendar_copy: '🔗 Copier le lien d\'abonnement',
+    calendar_hint: 'Collez ce lien dans « Ajouter par URL » de Google/Apple Agenda pour un abonnement mis à jour automatiquement.',
+    calendar_copied: 'Lien d\'abonnement copié',
     faq_title: 'Questions fréquentes',
   },
 
@@ -108,7 +111,7 @@ export default {
     time_tbd: 'Horaire à confirmer',
     available: 'Jeux disponibles ({count})',
     games_soon: 'La liste des jeux sera précisée prochainement.',
-    see_games: 'Voir les jeux de cette soirée',
+    see_games: 'Voir les jeux de cet évènement',
     register_wa: "S'inscrire via WhatsApp",
     type_inscription: '{label} — {sub}',
     loading: 'Chargement…',
@@ -138,9 +141,9 @@ export default {
 
   gamesPage: {
     hero_title: 'Notre ludothèque',
-    intro_default: 'Tous les jeux disponibles lors de nos soirées.',
+    intro_default: 'Tous les jeux disponibles lors de nos évènements.',
     intro_count:
-      '{count} jeux disponibles lors de nos soirées — cliquez pour les détails.',
+      '{count} jeux disponibles lors de nos évènements — cliquez pour voir les détails.',
     search_ph: 'Rechercher un jeu, une catégorie, un thème…',
     sort_title: 'Trier par titre (A→Z)',
     sort_rating: 'Trier par note',
@@ -163,15 +166,15 @@ export default {
   },
 
   modal: {
-    event_title: 'Soirée',
+    event_title: 'Évènement',
     game_title: 'Jeu',
     close: 'Fermer',
   },
 
   meta: {
-    index_title: 'Soirées Jeux — Soirées Jeux MJC Estrablin',
-    games_title: 'Nos jeux — Soirées Jeux MJC Estrablin',
-    admin_title: 'Administration — Soirées Jeux MJC Estrablin',
+    index_title: 'Évènements Jeux MJC Estrablin',
+    games_title: 'Nos jeux — Évènements Jeux MJC Estrablin',
+    admin_title: 'Administration — Évènements Jeux MJC Estrablin',
   },
 
   admin: {
@@ -182,26 +185,26 @@ export default {
     login_bad: 'Mot de passe incorrect',
     login_wait: 'Trop de tentatives. Réessayez dans {n} s.',
 
-    stat_events: 'soirées',
+    stat_events: 'évènements',
     stat_games: 'jeux',
     stat_locations: 'lieux',
 
-    tab_events: '📅 Soirées',
+    tab_events: '📅 Évènements',
     tab_games: '🎲 Jeux & import',
     tab_locations: '📍 Lieux',
-    tab_types: '🏷️ Types de soirées',
+    tab_types: '🏷️ Types d\'évènements',
     tab_settings: '⚙️ Réglages',
 
-    events_title: 'Soirées',
+    events_title: 'Évènements',
     upcoming_events_title: 'À venir',
-    past_events_title: 'Soirées passées',
-    new_event: '+ Nouvelle soirée',
-    th_event: 'Soirée',
+    past_events_title: 'Évènements passés',
+    new_event: '+ Nouvel évènement',
+    th_event: 'Évènement',
     th_type: 'Type',
     th_location: 'Lieu',
     th_games: 'Jeux',
-    no_events: 'Aucune soirée. Créez-en une !',
-    no_past_events: 'Aucune soirée passée.',
+    no_events: 'Aucun évènement. Créez-en un !',
+    no_past_events: 'Aucun évènement passé.',
     games_unit_one: '{count} jeu',
     games_unit_other: '{count} jeux',
 
@@ -233,15 +236,15 @@ export default {
     no_archived_loc: 'Aucun lieu archivé.',
     coords_undefined: 'non définies',
 
-    // Types de soirées
-    types_title: 'Types de soirées',
+    // Types d'évènements
+    types_title: 'Types d\'évènements',
     new_type: '+ Nouveau type',
     types_help:
       "Chaque type définit un libellé, une mention, une couleur et s'il propose une inscription WhatsApp.",
     th_type_label: 'Libellé',
     th_type_sub: 'Mention',
     th_type_signup: 'Inscription',
-    no_types: 'Aucun type de soirée.',
+    no_types: 'Aucun type d\'évènement.',
     yes: 'Oui',
     no: 'Non',
     tf_new: 'Nouveau type',
@@ -256,7 +259,7 @@ export default {
     saved_type: 'Type enregistré',
     del_type_title: 'Supprimer le type',
     del_type_msg:
-      'Voulez-vous vraiment supprimer le type <strong>{label}</strong> ? (refusé si des soirées l\'utilisent)',
+      'Voulez-vous vraiment supprimer le type <strong>{label}</strong> ? (refusé si des évènements l\'utilisent)',
     del_type_done: 'Type supprimé',
 
     settings_title: 'Réglages',
@@ -269,9 +272,9 @@ export default {
     set_pwd: 'Nouveau mot de passe admin (laisser vide pour ne pas changer)',
     save_settings: 'Enregistrer les réglages',
 
-    ef_new: 'Nouvelle soirée',
-    ef_edit: 'Modifier la soirée',
-    ef_duplicate: 'Dupliquer la soirée',
+    ef_new: 'Nouvel évènement',
+    ef_edit: 'Modifier l\'évènement',
+    ef_duplicate: 'Dupliquer l\'évènement',
     duplicate: 'Dupliquer',
     ef_title: 'Titre *',
     ef_title_ph: 'Grande soirée jeux',
@@ -284,7 +287,7 @@ export default {
     ef_desc: 'Description',
     ef_wa: "Lien WhatsApp d'inscription (optionnel)",
     ef_wa_ph: 'laisser vide pour utiliser le lien par défaut',
-    ef_games_label: 'Jeux disponibles ce soir-là —',
+    ef_games_label: 'Jeux disponibles lors de cet évènement',
     ef_selected: 'sélectionné(s)',
     ef_filter_ph: 'Filtrer les jeux…',
 
@@ -317,22 +320,22 @@ export default {
     archive: 'Archiver',
     unarchive: 'Désarchiver',
 
-    del_event_title: 'Supprimer la soirée',
-    del_event_msg: 'Voulez-vous vraiment supprimer la soirée <strong>{label}</strong> ?',
-    del_event_done: 'Soirée supprimée',
+    del_event_title: 'Supprimer l\'évènement',
+    del_event_msg: 'Voulez-vous vraiment supprimer l\'évènement <strong>{label}</strong> ?',
+    del_event_done: 'Évènement supprimé',
     del_game_title: 'Supprimer le jeu',
     del_game_msg: 'Voulez-vous vraiment supprimer le jeu <strong>{label}</strong> ?',
     del_game_done: 'Jeu supprimé',
     del_loc_title: 'Archiver le lieu',
     del_loc_msg:
-      'Voulez-vous vraiment archiver le lieu <strong>{label}</strong> ? Les soirées associées sont conservées, et vous pourrez le désarchiver plus tard.',
+      'Voulez-vous vraiment archiver le lieu <strong>{label}</strong> ? Les évènements associés sont conservés, et vous pourrez le restaurer plus tard.',
     del_loc_done: 'Lieu archivé',
     replace_title: 'Remplacer la collection',
     replace_msg:
       'Voulez-vous vraiment <strong>remplacer toute la collection</strong> par le contenu de ce fichier ? Les images et « apporté par » saisis manuellement seront conservés.',
     replace_btn: 'Remplacer',
 
-    saved_event: 'Soirée enregistrée',
+    saved_event: 'Évènement enregistré',
     saved_location: 'Lieu enregistré',
     saved_game: 'Jeu mis à jour',
     saved_settings: 'Réglages enregistrés',

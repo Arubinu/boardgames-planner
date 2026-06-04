@@ -53,7 +53,7 @@
       <div class="stat-grid">
         <div class="card card-pad stat">
           <div class="n" id="stat-events">–</div>
-          <div class="muted" data-i18n="admin.stat_events">soirées</div>
+          <div class="muted" data-i18n="admin.stat_events">évènements</div>
         </div>
         <div class="card card-pad stat">
           <div class="n" id="stat-games">–</div>
@@ -66,10 +66,10 @@
       </div>
 
       <div class="tabs">
-        <button class="tab active" data-tab="events" data-i18n="admin.tab_events">📅 Soirées</button>
+        <button class="tab active" data-tab="events" data-i18n="admin.tab_events">📅 Évènements</button>
         <button class="tab" data-tab="games" data-i18n="admin.tab_games">🎲 Jeux & import</button>
         <button class="tab" data-tab="locations" data-i18n="admin.tab_locations">📍 Lieux</button>
-        <button class="tab" data-tab="types" data-i18n="admin.tab_types">🏷️ Types de soirées</button>
+        <button class="tab" data-tab="types" data-i18n="admin.tab_types">🏷️ Types d'évènements</button>
         <button class="tab" data-tab="settings" data-i18n="admin.tab_settings">⚙️ Réglages</button>
       </div>
 
@@ -78,13 +78,13 @@
         <div
           style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem"
         >
-          <h2 class="font-display" style="margin: 0" data-i18n="admin.events_title">Soirées</h2>
-          <button class="btn btn-primary" id="new-event-btn" data-i18n="admin.new_event">+ Nouvelle soirée</button>
+          <h2 class="font-display" style="margin: 0" data-i18n="admin.events_title">Évènements</h2>
+          <button class="btn btn-primary" id="new-event-btn" data-i18n="admin.new_event">+ Nouvel évènement</button>
         </div>
         <h3 class="font-display" style="margin: 0 0 .6rem" data-i18n="admin.upcoming_events_title">À venir</h3>
         <div class="card card-pad"><div id="events-table"><div class="spinner"></div></div></div>
 
-        <h3 class="font-display" style="margin: 1.5rem 0 .6rem" data-i18n="admin.past_events_title">Soirées passées</h3>
+        <h3 class="font-display" style="margin: 1.5rem 0 .6rem" data-i18n="admin.past_events_title">Évènements passés</h3>
         <div class="card card-pad"><div id="past-events-table"></div></div>
       </section>
 
@@ -146,7 +146,7 @@
         <div
           style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem"
         >
-          <h2 class="font-display" style="margin: 0" data-i18n="admin.types_title">Types de soirées</h2>
+          <h2 class="font-display" style="margin: 0" data-i18n="admin.types_title">Types d'évènements</h2>
           <button class="btn btn-primary" id="new-type-btn" data-i18n="admin.new_type">+ Nouveau type</button>
         </div>
         <p class="help" data-i18n="admin.types_help">
@@ -202,7 +202,7 @@
     <div class="modal-backdrop" id="event-form-modal">
       <div class="modal">
         <div class="modal-head">
-          <h3 id="ef-title" data-i18n="admin.ef_new">Nouvelle soirée</h3>
+          <h3 id="ef-title" data-i18n="admin.ef_new">Nouvel évènement</h3>
           <button class="modal-close" data-close-modal="event-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
         </div>
         <input type="hidden" id="ef-id" />
@@ -229,7 +229,7 @@
 
         <div style="margin-top: 0.5rem">
           <span style="font-weight: 600; font-size: 0.85rem"
-            ><span data-i18n="admin.ef_games_label">Jeux disponibles ce soir-là —</span> <span class="gp-selected-count" id="gp-count">0</span>
+            ><span data-i18n="admin.ef_games_label">Jeux disponibles lors de cet évènement</span> — <span class="gp-selected-count" id="gp-count">0</span>
             <span data-i18n="admin.ef_selected">sélectionné(s)</span></span
           >
           <input type="search" id="gp-search" data-i18n-ph="admin.ef_filter_ph" placeholder="Filtrer les jeux…" style="margin: 0.5rem 0" />

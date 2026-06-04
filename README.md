@@ -1,8 +1,8 @@
-# 🎲 Boardgames Planner
+# 🎲 Boardgames Planner - Appointment Planner for Board Games
 
 *__Read this in:__ English | [Français](README.fr.md)*
 
-Website for the board game nights of MJC Estrablin: a calendar of upcoming dates, a browsable game library (MyLudo collection) and an admin area to manage nights, venues and games.
+Website for the board game events of MJC Estrablin: a calendar of upcoming dates, a browsable game library (MyLudo collection) and an admin area to manage events, venues and games.
 
 No external database: everything is stored in a single **SQLite** file.
 
@@ -16,16 +16,16 @@ The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (sty
 
 **For visitors** (single scrolling page):
 - Library preview + a dedicated `/jeux.html` page with search, filters (base games / expansions) and sorting by rating.
-- Practical info, venues, contact and **WhatsApp** sign-up links for the nights that offer it.
+- Practical info, venues, contact and **WhatsApp** sign-up links for the events that offer it.
 - **Membership section**: download the membership form (PDF) to fill in and pay on site.
-- **Add to calendar**: download the upcoming nights as an `.ics` file (also subscribable via `webcal://`), from the practical info section.
-- **Interactive calendar**: the legend is **dynamic** (only the night types present in the displayed month appear, with their color). Clicking a night card re-centers the calendar on its date and shows the venue on a **mini-map** (OpenStreetMap); the "See this night's games" button opens the details.
+- **Add to calendar**: download the upcoming events as an `.ics` file (also subscribable via `webcal://`), from the practical info section.
+- **Interactive calendar**: the legend is **dynamic** (only the events types present in the displayed month appear, with their color). Clicking a event card re-centers the calendar on its date and shows the venue on a **mini-map** (OpenStreetMap); the "See this event's games" button opens the details.
 - **Multilingual** (French / English): a switcher in the navigation bar, language detected then remembered. See the dedicated section below.
 - Light / dark theme.
 
 **For administration** (`/admin.html`, password-protected):
-- Create / edit / duplicate / delete nights (shown in **two tables**: upcoming and past), choose their venue and tick the games available that evening.
-- Manage **night types** from a dedicated tab: label, mention ("sign-up required"…), **color** and whether they offer WhatsApp sign-up. Types feed the night form, the calendar and the badges.
+- Create / edit / duplicate / delete events (shown in **two tables**: upcoming and past), choose their venue and tick the games available that evening.
+- Manage **event types** from a dedicated tab: label, mention ("sign-up required"…), **color** and whether they offer WhatsApp sign-up. Types feed the event form, the calendar and the badges.
 - Manage the list of venues (quick selection when creating a date). Each venue is **located by clicking on a Leaflet map** (OpenStreetMap): the coordinates are saved and the Google Maps link is derived automatically (no URL to paste). "Deleting" a venue **archives** it: it disappears from the public site but can be unarchived.
 - Import the collection from a **MyLudo** export (CSV or JSON). Each game's **creation date** is preserved across imports; the modification date is updated.
 - Add an image and a "brought by" note to each game (preserved across re-imports), or delete a game.
@@ -84,7 +84,7 @@ docker compose up -d --build
 The site is available on the port you mapped (e.g. **http://localhost:3001**).
 Administration is at **…/admin.html**.
 
-On the very first launch, the database is automatically initialized with the two official venues (Salle Festive and Local de la MJC, with their coordinates), a sample selection of **12 games** (including a few expansions) and two demo nights. The database is persisted in the `./data` folder (mounted as a volume), so it survives restarts and rebuilds.
+On the very first launch, the database is automatically initialized with the two official venues (Salle Festive and Local de la MJC, with their coordinates), a sample selection of **12 games** (including a few expansions) and two demo events. The database is persisted in the `./data` folder (mounted as a volume), so it survives restarts and rebuilds.
 
 To stop: `docker compose down` (data stays in `./data`).
 
@@ -192,17 +192,17 @@ boardgames-planner/
 │   ├── scripts/
 │   │   ├── shared/         # shared modules (api, dom, maps, thumbnails, modal)
 │   │   │   ├── i18n.js     # translation engine (dependency-free)
-│   │   │   ├── eventTypes.js  # runtime registry of night types (loaded from the API)
+│   │   │   ├── eventTypes.js  # runtime registry of event types (loaded from the API)
 │   │   │   └── locales/    # language dictionaries (fr.js, en.js)
 │   │   └── pages/          # per-page logic (home, games, admin)
 │   ├── styles/             # SCSS organized into partials (_variables, _base, …)
 ├── static/                 # copied to the site root (favicons, manifest, /assets/…)
 ├── server/
 │   ├── index.js            # Express server: REST API + page serving + helmet
-│   ├── db.js               # SQLite database + schema + migrations + night types + env config + password hashing
+│   ├── db.js               # SQLite database + schema + migrations + event types + env config + password hashing
 │   ├── password.js         # Argon2id hashing / verification
 │   ├── myludo.js           # MyLudo export parsing (CSV and JSON)
-│   └── seed.js             # initialization: 2 venues, 12-game selection, demo nights
+│   └── seed.js             # initialization: 2 venues, 12-game selection, demo events
 ├── public/                 # OUTPUT of the Vite build (generated — not versioned)
 ├── import-data/            # sample MyLudo collection (CSV + JSON)
 ├── data/                   # SQLite database (created at launch — not versioned)

@@ -1,8 +1,8 @@
-# 🎲 Boardgames Planner - Planificateur de Soirées Jeux de Société
+# 🎲 Boardgames Planner - Planificateur des rendez-vous Jeux de Société
 
 *__Read this in:__ [English](README.md) | Français*
 
-Site web des soirées jeux de société de la MJC Estrablin : calendrier des prochaines dates, ludothèque consultable (collection MyLudo) et espace d'administration pour gérer les soirées, les lieux et les jeux.
+Site web des évènements jeux de société de la MJC Estrablin : calendrier des prochaines dates, ludothèque consultable (collection MyLudo) et espace d'administration pour gérer les évènements, les lieux et les jeux.
 
 Aucune base de données externe : tout est stocké dans un simple fichier **SQLite**.
 
@@ -16,16 +16,16 @@ Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass
 
 **Côté visiteurs** (page unique avec défilement) :
 - Aperçu de la ludothèque + page dédiée `/jeux.html` avec recherche, filtres (jeux de base / extensions) et tri par note.
-- Infos pratiques, lieux, contact et liens d'inscription **WhatsApp** pour les soirées qui le proposent.
+- Infos pratiques, lieux, contact et liens d'inscription **WhatsApp** pour les évènements qui le proposent.
 - **Section adhésion** : téléchargement du bulletin d'adhésion (PDF) à remplir et à régler sur place.
-- **Ajout à l'agenda** : téléchargement des prochaines soirées au format `.ics` (abonnement possible via `webcal://`), depuis les infos pratiques.
-- **Calendrier interactif** : la légende est **dynamique** (seuls les types de soirées présents dans le mois affiché y figurent, avec leur couleur). Cliquer sur une carte de soirée recadre le calendrier sur la date et affiche le lieu sur une **mini-carte** (OpenStreetMap) ; le bouton « Voir les jeux de cette soirée » ouvre le détail.
+- **Ajout à l'agenda** : téléchargement des prochains évènements au format `.ics` (abonnement possible via `webcal://`), depuis les infos pratiques.
+- **Calendrier interactif** : la légende est **dynamique** (seuls les types d'évènements présents dans le mois affiché y figurent, avec leur couleur). Cliquer sur une carte d'évènement recadre le calendrier sur la date et affiche le lieu sur une **mini-carte** (OpenStreetMap) ; le bouton « Voir les jeux de cet évènement » ouvre le détail.
 - **Multilingue** (français / anglais) : sélecteur dans la barre de navigation, langue détectée puis mémorisée. Voir la section dédiée plus bas.
 - Thème clair / sombre.
 
 **Côté administration** (`/admin.html`, protégée par mot de passe) :
-- Créer / modifier / dupliquer / supprimer des soirées (présentées en **deux tableaux** : à venir et passées), choisir leur lieu et cocher les jeux disponibles ce soir-là.
-- Gérer les **types de soirées** depuis un onglet dédié : libellé, mention (« sur inscription »…), **couleur** et proposition d'inscription WhatsApp. Les types alimentent le formulaire de soirée, le calendrier et les badges.
+- Créer / modifier / dupliquer / supprimer des évènements (présentées en **deux tableaux** : à venir et passées), choisir leur lieu et cocher les jeux disponibles ce soir-là.
+- Gérer les **types d'évènement** depuis un onglet dédié : libellé, mention (« sur inscription »…), **couleur** et proposition d'inscription WhatsApp. Les types alimentent le formulaire d'évènement, le calendrier et les badges.
 - Gérer la liste des lieux (choix rapide à la création d'une date). Chaque lieu est **localisé d'un clic sur une carte Leaflet** (OpenStreetMap) : les coordonnées sont enregistrées et le lien Google Maps en est dérivé automatiquement (plus aucune URL à coller). « Supprimer » un lieu l'**archive** : il disparaît du site public mais reste désarchivable.
 - Importer la collection depuis un export **MyLudo** (CSV ou JSON). La **date de création** de chaque jeu est conservée d'un import à l'autre ; la date de modification est mise à jour.
 - Ajouter une image et un « apporté par » à chaque jeu (conservés lors des ré-imports), ou supprimer un jeu.
@@ -84,7 +84,7 @@ docker compose up -d --build
 Le site est disponible sur le port que tu as mappé (par ex. **http://localhost:3001**).
 L'administration est sur **…/admin.html**.
 
-Au tout premier lancement, la base est automatiquement initialisée avec les deux lieux officiels (Salle Festive et Local de la MJC, avec leurs coordonnées), une sélection d'exemple de **12 jeux** (dont quelques extensions) et deux soirées de démonstration. La base est persistée dans le dossier `./data` (monté en volume), elle survit donc aux redémarrages et reconstructions.
+Au tout premier lancement, la base est automatiquement initialisée avec les deux lieux officiels (Salle Festive et Local de la MJC, avec leurs coordonnées), une sélection d'exemple de **12 jeux** (dont quelques extensions) et deux évènements de démonstration. La base est persistée dans le dossier `./data` (monté en volume), elle survit donc aux redémarrages et reconstructions.
 
 Pour arrêter : `docker compose down` (les données restent dans `./data`).
 
@@ -194,17 +194,17 @@ boardgames-planner/
 │   ├── scripts/
 │   │   ├── shared/         # modules communs (api, dom, cartes, vignettes, modale)
 │   │   │   ├── i18n.js     # moteur de traduction (sans dépendance)
-│   │   │   ├── eventTypes.js  # registre runtime des types de soirées (chargé depuis l'API)
+│   │   │   ├── eventTypes.js  # registre runtime des types d'évènements (chargé depuis l'API)
 │   │   │   └── locales/    # dictionnaires de langue (fr.js, en.js)
 │   │   └── pages/          # logique propre à chaque page (home, games, admin)
 │   ├── styles/             # SCSS organisé en partials (_variables, _base, …)
 ├── static/                 # copiés à la racine du site (favicons, manifeste, /assets/…)
 ├── server/
 │   ├── index.js            # serveur Express : API REST + service des pages + helmet
-│   ├── db.js               # base SQLite + schéma + migrations + types de soirées + config d'environnement + hachage du mot de passe
+│   ├── db.js               # base SQLite + schéma + migrations + types d'évènements + config d'environnement + hachage du mot de passe
 │   ├── password.js         # hachage / vérification Argon2id
 │   ├── myludo.js           # analyse des exports MyLudo (CSV et JSON)
-│   └── seed.js             # initialisation : 2 lieux, sélection de 12 jeux, soirées démo
+│   └── seed.js             # initialisation : 2 lieux, sélection de 12 jeux, évènements démo
 ├── public/                 # SORTIE du build Vite (générée — non versionnée)
 ├── import-data/            # collection MyLudo d'exemple (CSV + JSON)
 ├── data/                   # base SQLite (créée au lancement — non versionnée)

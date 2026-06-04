@@ -4,7 +4,7 @@
 // basée sur les coordonnées du lieu, aperçu de la ludothèque, infos + FAQ.
 import '../../styles/home.scss';
 import { API } from '../shared/api.js';
-import { esc, isUpcoming, initTheme, toggleTheme, openModal, closeModal } from '../shared/dom.js';
+import { esc, isUpcoming, initTheme, toggleTheme, openModal, closeModal, toast } from '../shared/dom.js';
 import {
   initI18n,
   applyI18n,
@@ -539,6 +539,17 @@ function wireGlobalHandlers() {
     if (gameEl) return openGameModal(GAMES_BY_ID[Number(gameEl.dataset.game)]);
     const faq = e.target.closest('[data-faq]');
     if (faq) return toggleFaq(Number(faq.dataset.faq));
+    const copyIcs = e.target.closest('[data-copy-ics]');
+    if (copyIcs) {
+      const url = `${location.origin}/events.ics`;
+      const done = () => toast(t('infos.calendar_copied'));
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(url).then(done, () => window.prompt(url, url));
+      } else {
+        window.prompt(url, url); // repli navigateurs anciens
+      }
+      return;
+    }
   });
 
   document.getElementById('cal-prev')?.addEventListener('click', calPrev);

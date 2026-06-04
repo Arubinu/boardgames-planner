@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title data-i18n="meta.index_title">Soirées Jeux — Soirées Jeux MJC Estrablin</title>
+    <title data-i18n="meta.index_title">Évènements Jeux MJC Estrablin</title>
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -41,7 +41,7 @@
     <header class="hero" id="accueil">
       <div class="wrap">
         <p class="script" data-i18n="hero.script">On vous attend autour d'une table&nbsp;!</p>
-        <h1 data-i18n-html="hero.title_html">Les <span class="accent">soirées jeux</span><br />de la MJC Estrablin</h1>
+        <h1 data-i18n-html="hero.title_html">Les <span class="accent">rendez-vous jeux</span><br />de la MJC Estrablin</h1>
         <p data-i18n="hero.subtitle">
           Retrouvez les prochaines dates, découvrez la ludothèque disponible et venez partager un
           bon moment autour des jeux de société.
@@ -58,11 +58,11 @@
       <section class="section section--cream" id="dates">
         <div class="wrap">
           <div class="center">
-            <h2 class="section-title" data-i18n="dates.title">Prochaines soirées</h2>
+            <h2 class="section-title" data-i18n="dates.title">Prochaines dates</h2>
             <p class="section-sub">
-              <span data-i18n="dates.sub_1">Cliquez sur une soirée pour la situer dans le calendrier et voir le lieu.</span>
+              <span data-i18n="dates.sub_1">Cliquez sur une date pour situer l'évènement dans le calendrier et voir le lieu.</span>
               <br />
-              <span data-i18n-html="dates.sub_2_html">Le bouton <u>« Voir les jeux de cette soirée »</u> en ouvre le détail.</span>
+              <span data-i18n-html="dates.sub_2_html">Le bouton <u>« Voir les jeux de cet évènement »</u> en ouvre les détails.</span>
             </p>
           </div>
           <div id="events-container"><div class="spinner"></div></div>
@@ -82,7 +82,7 @@
             <div class="card map-panel" id="map-panel">
               <div id="map-embed" class="map-embed"></div>
               <div class="map-info card-pad" id="map-info">
-                <p class="muted" data-i18n="dates.map_default">Sélectionnez une date pour voir le lieu.</p>
+                <p class="muted" data-i18n="dates.map_default">Sélectionnez une date pour voir l'évènement.</p>
               </div>
             </div>
           </div>
@@ -115,12 +115,12 @@
         <div class="wrap">
           <div class="center">
             <h2 class="section-title" data-i18n="infos.title">Infos pratiques</h2>
-            <p class="section-sub" data-i18n="infos.sub">Deux formats de soirées, deux ambiances. À vous de choisir&nbsp;!</p>
+            <p class="section-sub" data-i18n="infos.sub">Deux formats d'évènements, deux ambiances. À vous de choisir !</p>
           </div>
           <div class="info-grid">
             <div class="card card-pad fade-in">
               <div class="info-icon info-icon--terracotta">📅</div>
-              <h3 class="font-display" data-i18n="infos.types_title">Deux types de soirées</h3>
+              <h3 class="font-display" data-i18n="infos.types_title">Deux types d'évènements</h3>
               <div data-i18n-html="infos.types_desc_html"></div>
             </div>
             <div class="card card-pad fade-in">
@@ -137,8 +137,12 @@
                 id="whatsapp-actions"
                 style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.6rem"
               ></div>
-              <p style="margin-top: 1rem" data-i18n="infos.calendar_desc">Ajoutez les prochaines soirées à votre agenda :</p>
-              <a class="btn btn-ghost btn-sm" href="/events.ics" data-i18n="infos.calendar_ics">📅 Ajouter au calendrier (.ics)</a>
+              <p style="margin-top: 1rem" data-i18n="infos.calendar_desc">Ajoutez les prochains évènements à votre agenda :</p>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.6rem">
+                <a class="btn btn-ghost btn-sm" href="/events.ics" download data-i18n="infos.calendar_ics">📅 Télécharger (.ics)</a>
+                <button class="btn btn-ghost btn-sm" type="button" data-copy-ics data-i18n="infos.calendar_copy">🔗 Copier le lien d'abonnement</button>
+              </div>
+              <p class="muted" style="font-size: 0.8rem; margin-top: 0.4rem" data-i18n="infos.calendar_hint">Collez ce lien dans « Ajouter par URL » de Google/Apple Agenda pour un abonnement mis à jour automatiquement.</p>
             </div>
           </div>
 
@@ -186,7 +190,7 @@
     <div class="modal-backdrop" id="event-modal">
       <div class="modal">
         <div class="modal-head">
-          <h3 id="em-title" data-i18n="modal.event_title">Soirée</h3>
+          <h3 id="em-title" data-i18n="modal.event_title">Évènement</h3>
           <button class="modal-close" data-close-modal="event-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
         </div>
         <div id="em-body"></div>
