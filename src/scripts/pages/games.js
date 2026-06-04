@@ -11,6 +11,7 @@ import {
   initI18n,
   applyI18n,
   mountLangSwitchers,
+  applySiteDefaultLang,
   onLangChange,
   t,
   tp,
@@ -162,6 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   wireHandlers();
   onLangChange(onLanguageChanged);
+  applySiteDefaultLang();
   try {
     ALL = await API.get('/api/games');
     renderIntro();

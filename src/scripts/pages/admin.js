@@ -20,6 +20,7 @@ import {
   t,
   tp,
   getLocale,
+  LANGUAGES,
 } from '../shared/i18n.js';
 import {
   setEventTypes,
@@ -716,16 +717,29 @@ async function loadSettings() {
     document.getElementById('set-site-name').value = s.site_name || '';
     document.getElementById('set-site-desc').value = s.site_description || '';
     document.getElementById('set-og-image').value = s.og_image || '';
+    populateDefaultLangSelect(s.default_lang);
     document.getElementById('set-wa-main').value = s.whatsapp_main || '';
     document.getElementById('set-wa-mjc').value = s.whatsapp_mjc || '';
     document.getElementById('set-myludo').value = s.myludo_profile || '';
   } catch {}
+}
+
+// Remplit la liste « Langue par défaut du site » : « Auto (navigateur) » puis
+// une entrée par langue disponible. Reconstruit à chaque ouverture des réglages.
+function populateDefaultLangSelect(selected) {
+  const sel = document.getElementById('set-default-lang');
+  if (!sel) return;
+  sel.innerHTML =
+    `<option value="">${esc(t('admin.lang_auto'))}</option>` +
+    LANGUAGES.map((l) => `<option value="${l.code}">${esc(l.label)}</option>`).join('');
+  sel.value = selected || '';
 }
 async function saveSettings() {
   const payload = {
     site_name: document.getElementById('set-site-name').value.trim(),
     site_description: document.getElementById('set-site-desc').value.trim(),
     og_image: document.getElementById('set-og-image').value.trim(),
+    default_lang: document.getElementById('set-default-lang').value,
     whatsapp_main: document.getElementById('set-wa-main').value.trim(),
     whatsapp_mjc: document.getElementById('set-wa-mjc').value.trim(),
     myludo_profile: document.getElementById('set-myludo').value.trim(),

@@ -163,6 +163,8 @@ ensureSetting.run(
   'Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.'
 );
 ensureSetting.run('og_image', '/assets/boardgames.webp');
+// Langue par défaut du site : '' = se fier au navigateur (auto).
+ensureSetting.run('default_lang', '');
 
 // --- Configuration par variables d'environnement --------------------------
 // Appliquée à CHAQUE démarrage du conteneur :
@@ -171,6 +173,7 @@ ensureSetting.run('og_image', '/assets/boardgames.webp');
 // Pour exposer une nouvelle option plus tard, il suffit d'ajouter une ligne
 // à ce tableau (la variable d'environnement -> la clé en base).
 const ENV_SETTINGS = [
+  { env: 'DEFAULT_LANG',   key: 'default_lang' },
   { env: 'WHATSAPP_MAIN',  key: 'whatsapp_main' },
   { env: 'WHATSAPP_MJC',   key: 'whatsapp_mjc' },
   { env: 'MYLUDO_PROFILE', key: 'myludo_profile' },

@@ -129,6 +129,7 @@ app.get('/api/public-settings', (req, res) => {
     whatsapp_main: setting('whatsapp_main'),
     whatsapp_mjc: setting('whatsapp_mjc'),
     myludo_profile: setting('myludo_profile'),
+    default_lang: setting('default_lang'),
   });
 });
 
@@ -516,10 +517,14 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     'site_name',
     'site_description',
     'og_image',
+    'default_lang',
     'admin_password',
   ];
   for (const [k, v] of Object.entries(req.body || {})) {
-    if (!allowed.includes(k) || v === undefined || v === '') continue;
+    if (!allowed.includes(k) || v === undefined) continue;
+    // On ignore les valeurs vides (préserve l'existant), SAUF default_lang où
+    // « vide » est un choix valide signifiant « Auto (navigateur) ».
+    if (v === '' && k !== 'default_lang') continue;
     if (k === 'admin_password') {
       // Ne jamais stocker le mot de passe en clair : on le hache (Argon2id).
       setSetting.run(k, await hashPassword(String(v)));

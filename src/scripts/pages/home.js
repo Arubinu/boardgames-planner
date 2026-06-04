@@ -9,6 +9,7 @@ import {
   initI18n,
   applyI18n,
   mountLangSwitchers,
+  applySiteDefaultLang,
   onLangChange,
   t,
   tp,
@@ -582,6 +583,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   wireGlobalHandlers();
   onLangChange(onLanguageChanged);
+  applySiteDefaultLang();
   try {
     const [settings, types] = await Promise.all([
       API.get('/api/public-settings'),

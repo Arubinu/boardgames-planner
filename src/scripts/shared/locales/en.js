@@ -266,6 +266,8 @@ export default {
     set_site_name: 'Site name (social sharing, .ics)',
     set_site_desc: 'Description (sharing preview)',
     set_og_image: 'Sharing image (URL or /assets/… path)',
+    set_default_lang: 'Site default language',
+    lang_auto: 'Auto (browser)',
     set_wa_main: '"Game Nights" WhatsApp group link',
     set_wa_mjc: '"MJC Estrablin" WhatsApp group link',
     set_myludo: 'MyLudo profile (public link)',

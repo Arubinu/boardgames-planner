@@ -46,6 +46,25 @@ export function initI18n() {
 export function getLang() {
   return current;
 }
+
+// Indique si le visiteur a explicitement choisi une langue (sélecteur).
+export function hasUserLang() {
+  return !!localStorage.getItem(STORAGE_KEY);
+}
+
+// Applique la langue par défaut du site (réglage admin) tant que le visiteur
+// n'a pas choisi lui-même. Valeur vide / 'auto' ⇒ on garde la détection
+// navigateur. À appeler tôt au démarrage de chaque page publique.
+export async function applySiteDefaultLang() {
+  if (hasUserLang()) return; // le choix explicite du visiteur prime
+  try {
+    const r = await fetch('/api/public-settings');
+    const def = (await r.json())?.default_lang;
+    if (def && DICTS[def]) setLang(def, { persist: false });
+  } catch {
+    /* hors-ligne / erreur réseau : on garde la langue détectée */
+  }
+}
 export function getLocale() {
   return LOCALES[current] || LOCALES[DEFAULT_LANG];
 }
@@ -56,10 +75,10 @@ export function onLangChange(cb) {
   return () => listeners.delete(cb);
 }
 
-export function setLang(lang) {
+export function setLang(lang, { persist = true } = {}) {
   if (!DICTS[lang] || lang === current) return;
   current = lang;
-  localStorage.setItem(STORAGE_KEY, lang);
+  if (persist) localStorage.setItem(STORAGE_KEY, lang);
   document.documentElement.lang = lang;
   applyI18n(document);
   syncLangSwitchers();

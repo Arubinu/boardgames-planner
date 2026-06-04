@@ -269,6 +269,8 @@ export default {
     set_site_name: 'Nom du site (partage social, .ics)',
     set_site_desc: 'Description (aperçu de partage)',
     set_og_image: 'Image de partage (URL ou chemin /assets/…)',
+    set_default_lang: 'Langue par défaut du site',
+    lang_auto: 'Auto (navigateur)',
     set_wa_main: 'Lien groupe WhatsApp « Soirées Jeux »',
     set_wa_mjc: 'Lien groupe WhatsApp « MJC Estrablin »',
     set_myludo: 'Profil MyLudo (lien public)',
