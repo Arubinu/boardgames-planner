@@ -18,7 +18,6 @@ export default {
 
   hero: {
     script: "We'll be waiting for you around a table!",
-    title_html: 'The <span class="accent">game meetups</span><br />of MJC Estrablin',
     subtitle:
       'Find the upcoming dates, discover the available game library, and come share a good time around board games.',
     cta_dates: 'See upcoming dates',
@@ -39,7 +38,7 @@ export default {
   },
 
   gamesPreview: {
-    title: 'Our game library',
+    title: 'Our games library',
     sub_default: 'A selection from the collection.',
     sub_count:
       '{count} games in the collection — here are a few of the top-rated gems.',
@@ -158,7 +157,6 @@ export default {
   },
 
   footer: {
-    tagline: 'Friendly evenings to share a passion for board games.',
     admin_link: 'Administration',
     back_home: 'Back to home',
   },
@@ -170,18 +168,18 @@ export default {
   },
 
   meta: {
-    index_title: 'MJC Estrablin Game Events',
-    games_title: 'Our games — MJC Estrablin Game Events',
-    admin_title: 'Administration — MJC Estrablin Game Events',
+    index_title: '',
+    games_title: 'Our games',
+    admin_title: 'Administration',
   },
 
   admin: {
     login_title: 'Administration area',
-    login_sub: 'Enter the password to manage the dates and the game library.',
+    login_sub: 'Enter the password to manage the dates and the games library.',
     login_pwd: 'Password',
     login_btn: 'Log in',
     login_bad: 'Incorrect password',
-    login_wait: 'Too many attempts. Try again in {n} s.',
+    login_wait: 'Too many attempts. Try again in {n}s.',
 
     stat_events: 'events',
     stat_games: 'games',
@@ -263,11 +261,16 @@ export default {
     settings_title: 'Settings',
     settings_help:
       'The PWA manifest (static/site.webmanifest) and the favicons are not configured here: edit the file in a text editor (app name, colors, icons) and replace the images to match your own branding.',
-    set_site_name: 'Site name (social sharing, .ics)',
+    set_site_name: 'Nom du site',
+    set_site_holder: 'Détenteur',
     set_site_desc: 'Description (sharing preview)',
     set_og_image: 'Sharing image (URL or /assets/… path)',
     set_default_lang: 'Site default language',
     lang_auto: 'Auto (browser)',
+    set_site_title: 'Home title (main page)',
+    set_site_title_help: 'Wrap the text to highlight in brackets, e.g. The [game nights] of MJC.',
+    set_footer_text: 'Footer text',
+    set_footer_text_help: 'Links allowed in [label](https://…) format.',
     set_wa_main: '"Game Nights" WhatsApp group link',
     set_wa_mjc: '"MJC Estrablin" WhatsApp group link',
     set_myludo: 'MyLudo profile (public link)',

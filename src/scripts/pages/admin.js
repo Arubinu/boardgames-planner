@@ -21,6 +21,7 @@ import {
   tp,
   getLocale,
   LANGUAGES,
+  setSiteIdentity,
 } from '../shared/i18n.js';
 import {
   setEventTypes,
@@ -715,9 +716,13 @@ async function loadSettings() {
   try {
     const s = await API.send('/api/admin/settings', 'GET', null, PWD);
     document.getElementById('set-site-name').value = s.site_name || '';
+    document.getElementById('set-site-holder').value = s.site_holder || '';
     document.getElementById('set-site-desc').value = s.site_description || '';
     document.getElementById('set-og-image').value = s.og_image || '';
     populateDefaultLangSelect(s.default_lang);
+    document.getElementById('set-site-title').value = s.site_title || '';
+    document.getElementById('set-footer-text').value = s.footer_text || '';
+    setSiteIdentity(s.site_name, s.site_holder);
     document.getElementById('set-wa-main').value = s.whatsapp_main || '';
     document.getElementById('set-wa-mjc').value = s.whatsapp_mjc || '';
     document.getElementById('set-myludo').value = s.myludo_profile || '';
@@ -737,9 +742,12 @@ function populateDefaultLangSelect(selected) {
 async function saveSettings() {
   const payload = {
     site_name: document.getElementById('set-site-name').value.trim(),
+    site_holder: document.getElementById('set-site-holder').value.trim(),
     site_description: document.getElementById('set-site-desc').value.trim(),
     og_image: document.getElementById('set-og-image').value.trim(),
     default_lang: document.getElementById('set-default-lang').value,
+    site_title: document.getElementById('set-site-title').value.trim(),
+    footer_text: document.getElementById('set-footer-text').value.trim(),
     whatsapp_main: document.getElementById('set-wa-main').value.trim(),
     whatsapp_mjc: document.getElementById('set-wa-mjc').value.trim(),
     myludo_profile: document.getElementById('set-myludo').value.trim(),

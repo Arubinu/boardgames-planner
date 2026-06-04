@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title data-i18n="meta.index_title">Évènements Jeux MJC Estrablin</title>
+    <title data-title-key="index_title">Évènements Jeux — MJC Estrablin</title>
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -23,7 +23,7 @@
       <div class="wrap nav-inner">
         <div class="brand">
           <span class="logo">🎲</span>
-          <span>Soirées Jeux<small>MJC Estrablin</small></span>
+          <span data-site-brand>Évènements Jeux<small>MJC Estrablin</small></span>
         </div>
         <button class="nav-burger" data-i18n-aria="nav.menu" aria-label="Menu">☰</button>
         <div class="nav-links" id="navlinks">
@@ -41,14 +41,14 @@
     <header class="hero" id="accueil">
       <div class="wrap">
         <p class="script" data-i18n="hero.script">On vous attend autour d'une table&nbsp;!</p>
-        <h1 data-i18n-html="hero.title_html">Les <span class="accent">rendez-vous jeux</span><br />de la MJC Estrablin</h1>
+        <h1 id="hero-title">Les <span class="accent">rendez-vous jeux</span> de la MJC Estrablin</h1>
         <p data-i18n="hero.subtitle">
           Retrouvez les prochaines dates, découvrez la ludothèque disponible et venez partager un
           bon moment autour des jeux de société.
         </p>
         <div class="hero-actions">
           <button class="btn btn-primary" data-goto="dates" data-i18n="hero.cta_dates">Voir les prochaines dates</button>
-          <a class="btn btn-ghost" href="/jeux.html" data-i18n="hero.cta_games">Parcourir les jeux</a>
+          <a class="btn btn-ghost" href="/games.html" data-i18n="hero.cta_games">Parcourir les jeux</a>
         </div>
       </div>
     </header>
@@ -105,7 +105,7 @@
           </div>
           <div class="preview-games" id="games-preview"><div class="spinner"></div></div>
           <div class="center" style="margin-top: 2.5rem">
-            <a class="btn btn-primary" href="/jeux.html" data-i18n="gamesPreview.see_all">Voir tous les jeux →</a>
+            <a class="btn btn-primary" href="/games.html" data-i18n="gamesPreview.see_all">Voir tous les jeux →</a>
           </div>
         </div>
       </section>
@@ -175,9 +175,9 @@
     <footer class="footer">
       <div class="wrap">
         <div class="brand" style="justify-content: center; color: #fff; margin-bottom: 1rem">
-          <span class="logo">🎲</span><span>Soirées Jeux — MJC Estrablin</span>
+          <span class="logo">🎲</span><span data-site-name>Évènements Jeux — MJC Estrablin</span>
         </div>
-        <p style="color: #aaa; max-width: 560px; margin: 0 auto 1rem" data-i18n="footer.tagline">
+        <p id="footer-tagline" style="color: #aaa; max-width: 560px; margin: 0 auto 1rem">
           Des soirées conviviales pour partager la passion des jeux de société.
         </p>
         <p style="color: #777; font-size: 0.85rem">

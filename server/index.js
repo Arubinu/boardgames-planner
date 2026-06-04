@@ -64,12 +64,19 @@ const setSetting = db.prepare(
 );
 function setting(key) { return getSetting.get(key)?.value ?? ''; }
 
+// Nom complet = « Nom — Détenteur » (recombinaison des deux réglages).
+function siteFullName() {
+  const n = setting('site_name');
+  const h = setting('site_holder');
+  return h ? (n ? `${n} — ${h}` : h) : n;
+}
+
 // --- Limitation des tentatives de connexion échouées ----------------------
 // LOGIN_RETRY_DELAY : délai minimal (en secondes) avant de pouvoir réessayer
 // APRÈS une tentative échouée, par adresse IP. 0 (défaut) = désactivé.
 const LOGIN_RETRY_DELAY = Math.max(
   0,
-  parseInt(process.env.LOGIN_RETRY_DELAY || '10', 10) || 0
+  parseInt(process.env.LOGIN_RETRY_DELAY || '0', 10) || 0
 );
 const lastFailedLogin = new Map(); // ip -> timestamp (ms) du dernier échec
 
@@ -130,6 +137,10 @@ app.get('/api/public-settings', (req, res) => {
     whatsapp_mjc: setting('whatsapp_mjc'),
     myludo_profile: setting('myludo_profile'),
     default_lang: setting('default_lang'),
+    site_name: setting('site_name'),
+    site_holder: setting('site_holder'),
+    site_title: setting('site_title'),
+    footer_text: setting('footer_text'),
   });
 });
 
@@ -197,7 +208,7 @@ app.get('/events.ics', (req, res) => {
     .all();
 
   const stamp = icsStamp(new Date());
-  const calName = setting('site_name') || 'Boardgames Planner';
+  const calName = siteFullName() || 'Boardgames Planner';
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -515,8 +526,11 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     'whatsapp_mjc',
     'myludo_profile',
     'site_name',
+    'site_holder',
     'site_description',
     'og_image',
+    'site_title',
+    'footer_text',
     'default_lang',
     'admin_password',
   ];
@@ -547,7 +561,7 @@ function htmlEscapeAttr(s) {
     .replace(/"/g, '&quot;');
 }
 function injectOpenGraph(html, req) {
-  const name = setting('site_name');
+  const name = siteFullName();
   const desc = setting('site_description');
   let image = setting('og_image');
   const host = req.get('x-forwarded-host') || req.get('host');
@@ -583,7 +597,7 @@ function servePublicHtml(file) {
   };
 }
 app.get(['/', '/index.html'], servePublicHtml('index.html'));
-app.get('/jeux.html', servePublicHtml('jeux.html'));
+app.get('/games.html', servePublicHtml('games.html'));
 
 app.use(
   express.static(PUBLIC_DIR, {

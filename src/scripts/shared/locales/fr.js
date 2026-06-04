@@ -21,7 +21,6 @@ export default {
 
   hero: {
     script: "On vous attend autour d'une table !",
-    title_html: 'Les <span class="accent">rendez-vous jeux</span><br />de la MJC Estrablin',
     subtitle:
       'Retrouvez les prochaines dates, découvrez la ludothèque disponible et venez partager un bon moment autour des jeux de société.',
     cta_dates: 'Voir les prochaines dates',
@@ -161,7 +160,6 @@ export default {
   },
 
   footer: {
-    tagline: 'Des soirées conviviales pour partager la passion des jeux de société.',
     admin_link: 'Administration',
     back_home: "Retour à l'accueil",
   },
@@ -173,9 +171,9 @@ export default {
   },
 
   meta: {
-    index_title: 'Évènements Jeux MJC Estrablin',
-    games_title: 'Nos jeux — Évènements Jeux MJC Estrablin',
-    admin_title: 'Administration — Évènements Jeux MJC Estrablin',
+    index_title: '',
+    games_title: 'Nos jeux',
+    admin_title: 'Administration',
   },
 
   admin: {
@@ -266,11 +264,16 @@ export default {
     settings_title: 'Réglages',
     settings_help:
       'Le manifeste PWA (static/site.webmanifest) et les favicons ne se règlent pas ici : éditez le fichier dans un éditeur de texte (nom de l\'application, couleurs, icônes) et remplacez les images pour correspondre à votre identité.',
-    set_site_name: 'Nom du site (partage social, .ics)',
+    set_site_name: 'Nom du site',
+    set_site_holder: 'Détenteur',
     set_site_desc: 'Description (aperçu de partage)',
     set_og_image: 'Image de partage (URL ou chemin /assets/…)',
     set_default_lang: 'Langue par défaut du site',
     lang_auto: 'Auto (navigateur)',
+    set_site_title: "Titre d'accueil (page principale)",
+    set_site_title_help: 'Entourez de crochets le texte à colorer, par ex. : Les [soirées jeux] de la MJC.',
+    set_footer_text: 'Texte du pied de page',
+    set_footer_text_help: 'Liens autorisés au format [libellé](https://…).',
     set_wa_main: 'Lien groupe WhatsApp « Soirées Jeux »',
     set_wa_mjc: 'Lien groupe WhatsApp « MJC Estrablin »',
     set_myludo: 'Profil MyLudo (lien public)',

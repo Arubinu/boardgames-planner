@@ -576,6 +576,18 @@ function onLanguageChanged() {
   renderInfos();
 }
 
+// [texte] => portion colorée ; tout le reste est échappé (anti-injection).
+function renderAccentTitle(str) {
+  return esc(str).replace(/\[([^\]]+)\]/g, '<span class="accent">$1</span>');
+}
+// [libellé](https://… | mailto:…) => lien ; tout le reste est échappé.
+function renderFooterText(str) {
+  return esc(str).replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g,
+    (_, label, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`
+  );
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   initI18n();
   applyI18n(document);
@@ -591,6 +603,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     ]);
     SETTINGS = settings;
     setEventTypes(types);
+    if (SETTINGS.site_title) {
+      document.getElementById('hero-title').innerHTML = renderAccentTitle(SETTINGS.site_title);
+    }
+    if (SETTINGS.footer_text) {
+      document.getElementById('footer-tagline').innerHTML = renderFooterText(SETTINGS.footer_text);
+    }
   } catch {}
   loadEvents();
   loadGamesPreview();

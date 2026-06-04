@@ -4,7 +4,7 @@
 // qui est servi tel quel par le serveur Express.
 //
 // La racine Vite est `src/pages` : les pages HTML sont donc écrites à plat à
-// la racine de `public/` (public/index.html, public/jeux.html, …). Les scripts
+// la racine de `public/` (public/index.html, public/games.html, …). Les scripts
 // sont référencés relativement ("../scripts/…") et les fichiers de `static/`
 // sont copiés tels quels (ex. /assets/boardgames.webp).
 import { defineConfig } from 'vite';
@@ -22,7 +22,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: resolve(root, 'index.html'),
-        jeux: resolve(root, 'jeux.html'),
+        games: resolve(root, 'games.html'),
         admin: resolve(root, 'admin.html'),
       },
     },

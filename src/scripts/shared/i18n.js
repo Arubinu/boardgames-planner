@@ -52,15 +52,65 @@ export function hasUserLang() {
   return !!localStorage.getItem(STORAGE_KEY);
 }
 
+// Nom du site (réglage admin) : sert de suffixe aux <title>. Le préfixe (nom de
+// page) vit dans les locales (meta.*_title) ; pour l'accueil il est vide → le
+// titre est uniquement le nom du site.
+// Identité du site (réglages admin) : Nom + Détenteur, recombinés en
+// « Nom — Détenteur » au besoin. Le détenteur sert de suffixe aux <title> des
+// pages internes ; l'accueil (préfixe vide) prend le nom complet.
+let siteName = '';
+let siteHolder = '';
+function siteFull() {
+  return siteHolder ? (siteName ? `${siteName} — ${siteHolder}` : siteHolder) : siteName;
+}
+export function setSiteIdentity(name, holder) {
+  siteName = name || '';
+  siteHolder = holder || '';
+  applyDocTitle();
+  applySiteBrand();
+}
+function applyDocTitle() {
+  if (!siteName && !siteHolder) return; // sinon on garde le <title> statique
+  const el = document.querySelector('title[data-title-key]');
+  if (!el) return;
+  const prefix = t('meta.' + el.dataset.titleKey) || '';
+  document.title = prefix ? `${prefix} — ${siteHolder || siteName}` : siteFull();
+}
+// Marque (logo) : [data-site-brand] = Nom + <small>Détenteur</small> ;
+// [data-site-name] = nom complet en texte simple.
+function applySiteBrand() {
+  if (!siteName && !siteHolder) return;
+  const e = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Titre propre à la page (meta), comme le <title> de l'onglet :
+  // Jeux/Admin affichent leur nom ; l'accueil (préfixe vide) montre le nom du site.
+  const tk = document.querySelector('title[data-title-key]')?.dataset.titleKey;
+  const prefix = tk ? t('meta.' + tk) : '';
+  const main = prefix || siteName;
+  const sub = prefix ? siteName : siteHolder;
+  const brandHtml = e(main) + (sub ? `<small>${e(sub)}</small>` : '');
+  document.querySelectorAll('[data-site-brand]').forEach((el) => {
+    el.innerHTML = brandHtml;
+  });
+  const full = siteFull();
+  document.querySelectorAll('[data-site-name]').forEach((el) => {
+    el.textContent = full;
+  });
+}
+
 // Applique la langue par défaut du site (réglage admin) tant que le visiteur
 // n'a pas choisi lui-même. Valeur vide / 'auto' ⇒ on garde la détection
 // navigateur. À appeler tôt au démarrage de chaque page publique.
+// Charge la configuration publique au démarrage : applique le nom du site (pour
+// le <title>) et, si le visiteur n'a pas déjà choisi, la langue par défaut.
 export async function applySiteDefaultLang() {
-  if (hasUserLang()) return; // le choix explicite du visiteur prime
   try {
     const r = await fetch('/api/public-settings');
-    const def = (await r.json())?.default_lang;
-    if (def && DICTS[def]) setLang(def, { persist: false });
+    const s = await r.json();
+    if (!s) return;
+    setSiteIdentity(s.site_name, s.site_holder);
+    if (!hasUserLang() && s.default_lang && DICTS[s.default_lang]) {
+      setLang(s.default_lang, { persist: false });
+    }
   } catch {
     /* hors-ligne / erreur réseau : on garde la langue détectée */
   }
@@ -153,6 +203,10 @@ export function applyI18n(root = document) {
   root.querySelectorAll('[data-year]').forEach((el) => {
     el.textContent = new Date().getFullYear();
   });
+  if (root === document) {
+    applyDocTitle();
+    applySiteBrand();
+  }
 }
 
 // --- Sélecteur de langue (dans la barre de navigation) -------------------

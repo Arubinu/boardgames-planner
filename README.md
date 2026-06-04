@@ -15,7 +15,7 @@ The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (sty
 ## What the site does
 
 **For visitors** (single scrolling page):
-- Library preview + a dedicated `/jeux.html` page with search, filters (base games / expansions) and sorting by rating.
+- Library preview + a dedicated `/games.html` page with search, filters (base games / expansions) and sorting by rating.
 - Practical info, venues, contact and **WhatsApp** sign-up links for the events that offer it.
 - **Membership section**: download the membership form (PDF) to fill in and pay on site.
 - **Add to calendar**: download the upcoming events as an `.ics` file (also subscribable via `webcal://`), from the practical info section.
@@ -188,7 +188,7 @@ comparison, and any password update is re-hashed before being saved.
 ```
 boardgames-planner/
 ├── src/                    # front-end sources (compiled by Vite)
-│   ├── pages/              # index.html, jeux.html, admin.html (no <style>)
+│   ├── pages/              # index.html, games.html, admin.html (no <style>)
 │   ├── scripts/
 │   │   ├── shared/         # shared modules (api, dom, maps, thumbnails, modal)
 │   │   │   ├── i18n.js     # translation engine (dependency-free)

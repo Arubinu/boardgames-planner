@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title data-i18n="meta.admin_title">Administration — Soirées Jeux MJC Estrablin</title>
+    <title data-title-key="admin_title">Administration — MJC Estrablin</title>
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -21,7 +21,8 @@
     <nav class="nav">
       <div class="wrap nav-inner">
         <div class="brand">
-          <span class="logo">🎲</span><span>Administration<small>Soirées Jeux</small></span>
+          <span class="logo">🎲</span>
+          <span data-site-brand>Administration<small>Évènements Jeux</small></span>
         </div>
         <button class="nav-burger" data-i18n-aria="nav.menu" aria-label="Menu">☰</button>
         <div class="nav-links" id="navlinks">
@@ -166,10 +167,16 @@
           Le manifeste PWA (<code>static/site.webmanifest</code>) et les favicons ne se règlent pas ici : éditez le fichier dans un éditeur de texte (nom de l'application, couleurs, icônes) et remplacez les images pour correspondre à votre identité.
         </p>
         <div class="card card-pad">
-          <label class="field"
-            ><span data-i18n="admin.set_site_name">Nom du site (partage social, .ics)</span>
-            <input id="set-site-name" placeholder="Soirées Jeux — MJC Estrablin"
-          /></label>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap">
+            <label class="field" style="flex: 1; min-width: 12rem"
+              ><span data-i18n="admin.set_site_name">Nom du site</span>
+              <input id="set-site-name" placeholder="Soirées Jeux"
+            /></label>
+            <label class="field" style="flex: 1; min-width: 12rem"
+              ><span data-i18n="admin.set_site_holder">Détenteur</span>
+              <input id="set-site-holder" placeholder="MJC Estrablin"
+            /></label>
+          </div>
           <label class="field"
             ><span data-i18n="admin.set_site_desc">Description (aperçu de partage)</span>
             <input id="set-site-desc" placeholder="Calendrier des soirées jeux de société…"
@@ -182,6 +189,16 @@
             ><span data-i18n="admin.set_default_lang">Langue par défaut du site</span>
             <select id="set-default-lang"></select>
           </label>
+          <label class="field"
+            ><span data-i18n="admin.set_site_title">Titre d'accueil (page principale)</span>
+            <input id="set-site-title" placeholder="Les [soirées jeux] de la MJC Estrablin"
+          /></label>
+          <p class="help" data-i18n="admin.set_site_title_help">Entourez de crochets le texte à colorer : <code>Les [soirées jeux] de la MJC</code>.</p>
+          <label class="field"
+            ><span data-i18n="admin.set_footer_text">Texte du pied de page</span>
+            <textarea id="set-footer-text" rows="2"></textarea>
+          </label>
+          <p class="help" data-i18n="admin.set_footer_text_help">Liens autorisés au format <code>[libellé](https://…)</code>.</p>
           <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0" />
           <label class="field"
             ><span data-i18n="admin.set_wa_main">Lien groupe WhatsApp « Soirées Jeux »</span>

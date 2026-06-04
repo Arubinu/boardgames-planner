@@ -15,7 +15,7 @@ Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass
 ## Ce que fait le site
 
 **Côté visiteurs** (page unique avec défilement) :
-- Aperçu de la ludothèque + page dédiée `/jeux.html` avec recherche, filtres (jeux de base / extensions) et tri par note.
+- Aperçu de la ludothèque + page dédiée `/games.html` avec recherche, filtres (jeux de base / extensions) et tri par note.
 - Infos pratiques, lieux, contact et liens d'inscription **WhatsApp** pour les évènements qui le proposent.
 - **Section adhésion** : téléchargement du bulletin d'adhésion (PDF) à remplir et à régler sur place.
 - **Ajout à l'agenda** : téléchargement des prochains évènements au format `.ics` (abonnement possible via `webcal://`), depuis les infos pratiques.
@@ -190,7 +190,7 @@ enregistrement.
 ```
 boardgames-planner/
 ├── src/                    # sources front-end (compilées par Vite)
-│   ├── pages/              # index.html, jeux.html, admin.html (sans <style>)
+│   ├── pages/              # index.html, games.html, admin.html (sans <style>)
 │   ├── scripts/
 │   │   ├── shared/         # modules communs (api, dom, cartes, vignettes, modale)
 │   │   │   ├── i18n.js     # moteur de traduction (sans dépendance)

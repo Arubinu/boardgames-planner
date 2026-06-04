@@ -156,13 +156,22 @@ ensureSetting.run('admin_password', 'admin');
 ensureSetting.run('whatsapp_main', '');
 ensureSetting.run('whatsapp_mjc', '');
 ensureSetting.run('myludo_profile', 'https://www.myludo.fr/#!/profil/christophe-t-81487');
-// Identité du site (réutilisée par les balises OpenGraph et le flux .ics).
-ensureSetting.run('site_name', 'Soirées Jeux — MJC Estrablin');
+// Identité du site (réutilisée par la marque, les balises OpenGraph, le .ics).
+// Nom + Détenteur séparés ; recombinés en « Nom — Détenteur » au besoin.
+ensureSetting.run('site_name', 'Soirées Jeux');
+ensureSetting.run('site_holder', 'MJC Estrablin');
 ensureSetting.run(
   'site_description',
   'Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.'
 );
 ensureSetting.run('og_image', '/assets/boardgames.webp');
+// Titre d'accueil (hero) : [texte] = portion colorée (class "accent").
+ensureSetting.run('site_title', 'Les [soirées jeux] de la MJC Estrablin');
+// Texte du pied de page : [libellé](https://…) = lien.
+ensureSetting.run(
+  'footer_text',
+  'Des soirées conviviales pour partager la passion des jeux de société.'
+);
 // Langue par défaut du site : '' = se fier au navigateur (auto).
 ensureSetting.run('default_lang', '');
 
@@ -174,6 +183,9 @@ ensureSetting.run('default_lang', '');
 // à ce tableau (la variable d'environnement -> la clé en base).
 const ENV_SETTINGS = [
   { env: 'DEFAULT_LANG',   key: 'default_lang' },
+  { env: 'SITE_NAME',      key: 'site_name' },
+  { env: 'SITE_TITLE',     key: 'site_title' },
+  { env: 'FOOTER_TEXT',    key: 'footer_text' },
   { env: 'WHATSAPP_MAIN',  key: 'whatsapp_main' },
   { env: 'WHATSAPP_MJC',   key: 'whatsapp_mjc' },
   { env: 'MYLUDO_PROFILE', key: 'myludo_profile' },
@@ -190,6 +202,17 @@ for (const { env, key } of ENV_SETTINGS) {
     setSetting.run(key, value);
     console.log(`[db] réglage « ${key} » défini depuis ${env}`);
   }
+}
+
+// Migration : ancien format où « Nom du site » contenait « Nom — Détenteur ».
+// On le scinde une seule fois en deux réglages distincts (l'opération est
+// idempotente : après coup, site_name ne contient plus de « — »).
+const legacyName = db.prepare('SELECT value FROM settings WHERE key = ?').get('site_name')?.value || '';
+if (legacyName.includes(' — ')) {
+  const [nm, ...rest] = legacyName.split(' — ');
+  setSetting.run('site_name', nm.trim());
+  setSetting.run('site_holder', rest.join(' — ').trim());
+  console.log('[db] migration : « site_name » scindé en site_name + site_holder');
 }
 
 // --- Sécurité : mot de passe administrateur (Argon2id) --------------------
