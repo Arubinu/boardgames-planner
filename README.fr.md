@@ -18,8 +18,8 @@ Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass
 - Aperçu de la ludothèque + page dédiée `/games.html` avec recherche, filtres (jeux de base / extensions) et tri par note.
 - Infos pratiques, lieux, contact et liens d'inscription **WhatsApp** pour les évènements qui le proposent.
 - **Section adhésion** : téléchargement du bulletin d'adhésion (PDF) à remplir et à régler sur place.
-- **Ajout à l'agenda** : téléchargement des prochains évènements au format `.ics` (abonnement possible via `webcal://`), depuis les infos pratiques.
-- **Calendrier interactif** : la légende est **dynamique** (seuls les types d'évènements présents dans le mois affiché y figurent, avec leur couleur). Cliquer sur une carte d'évènement recadre le calendrier sur la date et affiche le lieu sur une **mini-carte** (OpenStreetMap) ; le bouton « Voir les jeux de cet évènement » ouvre le détail.
+- **Ajout à l'agenda** : depuis les infos pratiques, télécharger les prochains évènements au format `.ics`, ou copier le lien du flux pour un abonnement mis à jour automatiquement (« ajouter par URL » de Google/Apple/Outlook).
+- **Calendrier interactif** : la légende est **dynamique** (seuls les types d'évènements présents dans le mois affiché y figurent, avec leur couleur). Cliquer sur une carte d'évènement recadre le calendrier sur la date et affiche le lieu sur une **mini-carte** (OpenStreetMap) ; le bouton « Voir les jeux de cet évènement » ouvre le détail. Un évènement passée sans jeux renseignés affiche un message au passé plutôt que « à venir ».
 - **Multilingue** (français / anglais) : sélecteur dans la barre de navigation, langue détectée puis mémorisée. Voir la section dédiée plus bas.
 - Thème clair / sombre.
 
@@ -29,7 +29,8 @@ Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass
 - Gérer la liste des lieux (choix rapide à la création d'une date). Chaque lieu est **localisé d'un clic sur une carte Leaflet** (OpenStreetMap) : les coordonnées sont enregistrées et le lien Google Maps en est dérivé automatiquement (plus aucune URL à coller). « Supprimer » un lieu l'**archive** : il disparaît du site public mais reste désarchivable.
 - Importer la collection depuis un export **MyLudo** (CSV ou JSON). La **date de création** de chaque jeu est conservée d'un import à l'autre ; la date de modification est mise à jour.
 - Ajouter une image et un « apporté par » à chaque jeu (conservés lors des ré-imports), ou supprimer un jeu.
-- Régler l'**identité du site** (nom, description et image de partage, utilisés pour les aperçus de liens via OpenGraph et pour le nom du flux d'agenda), les liens WhatsApp, le profil MyLudo et le mot de passe.
+- Régler l'**identité du site** : le **nom** et le **détenteur** (ex. « Soirées Jeux » / « MJC Estrablin »), utilisés pour la marque de la barre de navigation, les titres de page et les aperçus de partage ; ainsi que la description et l'image de partage (OpenGraph), le **titre d'accueil** (avec parties `[colorées]`) et le **texte du pied de page** (avec liens `[libellé](url)`).
+- Choisir la **langue par défaut du site** (ou la laisser sur *auto / navigateur*), les liens WhatsApp, le profil MyLudo et le mot de passe.
 
 ---
 
@@ -96,6 +97,7 @@ Deux familles de variables, toutes prises en compte **à chaque démarrage** du 
 
 | Variable | Rôle | Défaut |
 | --- | --- | --- |
+| `TRUST_PROXY` | Nombre de proxies de confiance pour les en-têtes `X-Forwarded-*` (`1` par défaut, `false` pour désactiver, ou un CIDR). |
 | `LOGIN_RETRY_DELAY` | Délai minimal (en secondes) avant de pouvoir réessayer après une connexion admin **échouée**, par adresse IP. `0` = désactivé. | `10` |
 | `PORT` | Port d'écoute interne du serveur (dans Docker, on mappe plutôt le port côté hôte). | `3000` |
 | `DATA_DIR` | Dossier de la base SQLite. | `./data` |
@@ -105,6 +107,10 @@ Deux familles de variables, toutes prises en compte **à chaque démarrage** du 
 | Variable | Rôle |
 | --- | --- |
 | `ADMIN_PASSWORD` | (Re)définit le mot de passe administrateur, haché en Argon2id. |
+| `DEFAULT_LANG` | Langue par défaut du site (`fr`, `en`, … ; vide = détection navigateur). |
+| `SITE_NAME` | Nom du site (marque de navigation, titres de page, aperçus de partage). |
+| `SITE_TITLE` | Titre d'accueil (hero) ; `[texte]` pour les portions colorées. |
+| `FOOTER_TEXT` | Texte du pied de page ; liens au format `[libellé](url)`. |
 | `MYLUDO_PROFILE` | Profil MyLudo public. |
 | `WHATSAPP_MAIN` / `WHATSAPP_MJC` | Liens d'inscription WhatsApp. |
 
@@ -230,10 +236,13 @@ Le site est disponible en **français** (langue par défaut) et en **anglais**, 
 aucune dépendance externe. Un petit moteur maison (`src/scripts/shared/i18n.js`)
 gère :
 - la **détection** de la langue au premier chargement (préférence enregistrée,
-  sinon langue du navigateur, sinon français) et sa **mémorisation** dans le
+  sinon la **langue par défaut du site** définie dans l'administration, sinon la
+  langue du navigateur, sinon français) et sa **mémorisation** dans le
   `localStorage` du visiteur ;
 - la mise à jour de l'attribut `<html lang>` et le formatage **localisé des dates**
   (`fr-FR` / `en-GB`) ;
+- un **début de semaine par langue** pour le calendrier (`weekStart` : 1 = lundi
+  pour le français, 0 = dimanche pour l'anglais) ;
 - les textes statiques via des attributs déclaratifs dans le HTML
   (`data-i18n`, `data-i18n-html`, `data-i18n-ph`, `data-i18n-aria`) ;
 - les textes générés en JavaScript (cartes, tableaux, messages) via les fonctions
@@ -244,7 +253,9 @@ gère :
 ### Ajouter une langue
 
 1. Créez `src/scripts/shared/locales/xx.js` en copiant `fr.js` et traduisez les
-   valeurs (en conservant les clés et les variantes `_one` / `_other`).
+   valeurs (en conservant les clés et les variantes `_one` / `_other` ; gardez
+   `cal.dow` dans l'ordre dimanche→samedi et réglez `cal.weekStart`, 0 = dimanche
+   ou 1 = lundi).
 2. Dans `i18n.js`, importez le dictionnaire, ajoutez-le à `DICTS`, à `LANGUAGES`
    (code + libellé court affiché) et à `LOCALES` (code de formatage des dates).
 

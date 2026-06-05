@@ -18,8 +18,8 @@ The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (sty
 - Library preview + a dedicated `/games.html` page with search, filters (base games / expansions) and sorting by rating.
 - Practical info, venues, contact and **WhatsApp** sign-up links for the events that offer it.
 - **Membership section**: download the membership form (PDF) to fill in and pay on site.
-- **Add to calendar**: download the upcoming events as an `.ics` file (also subscribable via `webcal://`), from the practical info section.
-- **Interactive calendar**: the legend is **dynamic** (only the events types present in the displayed month appear, with their color). Clicking a event card re-centers the calendar on its date and shows the venue on a **mini-map** (OpenStreetMap); the "See this event's games" button opens the details.
+- **Add to calendar**: from the practical info section, download the upcoming events as an `.ics` file, or copy the feed link for an auto-updating subscription (Google/Apple/Outlook "add by URL").
+- **Interactive calendar**: the legend is **dynamic** (only the events types present in the displayed month appear, with their color). Clicking a event card re-centers the calendar on its date and shows the venue on a **mini-map** (OpenStreetMap); the "See this event's games" button opens the details. A past event with no recorded games shows a past-tense note rather than the "coming soon" one.
 - **Multilingual** (French / English): a switcher in the navigation bar, language detected then remembered. See the dedicated section below.
 - Light / dark theme.
 
@@ -29,7 +29,8 @@ The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (sty
 - Manage the list of venues (quick selection when creating a date). Each venue is **located by clicking on a Leaflet map** (OpenStreetMap): the coordinates are saved and the Google Maps link is derived automatically (no URL to paste). "Deleting" a venue **archives** it: it disappears from the public site but can be unarchived.
 - Import the collection from a **MyLudo** export (CSV or JSON). Each game's **creation date** is preserved across imports; the modification date is updated.
 - Add an image and a "brought by" note to each game (preserved across re-imports), or delete a game.
-- Configure the **site identity** (name, description and share image, used for social link previews via OpenGraph and for the calendar feed name), the WhatsApp links, the MyLudo profile and the password.
+- Configure the **site identity**: the **name** and **holder** (e.g. "Game Nights" / "MJC Estrablin"), used to build the nav brand, the page titles and the share previews; plus the description and share image (OpenGraph), the **home title** (with `[highlighted]` parts) and the **footer text** (with `[label](url)` links).
+- Set the **default site language** (or leave it on *auto / browser*), the WhatsApp links, the MyLudo profile and the password.
 
 ---
 
@@ -96,6 +97,7 @@ Two families of variables, all taken into account **on every startup** of the co
 
 | Variable | Role | Default |
 | --- | --- | --- |
+| `TRUST_PROXY` | Number of trusted proxies for the `X-Forwarded-*` headers (`1` by default, `false` to disable, or a CIDR). |
 | `LOGIN_RETRY_DELAY` | Minimum delay (in seconds) before retrying after a **failed** admin login, per IP address. `0` = disabled. | `10` |
 | `PORT` | Server's internal listening port (in Docker, you usually map the host port instead). | `3000` |
 | `DATA_DIR` | SQLite database folder. | `./data` |
@@ -105,6 +107,10 @@ Two families of variables, all taken into account **on every startup** of the co
 | Variable | Role |
 | --- | --- |
 | `ADMIN_PASSWORD` | (Re)defines the admin password, hashed with Argon2id. |
+| `DEFAULT_LANG` | Site default language (`fr`, `en`, …; empty = browser detection). |
+| `SITE_NAME` | Site name (nav brand, page titles, share previews). |
+| `SITE_TITLE` | Home (hero) title; `[text]` for highlighted parts. |
+| `FOOTER_TEXT` | Footer text; links in `[label](url)` format. |
 | `MYLUDO_PROFILE` | Public MyLudo profile. |
 | `WHATSAPP_MAIN` / `WHATSAPP_MJC` | WhatsApp sign-up links. |
 
@@ -228,10 +234,12 @@ The site is available in **French** (default language) and **English**, with no
 external dependency. A small in-house engine (`src/scripts/shared/i18n.js`)
 handles:
 - **detection** of the language on first load (saved preference, otherwise the
-  browser language, otherwise French) and its **persistence** in the visitor's
-  `localStorage`;
+  **site default language** set in the admin, otherwise the browser language,
+  otherwise French) and its **persistence** in the visitor's `localStorage`;
 - updating the `<html lang>` attribute and **localized date formatting**
   (`fr-FR` / `en-GB`);
+- a **per-language week start** for the calendar (`weekStart`: 1 = Monday for
+  French, 0 = Sunday for English);
 - static texts via declarative attributes in the HTML
   (`data-i18n`, `data-i18n-html`, `data-i18n-ph`, `data-i18n-aria`);
 - texts generated in JavaScript (cards, tables, messages) via the functions
@@ -242,7 +250,8 @@ handles:
 ### Adding a language
 
 1. Create `src/scripts/shared/locales/xx.js` by copying `fr.js` and translate the
-   values (keeping the keys and the `_one` / `_other` variants).
+   values (keeping the keys and the `_one` / `_other` variants; keep `cal.dow` in
+   Sunday→Saturday order and set `cal.weekStart`, 0 = Sunday or 1 = Monday).
 2. In `i18n.js`, import the dictionary and add it to `DICTS`, to `LANGUAGES`
    (code + short displayed label) and to `LOCALES` (date formatting code).
 
