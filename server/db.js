@@ -109,6 +109,41 @@ db.exec(`
     key   TEXT PRIMARY KEY,
     value TEXT DEFAULT ''
   );
+  -- Blocs « Infos pratiques » de l'accueil, gérés depuis l'administration
+  -- (contenu mono-langue, sans traduction). kind :
+  --   'text'      → bloc libre (émoji + titre + texte) ;
+  --   'locations' → bloc spécial : la liste des lieux est ajoutée
+  --                 automatiquement sous le texte (non supprimable) ;
+  --   'whatsapp'  → bloc spécial : les boutons WhatsApp sont ajoutés
+  --                 automatiquement sous le texte (non supprimable).
+  CREATE TABLE IF NOT EXISTS info_blocks (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    kind       TEXT NOT NULL DEFAULT 'text',
+    icon       TEXT NOT NULL DEFAULT '📌',
+    title      TEXT NOT NULL DEFAULT '',
+    body       TEXT NOT NULL DEFAULT '',
+    sort_order INTEGER DEFAULT 0
+  );
+  -- Questions fréquentes, gérées depuis l'administration (mono-langue, liens
+  -- hypertexte autorisés dans la réponse).
+  CREATE TABLE IF NOT EXISTS faq (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    question   TEXT NOT NULL DEFAULT '',
+    answer     TEXT NOT NULL DEFAULT '',
+    sort_order INTEGER DEFAULT 0
+  );
+  -- Document(s) d'adhésion proposés au téléchargement (« Adhérer à la MJC »).
+  -- Les fichiers vivent sur disque (DATA_DIR/uploads/membership) ; seule la
+  -- métadonnée est stockée ici.
+  CREATE TABLE IF NOT EXISTS membership_files (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename      TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    mime          TEXT DEFAULT '',
+    size          INTEGER DEFAULT 0,
+    sort_order    INTEGER DEFAULT 0,
+    created_at    TEXT DEFAULT (datetime('now'))
+  );
 `);
 
 // --- Migrations légères (idempotentes) ------------------------------------
@@ -165,6 +200,10 @@ ensureSetting.run(
   'Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.'
 );
 ensureSetting.run('og_image', '/assets/boardgames.webp');
+// Bloc d'ajout des évènements à l'agenda (.ics) : activé par défaut, nom du
+// fichier proposé au téléchargement personnalisable.
+ensureSetting.run('calendar_enabled', '1');
+ensureSetting.run('ics_filename', 'soirees-jeux.ics');
 // Titre d'accueil (hero) : [texte] = portion colorée (class "accent").
 ensureSetting.run('site_title', 'Les [soirées jeux] de la MJC Estrablin');
 // Texte du pied de page : [libellé](https://…) = lien.
@@ -253,6 +292,69 @@ if (legacyName.includes(' — ')) {
     ins.run('grande', 'Grande soirée', 'sans inscription', '#c4704a', 0, 1);
     ins.run('petite', 'Petite soirée', 'sur inscription', '#8b9a6b', 1, 2);
     console.log('[db] types de soirées initialisés (Grande, Petite)');
+  }
+}
+
+// --- Blocs « Infos pratiques » : amorçage au premier lancement ------------
+// Reprend les trois cadres historiques. « Nos lieux » et « Contact » sont des
+// blocs spéciaux (kind locations/whatsapp) : leur contenu dynamique est ajouté
+// automatiquement sur l'accueil et ils ne peuvent pas être supprimés.
+{
+  const count = db.prepare('SELECT COUNT(*) AS c FROM info_blocks').get().c;
+  if (count === 0) {
+    const ins = db.prepare(
+      `INSERT INTO info_blocks (kind, icon, title, body, sort_order) VALUES (?,?,?,?,?)`
+    );
+    ins.run(
+      'text',
+      '📅',
+      "Deux types d'évènements",
+      '**Grandes soirées** — début du mois, 19h-23h, salle festive, sans inscription, plat + boisson à apporter.\n\n**Petites soirées** — mi-mois, 20h-23h, local de la MJC, sur inscription (14 max), nourriture facultative.',
+      1
+    );
+    ins.run('locations', '📍', 'Nos lieux', '', 2);
+    ins.run(
+      'whatsapp',
+      '💬',
+      'Contact & inscription',
+      'Email : [mjc.estrablin38@gmail.com](mailto:mjc.estrablin38@gmail.com)\n\nLes inscriptions aux petites soirées se font via le groupe WhatsApp.',
+      3
+    );
+    console.log('[db] blocs « Infos pratiques » initialisés');
+  }
+}
+
+// --- Questions fréquentes : amorçage au premier lancement -----------------
+{
+  const count = db.prepare('SELECT COUNT(*) AS c FROM faq').get().c;
+  if (count === 0) {
+    const ins = db.prepare(
+      `INSERT INTO faq (question, answer, sort_order) VALUES (?,?,?)`
+    );
+    const seed = [
+      [
+        'Quelle est la différence entre les deux types de soirées ?',
+        "Les grandes soirées (début du mois) sont ouvertes à tous sans inscription, en salle festive, avec un plat et une boisson à apporter. Les petites soirées (mi-mois) sont pour adultes et sur inscription (14 places), au local de la MJC, nourriture facultative.",
+      ],
+      [
+        "Comment s'inscrire aux petites soirées ?",
+        "Via le groupe WhatsApp « Soirées Jeux » ou par email à [mjc.estrablin38@gmail.com](mailto:mjc.estrablin38@gmail.com). Les places sont limitées à 14 personnes, pensez à vous inscrire à l'avance.",
+      ],
+      [
+        'Puis-je venir sans inscription ?',
+        "Oui pour les grandes soirées du début du mois. Pour les petites soirées, l'inscription est obligatoire (places limitées).",
+      ],
+      [
+        'Y a-t-il des jeux pour les débutants ?',
+        'Bien sûr ! La ludothèque couvre tous les niveaux, et les petites soirées sont idéales pour apprendre tranquillement.',
+      ],
+      [
+        'Puis-je venir seul(e) ?',
+        "Absolument, c'est l'occasion parfaite de rencontrer d'autres passionnés. On forme les tables selon les envies de chacun.",
+      ],
+    ];
+    seed.forEach(([q, a], i) => ins.run(q, a, i + 1));
+    console.log('[db] questions fréquentes initialisées');
   }
 }
 

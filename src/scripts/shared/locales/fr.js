@@ -53,20 +53,13 @@ export default {
   infos: {
     title: 'Infos pratiques',
     sub: 'Deux formats d\'évènements, deux ambiances. À vous de choisir !',
-    types_title: 'Deux types d\'évènements',
-    types_desc_html:
-      '<p><strong>Grandes soirées</strong> — début du mois, 19h-23h, salle festive, sans inscription, plat + boisson à apporter.</p><p><strong>Petites soirées</strong> — mi-mois, 20h-23h, local de la MJC, sur inscription (14 max), nourriture facultative.</p>',
-    locations_title: 'Nos lieux',
     locations_soon: 'À venir.',
     location_map_link: 'Voir sur la carte ↗',
-    contact_title: 'Contact & inscription',
-    email_html:
-      'Email : <a href="mailto:mjc.estrablin38@gmail.com">mjc.estrablin38@gmail.com</a>',
-    contact_wa: 'Les inscriptions aux petites soirées se font via le groupe WhatsApp.',
     wa_main: 'Groupe « Soirées Jeux »',
     wa_mjc: 'Groupe MJC Estrablin',
     wa_todo: 'Liens WhatsApp à configurer en administration.',
     calendar_desc: 'Ajoutez les prochains évènements à votre agenda :',
+    calendar_title: 'Ajouter à votre agenda',
     calendar_ics: '📅 Télécharger (.ics)',
     calendar_copy: '🔗 Copier le lien d\'abonnement',
     calendar_hint: 'Collez ce lien dans « Ajouter par URL » de Google/Apple Agenda pour un abonnement mis à jour automatiquement.',
@@ -74,34 +67,11 @@ export default {
     faq_title: 'Questions fréquentes',
   },
 
-  faq: [
-    {
-      q: 'Quelle est la différence entre les deux types de soirées ?',
-      a: "Les grandes soirées (début du mois) sont ouvertes à tous sans inscription, en salle festive, avec un plat et une boisson à apporter. Les petites soirées (mi-mois) sont pour adultes et sur inscription (14 places), au local de la MJC, nourriture facultative.",
-    },
-    {
-      q: "Comment s'inscrire aux petites soirées ?",
-      a: "Via le groupe WhatsApp « Soirées Jeux » ou par email à mjc.estrablin38@gmail.com. Les places sont limitées à 14 personnes, pensez à vous inscrire à l'avance.",
-    },
-    {
-      q: 'Puis-je venir sans inscription ?',
-      a: "Oui pour les grandes soirées du début du mois. Pour les petites soirées, l'inscription est obligatoire (places limitées).",
-    },
-    {
-      q: 'Y a-t-il des jeux pour les débutants ?',
-      a: 'Bien sûr ! La ludothèque couvre tous les niveaux, et les petites soirées sont idéales pour apprendre tranquillement.',
-    },
-    {
-      q: 'Puis-je venir seul(e) ?',
-      a: "Absolument, c'est l'occasion parfaite de rencontrer d'autres passionnés. On forme les tables selon les envies de chacun.",
-    },
-  ],
-
   join: {
     title: 'Adhérer à la MJC',
     desc_1: "L'adhésion à la MJC donne accès à l'ensemble des activités, dont les soirées jeux de société.",
     desc_2: 'Téléchargez le bulletin, remplissez-le et remettez-le sur place avec votre règlement.',
-    cta: 'Télécharger le bulletin d\'adhésion (PDF)',
+    cta_base: "Télécharger le bulletin d'adhésion",
   },
 
   event: {
@@ -192,6 +162,7 @@ export default {
     tab_games: '🎲 Jeux & import',
     tab_locations: '📍 Lieux',
     tab_types: '🏷️ Types d\'évènements',
+    tab_infos: '📋 Infos pratiques',
     tab_settings: '⚙️ Réglages',
 
     events_title: 'Évènements',
@@ -261,6 +232,90 @@ export default {
       'Voulez-vous vraiment supprimer le type <strong>{label}</strong> ? (refusé si des évènements l\'utilisent)',
     del_type_done: 'Type supprimé',
 
+    // Infos pratiques (onglet)
+    ip_panel_title: 'Infos pratiques',
+    ip_section_title: 'Texte de la section',
+    ip_section_help:
+      "Titre et sous-titre affichés en tête de la section « Infos pratiques » de l'accueil. Laissez vide pour utiliser le texte traduit par défaut.",
+    ip_field_title: 'Titre de la section',
+    ip_field_title_ph: 'Infos pratiques',
+    ip_field_sub: 'Sous-titre de la section',
+    ip_save_section: 'Enregistrer le texte',
+    ip_blocks_title: "Blocs d'information",
+    ip_blocks_help:
+      'Chaque bloc a un émoji, un titre et un texte (liens et gras autorisés). Les blocs « Nos lieux » et « Contact » ajoutent automatiquement leur contenu dynamique et ne peuvent pas être supprimés.',
+    ip_new_block: '+ Nouveau bloc',
+    ip_th_emoji: 'Émoji',
+    ip_th_block: 'Titre',
+    ip_th_kind: 'Type',
+    ip_kind_text: 'Libre',
+    ip_kind_locations: 'Lieux',
+    ip_kind_whatsapp: 'WhatsApp',
+    ip_no_blocks: 'Aucun bloc.',
+    ip_cal_title: 'Bloc agenda (.ics)',
+    ip_cal_help:
+      "Affiche un bloc permettant d'ajouter les prochains évènements à un agenda (téléchargement .ics + lien d'abonnement).",
+    ip_cal_enabled: "Afficher le bloc d'ajout à l'agenda",
+    ip_cal_filename: 'Nom du fichier .ics téléchargé',
+    ip_cal_save: 'Enregistrer le bloc agenda',
+    ip_join_title: 'Adhérer à la MJC',
+    ip_join_help:
+      'Titre et texte de la section « Adhérer ». Liens autorisés dans le texte au format [libellé](https://…).',
+    ip_join_field_title: 'Titre de la section',
+    ip_join_field_title_ph: 'Adhérer à la MJC',
+    ip_join_field_text: 'Texte (liens autorisés)',
+    ip_join_save: "Enregistrer le texte d'adhésion",
+    ip_join_docs_help:
+      'Aucun document : la section « Adhérer » est masquée sur l\'accueil. Plusieurs documents : ils sont regroupés dans une archive ZIP (mention « (ZIP) »). Formats acceptés : PDF, JPG, JPEG, PNG.',
+    ip_join_upload: '📎 Ajouter des fichiers',
+    ip_th_file: 'Fichier',
+    ip_th_size: 'Taille',
+    ip_no_docs: 'Aucun document pour le moment.',
+    ip_docs_single: 'téléchargement direct',
+    ip_docs_summary: '{count} document(s) · {format}',
+    ip_docs_chosen: 'Sélection : {names}',
+    ip_faq_title: 'Questions fréquentes',
+    ip_faq_help: 'Liens autorisés dans la réponse au format [libellé](https://…).',
+    ip_new_faq: '+ Nouvelle question',
+    ip_th_question: 'Question',
+    ip_no_faq: 'Aucune question.',
+    move_up: 'Monter',
+    move_down: 'Descendre',
+    // Modale bloc d'information
+    ibf_new: 'Nouveau bloc',
+    ibf_edit: 'Modifier le bloc',
+    ibf_special_note:
+      'Bloc spécial : son contenu dynamique (liste des lieux ou boutons WhatsApp) est ajouté automatiquement sous le texte ci-dessous.',
+    ibf_emoji: 'Émoji',
+    ibf_block_title: 'Titre *',
+    ibf_body: 'Texte',
+    ibf_body_help:
+      'Gras : **texte**. Lien : [libellé](https://…). Les retours à la ligne sont conservés.',
+    err_block_title: 'Titre obligatoire',
+    saved_block: 'Bloc enregistré',
+    del_block_title: 'Supprimer le bloc',
+    del_block_msg: 'Voulez-vous vraiment supprimer le bloc <strong>{label}</strong> ?',
+    del_block_done: 'Bloc supprimé',
+    // Modale question fréquente
+    faqf_new: 'Nouvelle question',
+    faqf_edit: 'Modifier la question',
+    faqf_question: 'Question *',
+    faqf_answer: 'Réponse',
+    faqf_answer_help: 'Lien autorisé au format [libellé](https://…).',
+    err_faq_question: 'Question obligatoire',
+    saved_faq: 'Question enregistrée',
+    del_faq_title: 'Supprimer la question',
+    del_faq_msg: 'Voulez-vous vraiment supprimer la question <strong>{label}</strong> ?',
+    del_faq_done: 'Question supprimée',
+    // Documents d'adhésion
+    uploaded_docs: '{count} fichier(s) ajouté(s)',
+    del_doc_title: 'Supprimer le document',
+    del_doc_msg: 'Voulez-vous vraiment supprimer <strong>{label}</strong> ?',
+    del_doc_done: 'Document supprimé',
+    saved_section: 'Texte de la section enregistré',
+    saved_calendar: 'Bloc agenda enregistré',
+    saved_join: "Texte d'adhésion enregistré",
+
     settings_title: 'Réglages',
     settings_help:
       'Le manifeste PWA (static/site.webmanifest) et les favicons ne se règlent pas ici : éditez le fichier dans un éditeur de texte (nom de l\'application, couleurs, icônes) et remplacez les images pour correspondre à votre identité.',
@@ -287,7 +342,8 @@ export default {
     ef_title: 'Titre *',
     ef_title_ph: 'Grande soirée jeux',
     ef_date: 'Date *',
-    ef_type: 'Type',
+    ef_type: 'Type *',
+    ef_type_none: '— Choisir un type —',
     ef_start: 'Heure de début',
     ef_end: 'Heure de fin',
     ef_location: 'Lieu',
@@ -350,6 +406,7 @@ export default {
     unarchived: 'Lieu désarchivé',
     imported: '{count} jeux importés ✓',
     err_title_date: 'Titre et date obligatoires',
+    err_type: 'Type obligatoire',
     err_name: 'Nom obligatoire',
     file_prefix: '📄 {name}',
     dash: '—',

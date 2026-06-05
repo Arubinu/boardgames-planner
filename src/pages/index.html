@@ -114,37 +114,12 @@
       <section class="section section--cream" id="infos">
         <div class="wrap">
           <div class="center">
-            <h2 class="section-title" data-i18n="infos.title">Infos pratiques</h2>
-            <p class="section-sub" data-i18n="infos.sub">Deux formats d'évènements, deux ambiances. À vous de choisir !</p>
+            <h2 class="section-title" id="infos-title" data-i18n="infos.title">Infos pratiques</h2>
+            <p class="section-sub" id="infos-sub" data-i18n="infos.sub">Deux formats d'évènements, deux ambiances. À vous de choisir !</p>
           </div>
-          <div class="info-grid">
-            <div class="card card-pad fade-in">
-              <div class="info-icon info-icon--terracotta">📅</div>
-              <h3 class="font-display" data-i18n="infos.types_title">Deux types d'évènements</h3>
-              <div data-i18n-html="infos.types_desc_html"></div>
-            </div>
-            <div class="card card-pad fade-in">
-              <div class="info-icon info-icon--olive">📍</div>
-              <h3 class="font-display" data-i18n="infos.locations_title">Nos lieux</h3>
-              <div id="locations-list"><div class="spinner"></div></div>
-            </div>
-            <div class="card card-pad fade-in">
-              <div class="info-icon info-icon--blue">💬</div>
-              <h3 class="font-display" data-i18n="infos.contact_title">Contact & inscription</h3>
-              <p data-i18n-html="infos.email_html">Email : <a href="mailto:mjc.estrablin38@gmail.com">mjc.estrablin38@gmail.com</a></p>
-              <p data-i18n="infos.contact_wa">Les inscriptions aux petites soirées se font via le groupe WhatsApp.</p>
-              <div
-                id="whatsapp-actions"
-                style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.6rem"
-              ></div>
-              <p style="margin-top: 1rem" data-i18n="infos.calendar_desc">Ajoutez les prochains évènements à votre agenda :</p>
-              <div style="display: flex; flex-wrap: wrap; gap: 0.6rem">
-                <a class="btn btn-ghost btn-sm" href="/events.ics" download data-i18n="infos.calendar_ics">📅 Télécharger (.ics)</a>
-                <button class="btn btn-ghost btn-sm" type="button" data-copy-ics data-i18n="infos.calendar_copy">🔗 Copier le lien d'abonnement</button>
-              </div>
-              <p class="muted" style="font-size: 0.8rem; margin-top: 0.4rem" data-i18n="infos.calendar_hint">Collez ce lien dans « Ajouter par URL » de Google/Apple Agenda pour un abonnement mis à jour automatiquement.</p>
-            </div>
-          </div>
+          <!-- Grille remplie dynamiquement depuis l'administration (blocs +
+               bloc agenda optionnel). Voir renderInfos() dans home.js. -->
+          <div class="info-grid" id="info-grid"><div class="spinner"></div></div>
 
           <!-- FAQ -->
           <div style="max-width: 760px; margin: 3.5rem auto 0">
@@ -156,17 +131,16 @@
         </div>
       </section>
 
-      <section class="container section" id="adhesion">
+      <section class="container section" id="adhesion" style="display: none">
         <div class="wrap">
           <div class="center">
-            <h2 class="section-title" data-i18n="join.title">Adhérer à la MJC</h2>
-            <p class="section-sub">
+            <h2 class="section-title" id="join-title" data-i18n="join.title">Adhérer à la MJC</h2>
+            <p class="section-sub" id="join-text">
               <span data-i18n="join.desc_1">L'adhésion à la MJC donne accès à l'ensemble des activités, dont les soirées jeux de société.</span>
               <br />
               <span data-i18n="join.desc_2">Téléchargez le bulletin, remplissez-le et remettez-le sur place avec votre règlement.</span>
             </p>
-            <a class="btn btn-primary" href="/assets/bulletin-adhesion.pdf" download
-              data-i18n="join.cta">Télécharger le bulletin d'adhésion (PDF)</a>
+            <a class="btn btn-primary" id="join-cta" href="/membership-download">Télécharger le bulletin d'adhésion</a>
           </div>
         </div>
       </section>

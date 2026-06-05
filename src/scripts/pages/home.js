@@ -47,6 +47,9 @@ L.Icon.Default.mergeOptions({
 let SETTINGS = {};
 let ALL_EVENTS = [];
 let LOCS = [];
+let INFO_BLOCKS = [];
+let FAQ_ITEMS = [];
+let MEMBERSHIP = { count: 0, format: '' };
 let GAMES_COUNT = null;
 const GAMES_BY_ID = {};
 
@@ -423,69 +426,158 @@ function renderGamesPreviewSub() {
       : t('gamesPreview.sub_count', { count: GAMES_COUNT });
 }
 
-// --- Lieux + WhatsApp + FAQ ----------------------------------------------
+// --- Infos pratiques : blocs + lieux + WhatsApp + agenda + FAQ + adhésion --
 async function loadInfos() {
-  try {
-    LOCS = await API.get('/api/locations');
-  } catch {
-    LOCS = [];
-  }
+  const [locs, blocks, faq, membership] = await Promise.all([
+    API.get('/api/locations').catch(() => []),
+    API.get('/api/info-blocks').catch(() => []),
+    API.get('/api/faq').catch(() => []),
+    API.get('/api/membership').catch(() => ({ count: 0, format: '' })),
+  ]);
+  LOCS = locs;
+  INFO_BLOCKS = blocks;
+  FAQ_ITEMS = faq;
+  MEMBERSHIP = membership;
   renderInfos();
 }
 
-function renderInfos() {
-  const locEl = document.getElementById('locations-list');
-  if (locEl)
-    locEl.innerHTML = LOCS.length
-      ? LOCS.map((l) => {
-          const coords = parseCoords(l.coords);
-          const link = coords
-            ? `<br><a href="${googleMapsUrl(
-                coords
-              )}" target="_blank" rel="noopener" style="font-size:.85rem">${esc(
-                t('infos.location_map_link')
-              )}</a>`
-            : '';
-          return `<div style="margin-bottom:.8rem">
-              <strong>${esc(l.name)}</strong>${
-            l.address ? `<br><span class="muted" style="font-size:.85rem">${esc(l.address)}</span>` : ''
-          }${link}
-            </div>`;
-        }).join('')
-      : `<p class="muted">${esc(t('infos.locations_soon'))}</p>`;
+// Texte enrichi mono-langue (contenu d'administration) : gras **…**, liens
+// [libellé](https://… | mailto:…) et retours à la ligne. Tout le reste est
+// échappé pour éviter toute injection.
+function renderRich(str) {
+  return esc(str)
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g,
+      (_, label, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`
+    )
+    .replace(/\n/g, '<br>');
+}
 
-  const wa = document.getElementById('whatsapp-actions');
-  if (wa) {
-    const parts = [];
-    if (SETTINGS.whatsapp_main)
-      parts.push(
-        `<a class="btn btn-olive btn-sm" href="${esc(
-          SETTINGS.whatsapp_main
-        )}" target="_blank" rel="noopener">${esc(t('infos.wa_main'))}</a>`
-      );
-    if (SETTINGS.whatsapp_mjc)
-      parts.push(
-        `<a class="btn btn-ghost btn-sm" href="${esc(
-          SETTINGS.whatsapp_mjc
-        )}" target="_blank" rel="noopener">${esc(t('infos.wa_mjc'))}</a>`
-      );
-    wa.innerHTML =
-      parts.join('') ||
-      `<span class="muted" style="font-size:.85rem">${esc(t('infos.wa_todo'))}</span>`;
+// Liste dynamique des lieux (bloc spécial « locations »).
+function locationsListHtml() {
+  if (!LOCS.length) return `<p class="muted">${esc(t('infos.locations_soon'))}</p>`;
+  return LOCS.map((l) => {
+    const coords = parseCoords(l.coords);
+    const link = coords
+      ? `<br><a href="${googleMapsUrl(coords)}" target="_blank" rel="noopener" style="font-size:.85rem">${esc(
+          t('infos.location_map_link')
+        )}</a>`
+      : '';
+    return `<div style="margin-bottom:.8rem"><strong>${esc(l.name)}</strong>${
+      l.address ? `<br><span class="muted" style="font-size:.85rem">${esc(l.address)}</span>` : ''
+    }${link}</div>`;
+  }).join('');
+}
+
+// Boutons WhatsApp (bloc spécial « whatsapp »), depuis les réglages.
+function whatsappActionsHtml() {
+  const parts = [];
+  if (SETTINGS.whatsapp_main)
+    parts.push(
+      `<a class="btn btn-olive btn-sm" href="${esc(SETTINGS.whatsapp_main)}" target="_blank" rel="noopener">${esc(
+        t('infos.wa_main')
+      )}</a>`
+    );
+  if (SETTINGS.whatsapp_mjc)
+    parts.push(
+      `<a class="btn btn-ghost btn-sm" href="${esc(SETTINGS.whatsapp_mjc)}" target="_blank" rel="noopener">${esc(
+        t('infos.wa_mjc')
+      )}</a>`
+    );
+  const inner =
+    parts.join('') ||
+    `<span class="muted" style="font-size:.85rem">${esc(t('infos.wa_todo'))}</span>`;
+  return `<div style="margin-top:1rem;display:flex;flex-direction:column;gap:.6rem">${inner}</div>`;
+}
+
+// Carte « Ajouter à l'agenda » (.ics) — bloc cohérent, activable en admin.
+function calendarCardHtml(colorClass) {
+  return `<div class="card card-pad fade-in">
+      <div class="info-icon ${colorClass}">🗓️</div>
+      <h3 class="font-display">${esc(t('infos.calendar_title'))}</h3>
+      <p>${esc(t('infos.calendar_desc'))}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:.6rem">
+        <a class="btn btn-ghost btn-sm" href="/events.ics" download>${esc(t('infos.calendar_ics'))}</a>
+        <button class="btn btn-ghost btn-sm" type="button" data-copy-ics>${esc(t('infos.calendar_copy'))}</button>
+      </div>
+      <p class="muted" style="font-size:.8rem;margin-top:.4rem">${esc(t('infos.calendar_hint'))}</p>
+    </div>`;
+}
+
+const INFO_ICON_VARIANTS = ['info-icon--terracotta', 'info-icon--olive', 'info-icon--blue'];
+
+function infoBlockHtml(b, i) {
+  const variant = INFO_ICON_VARIANTS[i % INFO_ICON_VARIANTS.length];
+  let extra = '';
+  if (b.kind === 'locations') extra = locationsListHtml();
+  else if (b.kind === 'whatsapp') extra = whatsappActionsHtml();
+  const body = b.body && b.body.trim() ? `<div>${renderRich(b.body)}</div>` : '';
+  return `<div class="card card-pad fade-in">
+      <div class="info-icon ${variant}">${esc(b.icon || '📌')}</div>
+      <h3 class="font-display">${esc(b.title)}</h3>
+      ${body}
+      ${extra}
+    </div>`;
+}
+
+function renderInfos() {
+  // Titre / sous-titre de la section : réglage admin sinon repli i18n.
+  const titleEl = document.getElementById('infos-title');
+  if (titleEl) titleEl.textContent = SETTINGS.infos_title || t('infos.title');
+  const subEl = document.getElementById('infos-sub');
+  if (subEl) subEl.textContent = SETTINGS.infos_sub || t('infos.sub');
+
+  // Grille des blocs (+ carte agenda optionnelle).
+  const grid = document.getElementById('info-grid');
+  if (grid) {
+    let html = INFO_BLOCKS.map(infoBlockHtml).join('');
+    if (SETTINGS.calendar_enabled) {
+      const variant = INFO_ICON_VARIANTS[INFO_BLOCKS.length % INFO_ICON_VARIANTS.length];
+      html += calendarCardHtml(variant);
+    }
+    grid.innerHTML =
+      html || `<p class="muted center">${esc(t('infos.locations_soon'))}</p>`;
   }
 
+  // FAQ (questions gérées en administration ; liens autorisés dans la réponse).
   const faqEl = document.getElementById('faq');
   if (faqEl) {
-    const faq = tRaw('faq') || [];
-    faqEl.innerHTML = faq
-      .map(
-        (item, i) => `
+    faqEl.innerHTML = FAQ_ITEMS.map(
+      (item, i) => `
       <div class="card card-pad faq-item" data-faq="${i}">
-        <div class="faq-q">${esc(item.q)}<span id="faq-ic-${i}" style="color:var(--terracotta);font-size:1.4rem">+</span></div>
-        <div class="faq-a" id="faq-a-${i}">${esc(item.a)}</div>
+        <div class="faq-q">${esc(item.question)}<span id="faq-ic-${i}" style="color:var(--terracotta);font-size:1.4rem">+</span></div>
+        <div class="faq-a" id="faq-a-${i}">${renderRich(item.answer)}</div>
       </div>`
-      )
-      .join('');
+    ).join('');
+  }
+
+  renderJoin();
+  revealObserve();
+}
+
+// Section « Adhérer à la MJC » : masquée tant qu'aucun document n'est fourni.
+// Mention de format automatique : « (PDF) » (fichier unique) ou « (ZIP) ».
+function renderJoin() {
+  const section = document.getElementById('adhesion');
+  if (!section) return;
+  if (!MEMBERSHIP.count) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+  const titleEl = document.getElementById('join-title');
+  if (titleEl) titleEl.textContent = SETTINGS.join_title || t('join.title');
+  const textEl = document.getElementById('join-text');
+  if (textEl) {
+    textEl.innerHTML = SETTINGS.join_text
+      ? renderRich(SETTINGS.join_text)
+      : `${esc(t('join.desc_1'))}<br>${esc(t('join.desc_2'))}`;
+  }
+  const cta = document.getElementById('join-cta');
+  if (cta) {
+    const fmt = MEMBERSHIP.format ? ` (${MEMBERSHIP.format})` : '';
+    cta.textContent = t('join.cta_base') + fmt;
   }
 }
 

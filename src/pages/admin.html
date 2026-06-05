@@ -41,11 +41,13 @@
       <div class="card card-pad login-box">
         <h2 class="font-display center" style="margin-top: 0" data-i18n="admin.login_title">Espace administration</h2>
         <p class="muted center" data-i18n="admin.login_sub">Entrez le mot de passe pour gérer les dates et la ludothèque.</p>
-        <label class="field"
-          ><span data-i18n="admin.login_pwd">Mot de passe</span>
-          <input type="password" id="login-pwd" autofocus
-        /></label>
-        <button class="btn btn-primary" style="width: 100%" id="login-btn" data-i18n="admin.login_btn">Se connecter</button>
+        <form id="login-form">
+          <label class="field"
+            ><span data-i18n="admin.login_pwd">Mot de passe</span>
+            <input type="password" id="login-pwd" autocomplete="current-password" autofocus
+          /></label>
+          <button class="btn btn-primary" style="width: 100%" type="submit" id="login-btn" data-i18n="admin.login_btn">Se connecter</button>
+        </form>
       </div>
     </div>
 
@@ -71,6 +73,7 @@
         <button class="tab" data-tab="games" data-i18n="admin.tab_games">🎲 Jeux & import</button>
         <button class="tab" data-tab="locations" data-i18n="admin.tab_locations">📍 Lieux</button>
         <button class="tab" data-tab="types" data-i18n="admin.tab_types">🏷️ Types d'évènements</button>
+        <button class="tab" data-tab="infos" data-i18n="admin.tab_infos">📋 Infos pratiques</button>
         <button class="tab" data-tab="settings" data-i18n="admin.tab_settings">⚙️ Réglages</button>
       </div>
 
@@ -156,6 +159,61 @@
         <div class="card card-pad"><div id="types-table"><div class="spinner"></div></div></div>
       </section>
 
+      <!-- Onglet Infos pratiques -->
+      <section class="panel" id="panel-infos">
+        <h2 class="font-display" data-i18n="admin.ip_panel_title">Infos pratiques</h2>
+
+        <!-- Texte de la section (one-page) -->
+        <h3 class="font-display" style="margin: 1.2rem 0 .6rem" data-i18n="admin.ip_section_title">Texte de la section</h3>
+        <p class="help" data-i18n="admin.ip_section_help">Titre et sous-titre affichés en tête de la section « Infos pratiques » de l'accueil. Laissez vide pour utiliser le texte traduit par défaut.</p>
+        <div class="card card-pad">
+          <label class="field"><span data-i18n="admin.ip_field_title">Titre de la section</span><input id="ip-infos-title" data-i18n-ph="admin.ip_field_title_ph" placeholder="Infos pratiques" /></label>
+          <label class="field"><span data-i18n="admin.ip_field_sub">Sous-titre de la section</span><input id="ip-infos-sub" /></label>
+          <button class="btn btn-primary" id="ip-save-section" data-i18n="admin.ip_save_section">Enregistrer le texte</button>
+        </div>
+
+        <!-- Blocs -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 .6rem">
+          <h3 class="font-display" style="margin: 0" data-i18n="admin.ip_blocks_title">Blocs d'information</h3>
+          <button class="btn btn-primary" id="ip-new-block" data-i18n="admin.ip_new_block">+ Nouveau bloc</button>
+        </div>
+        <p class="help" data-i18n="admin.ip_blocks_help">Chaque bloc a un émoji, un titre et un texte (liens et gras autorisés). Les blocs « Nos lieux » et « Contact » ajoutent automatiquement leur contenu dynamique et ne peuvent pas être supprimés.</p>
+        <div class="card card-pad"><div id="info-blocks-table"><div class="spinner"></div></div></div>
+
+        <!-- Bloc agenda (.ics) -->
+        <h3 class="font-display" style="margin: 2rem 0 .6rem" data-i18n="admin.ip_cal_title">Bloc agenda (.ics)</h3>
+        <p class="help" data-i18n="admin.ip_cal_help">Affiche un bloc permettant d'ajouter les prochains évènements à un agenda (téléchargement .ics + lien d'abonnement).</p>
+        <div class="card card-pad">
+          <label class="field" style="margin-bottom: .8rem"><span class="checkbox-line"><input type="checkbox" id="ip-cal-enabled" /> <span data-i18n="admin.ip_cal_enabled">Afficher le bloc d'ajout à l'agenda</span></span></label>
+          <label class="field"><span data-i18n="admin.ip_cal_filename">Nom du fichier .ics téléchargé</span><input id="ip-ics-filename" placeholder="soirees-jeux.ics" /></label>
+          <button class="btn btn-primary" id="ip-save-calendar" data-i18n="admin.ip_cal_save">Enregistrer le bloc agenda</button>
+        </div>
+
+        <!-- Adhésion -->
+        <h3 class="font-display" style="margin: 2rem 0 .6rem" data-i18n="admin.ip_join_title">Adhérer à la MJC</h3>
+        <p class="help" data-i18n="admin.ip_join_help">Titre et texte de la section « Adhérer ». Liens autorisés dans le texte au format <code>[libellé](https://…)</code>.</p>
+        <div class="card card-pad" style="margin-bottom: 1.2rem">
+          <label class="field"><span data-i18n="admin.ip_join_field_title">Titre de la section</span><input id="ip-join-title" data-i18n-ph="admin.ip_join_field_title_ph" placeholder="Adhérer à la MJC" /></label>
+          <label class="field"><span data-i18n="admin.ip_join_field_text">Texte (liens autorisés)</span><textarea id="ip-join-text" rows="3"></textarea></label>
+          <button class="btn btn-primary" id="ip-save-join" data-i18n="admin.ip_join_save">Enregistrer le texte d'adhésion</button>
+        </div>
+        <p class="help" data-i18n="admin.ip_join_docs_help">Aucun document : la section « Adhérer » est masquée sur l'accueil. Plusieurs documents : ils sont regroupés dans une archive ZIP (mention « (ZIP) »). Formats acceptés : PDF, JPG, JPEG, PNG.</p>
+        <div class="card card-pad">
+          <input type="file" id="ip-doc-input" accept=".pdf,.jpg,.jpeg,.png" multiple style="display: none" />
+          <button class="btn btn-ghost" id="ip-upload-docs" data-i18n="admin.ip_join_upload">📎 Ajouter des fichiers</button>
+          <p class="help" id="ip-doc-chosen"></p>
+          <div id="membership-table" style="margin-top: 1rem"><div class="spinner"></div></div>
+        </div>
+
+        <!-- FAQ -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 .6rem">
+          <h3 class="font-display" style="margin: 0" data-i18n="admin.ip_faq_title">Questions fréquentes</h3>
+          <button class="btn btn-primary" id="ip-new-faq" data-i18n="admin.ip_new_faq">+ Nouvelle question</button>
+        </div>
+        <p class="help" data-i18n="admin.ip_faq_help">Liens autorisés dans la réponse au format <code>[libellé](https://…)</code>.</p>
+        <div class="card card-pad"><div id="faq-table"><div class="spinner"></div></div></div>
+      </section>
+
       <!-- Onglet Réglages -->
       <section class="panel" id="panel-settings">
         <div
@@ -166,7 +224,7 @@
         <p class="help" data-i18n="admin.settings_help">
           Le manifeste PWA (<code>static/site.webmanifest</code>) et les favicons ne se règlent pas ici : éditez le fichier dans un éditeur de texte (nom de l'application, couleurs, icônes) et remplacez les images pour correspondre à votre identité.
         </p>
-        <div class="card card-pad">
+        <form class="card card-pad" id="settings-form">
           <div style="display: flex; gap: 1rem; flex-wrap: wrap">
             <label class="field" style="flex: 1; min-width: 12rem"
               ><span data-i18n="admin.set_site_name">Nom du site</span>
@@ -215,10 +273,10 @@
           <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0" />
           <label class="field"
             ><span data-i18n="admin.set_pwd">Nouveau mot de passe admin (laisser vide pour ne pas changer)</span>
-            <input type="password" id="set-pwd" placeholder="••••••"
+            <input type="password" id="set-pwd" autocomplete="new-password" placeholder="••••••"
           /></label>
-          <button class="btn btn-primary" id="save-settings-btn" data-i18n="admin.save_settings">Enregistrer les réglages</button>
-        </div>
+          <button class="btn btn-primary" type="submit" id="save-settings-btn" data-i18n="admin.save_settings">Enregistrer les réglages</button>
+        </form>
       </section>
     </main>
 
@@ -335,6 +393,48 @@
         <div style="display: flex; justify-content: flex-end; gap: 0.6rem">
           <button class="btn btn-ghost" data-close-modal="game-form-modal" data-i18n="admin.cancel">Annuler</button>
           <button class="btn btn-primary" id="save-game-btn" data-i18n="admin.save">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale formulaire bloc d'information -->
+    <div class="modal-backdrop" id="infoblock-form-modal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3 id="ibf-title" data-i18n="admin.ibf_new">Nouveau bloc</h3>
+          <button class="modal-close" data-close-modal="infoblock-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
+        </div>
+        <input type="hidden" id="ib-id" />
+        <p class="help" id="ib-special-note" style="display: none" data-i18n="admin.ibf_special_note">Bloc spécial : son contenu dynamique (liste des lieux ou boutons WhatsApp) est ajouté automatiquement sous le texte ci-dessous.</p>
+        <label class="field"><span data-i18n="admin.ibf_emoji">Émoji</span></label>
+        <div class="emoji-field">
+          <span class="emoji-preview" id="ib-icon-preview">📌</span>
+          <div class="emoji-grid" id="ib-emoji-grid"></div>
+        </div>
+        <label class="field" style="margin-top: 1rem"><span data-i18n="admin.ibf_block_title">Titre *</span><input id="ib-title-in" /></label>
+        <label class="field"><span data-i18n="admin.ibf_body">Texte</span><textarea id="ib-body" rows="4"></textarea></label>
+        <p class="help" data-i18n="admin.ibf_body_help">Gras : <code>**texte**</code>. Lien : <code>[libellé](https://…)</code>. Les retours à la ligne sont conservés.</p>
+        <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1rem">
+          <button class="btn btn-ghost" data-close-modal="infoblock-form-modal" data-i18n="admin.cancel">Annuler</button>
+          <button class="btn btn-primary" id="save-infoblock-btn" data-i18n="admin.save">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale formulaire question fréquente -->
+    <div class="modal-backdrop" id="faq-form-modal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3 id="faqf-title" data-i18n="admin.faqf_new">Nouvelle question</h3>
+          <button class="modal-close" data-close-modal="faq-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
+        </div>
+        <input type="hidden" id="faqf-id" />
+        <label class="field"><span data-i18n="admin.faqf_question">Question *</span><input id="faqf-question" /></label>
+        <label class="field"><span data-i18n="admin.faqf_answer">Réponse</span><textarea id="faqf-answer" rows="4"></textarea></label>
+        <p class="help" data-i18n="admin.faqf_answer_help">Lien autorisé au format <code>[libellé](https://…)</code>.</p>
+        <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1rem">
+          <button class="btn btn-ghost" data-close-modal="faq-form-modal" data-i18n="admin.cancel">Annuler</button>
+          <button class="btn btn-primary" id="save-faq-btn" data-i18n="admin.save">Enregistrer</button>
         </div>
       </div>
     </div>

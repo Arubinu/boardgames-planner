@@ -9,10 +9,25 @@ import fs from 'node:fs';
 import db from './db.js';
 import { parseMyludo, detailsUrlFromId } from './myludo.js';
 import { hashPassword, verifyPassword } from './password.js';
+import { zipSync } from './zip.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const PORT = process.env.PORT || 3000;
+
+// Stockage persistant des téléversements (volume « data »), à l'écart de
+// `public/` qui est reconstruit à chaque build du front.
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', 'data');
+const MEMBERSHIP_DIR = path.join(DATA_DIR, 'uploads', 'membership');
+fs.mkdirSync(MEMBERSHIP_DIR, { recursive: true });
+
+// Formats acceptés pour le(s) document(s) d'adhésion (extension → type MIME).
+const MEMBERSHIP_TYPES = {
+  pdf: 'application/pdf',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+};
 
 const app = express();
 
@@ -141,6 +156,12 @@ app.get('/api/public-settings', (req, res) => {
     site_holder: setting('site_holder'),
     site_title: setting('site_title'),
     footer_text: setting('footer_text'),
+    infos_title: setting('infos_title'),
+    infos_sub: setting('infos_sub'),
+    calendar_enabled: setting('calendar_enabled') !== '0',
+    ics_filename: icsFilename(),
+    join_title: setting('join_title'),
+    join_text: setting('join_text'),
   });
 });
 
@@ -168,6 +189,17 @@ app.get('/healthz', (req, res) => res.json({ ok: true }));
 // --- Flux iCalendar (.ics) ------------------------------------------------
 // Permet d'ajouter les soirées à un agenda (Google/Apple/Outlook), en
 // téléchargement ponctuel ou en abonnement (URL en webcal://).
+
+// Nom de fichier proposé au téléchargement du .ics (réglage admin).
+// On normalise pour éviter tout caractère problématique dans l'en-tête
+// Content-Disposition et on garantit l'extension « .ics ».
+function icsFilename() {
+  let name = setting('ics_filename') || 'soirees-jeux.ics';
+  name = name.replace(/[\\/:*?"<>|\r\n]+/g, '-').replace(/^\.+/, '').trim();
+  if (!name) name = 'soirees-jeux.ics';
+  if (!/\.ics$/i.test(name)) name += '.ics';
+  return name;
+}
 function icsStamp(d) {
   return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 }
@@ -240,7 +272,7 @@ app.get('/events.ics', (req, res) => {
   lines.push('END:VCALENDAR');
 
   res.set('Content-Type', 'text/calendar; charset=utf-8');
-  res.set('Content-Disposition', 'inline; filename="soirees-jeux.ics"');
+  res.set('Content-Disposition', `inline; filename="${icsFilename()}"`);
   res.send(lines.join('\r\n') + '\r\n');
 });
 
@@ -290,6 +322,78 @@ app.get('/api/events/:id', (req, res) => {
     WHERE eg.event_id = ? ORDER BY g.title COLLATE NOCASE
   `).all(event.id);
   res.json(event);
+});
+
+// --- Blocs « Infos pratiques » (public) -----------------------------------
+app.get('/api/info-blocks', (req, res) => {
+  res.json(db.prepare('SELECT * FROM info_blocks ORDER BY sort_order, id').all());
+});
+
+// --- Questions fréquentes (public) ----------------------------------------
+app.get('/api/faq', (req, res) => {
+  res.json(db.prepare('SELECT * FROM faq ORDER BY sort_order, id').all());
+});
+
+// --- Document(s) d'adhésion -----------------------------------------------
+function membershipFiles() {
+  return db.prepare('SELECT * FROM membership_files ORDER BY sort_order, id').all();
+}
+// Mention de format affichée sur l'accueil : « PDF » (un seul fichier, selon
+// son extension) ou « ZIP » (plusieurs fichiers regroupés en archive).
+function membershipFormat(files) {
+  if (files.length === 0) return '';
+  if (files.length > 1) return 'ZIP';
+  const ext = path.extname(files[0].original_name).replace('.', '').toUpperCase();
+  return ext || 'PDF';
+}
+
+// Résumé public : sert à l'accueil pour afficher/masquer la section « Adhérer »
+// et choisir la mention de format du bouton.
+app.get('/api/membership', (req, res) => {
+  const files = membershipFiles();
+  res.json({ count: files.length, format: membershipFormat(files) });
+});
+
+// Téléchargement public : un seul fichier (tel quel) ou une archive ZIP si
+// plusieurs documents sont fournis.
+app.get('/membership-download', (req, res) => {
+  const files = membershipFiles();
+  if (files.length === 0) return res.status(404).send('Aucun document disponible.');
+
+  if (files.length === 1) {
+    const f = files[0];
+    const full = path.join(MEMBERSHIP_DIR, f.filename);
+    if (!fs.existsSync(full)) return res.status(404).send('Fichier introuvable.');
+    res.set('Content-Type', f.mime || 'application/octet-stream');
+    res.set(
+      'Content-Disposition',
+      `attachment; filename="${f.original_name.replace(/[\\/:*?"<>|\r\n]+/g, '-')}"`
+    );
+    return fs.createReadStream(full).pipe(res);
+  }
+
+  // Plusieurs fichiers → archive ZIP générée à la volée.
+  try {
+    const entries = files
+      .map((f) => ({
+        name: f.original_name,
+        data: fs.readFileSync(path.join(MEMBERSHIP_DIR, f.filename)),
+      }))
+      .filter((e) => e.data);
+    const buf = zipSync(entries);
+    const base = (setting('join_title') || 'adhesion')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40) || 'adhesion';
+    res.set('Content-Type', 'application/zip');
+    res.set('Content-Disposition', `attachment; filename="${base}.zip"`);
+    return res.send(buf);
+  } catch (e) {
+    return res.status(500).send('Impossible de générer l\'archive.');
+  }
 });
 
 // =====================  API ADMIN  ========================================
@@ -512,6 +616,133 @@ app.post('/api/admin/import', requireAdmin, upload.single('file'), (req, res) =>
   }
 });
 
+// --- Réordonnancement générique (sort_order = position dans la liste) ------
+function reorderRows(table, ids) {
+  if (!Array.isArray(ids)) return;
+  const upd = db.prepare(`UPDATE ${table} SET sort_order = ? WHERE id = ?`);
+  const tx = db.transaction((list) => {
+    list.forEach((id, i) => upd.run(i + 1, id));
+  });
+  tx(ids.map((n) => Number(n)).filter(Number.isFinite));
+}
+
+// --- Blocs « Infos pratiques » (admin) ------------------------------------
+app.post('/api/admin/info-blocks', requireAdmin, (req, res) => {
+  const { icon = '📌', title = '', body = '' } = req.body || {};
+  if (!String(title).trim()) return res.status(400).json({ error: 'Titre requis' });
+  const max = db.prepare('SELECT COALESCE(MAX(sort_order),0) AS m FROM info_blocks').get().m;
+  const info = db
+    .prepare(
+      `INSERT INTO info_blocks (kind, icon, title, body, sort_order) VALUES ('text',?,?,?,?)`
+    )
+    .run(String(icon).slice(0, 16) || '📌', String(title).trim(), String(body), max + 1);
+  res.json(db.prepare('SELECT * FROM info_blocks WHERE id = ?').get(info.lastInsertRowid));
+});
+
+app.put('/api/admin/info-blocks/reorder', requireAdmin, (req, res) => {
+  reorderRows('info_blocks', req.body?.ids);
+  res.json({ ok: true });
+});
+
+app.put('/api/admin/info-blocks/:id', requireAdmin, (req, res) => {
+  const { icon = '📌', title = '', body = '' } = req.body || {};
+  if (!String(title).trim()) return res.status(400).json({ error: 'Titre requis' });
+  // On ne modifie jamais le « kind » (un bloc spécial le reste).
+  db.prepare('UPDATE info_blocks SET icon=?, title=?, body=? WHERE id=?').run(
+    String(icon).slice(0, 16) || '📌',
+    String(title).trim(),
+    String(body),
+    req.params.id
+  );
+  res.json(db.prepare('SELECT * FROM info_blocks WHERE id = ?').get(req.params.id));
+});
+
+// Suppression : interdite pour les blocs spéciaux (lieux / WhatsApp).
+app.delete('/api/admin/info-blocks/:id', requireAdmin, (req, res) => {
+  const row = db.prepare('SELECT id FROM info_blocks WHERE id = ?').get(req.params.id);
+  if (!row) return res.status(404).json({ error: 'Bloc introuvable' });
+  db.prepare('DELETE FROM info_blocks WHERE id = ?').run(req.params.id);
+  res.json({ ok: true });
+});
+
+// --- Questions fréquentes (admin) -----------------------------------------
+app.post('/api/admin/faq', requireAdmin, (req, res) => {
+  const { question = '', answer = '' } = req.body || {};
+  if (!String(question).trim()) return res.status(400).json({ error: 'Question requise' });
+  const max = db.prepare('SELECT COALESCE(MAX(sort_order),0) AS m FROM faq').get().m;
+  const info = db
+    .prepare('INSERT INTO faq (question, answer, sort_order) VALUES (?,?,?)')
+    .run(String(question).trim(), String(answer), max + 1);
+  res.json(db.prepare('SELECT * FROM faq WHERE id = ?').get(info.lastInsertRowid));
+});
+
+app.put('/api/admin/faq/reorder', requireAdmin, (req, res) => {
+  reorderRows('faq', req.body?.ids);
+  res.json({ ok: true });
+});
+
+app.put('/api/admin/faq/:id', requireAdmin, (req, res) => {
+  const { question = '', answer = '' } = req.body || {};
+  if (!String(question).trim()) return res.status(400).json({ error: 'Question requise' });
+  db.prepare('UPDATE faq SET question=?, answer=? WHERE id=?').run(
+    String(question).trim(),
+    String(answer),
+    req.params.id
+  );
+  res.json(db.prepare('SELECT * FROM faq WHERE id = ?').get(req.params.id));
+});
+
+app.delete('/api/admin/faq/:id', requireAdmin, (req, res) => {
+  db.prepare('DELETE FROM faq WHERE id = ?').run(req.params.id);
+  res.json({ ok: true });
+});
+
+// --- Document(s) d'adhésion (admin) ---------------------------------------
+app.get('/api/admin/membership', requireAdmin, (req, res) => {
+  res.json(membershipFiles());
+});
+
+app.post('/api/admin/membership', requireAdmin, upload.array('files', 20), (req, res) => {
+  const incoming = req.files || [];
+  if (!incoming.length) return res.status(400).json({ error: 'Aucun fichier fourni.' });
+  let max = db.prepare('SELECT COALESCE(MAX(sort_order),0) AS m FROM membership_files').get().m;
+  const ins = db.prepare(
+    `INSERT INTO membership_files (filename, original_name, mime, size, sort_order)
+     VALUES (?,?,?,?,?)`
+  );
+  const saved = [];
+  for (const file of incoming) {
+    const ext = path.extname(file.originalname).replace('.', '').toLowerCase();
+    if (!MEMBERSHIP_TYPES[ext]) {
+      return res.status(400).json({
+        error: `Format non accepté : « ${file.originalname} ». Formats autorisés : PDF, JPG, JPEG, PNG.`,
+      });
+    }
+    const stored = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    fs.writeFileSync(path.join(MEMBERSHIP_DIR, stored), file.buffer);
+    const info = ins.run(stored, file.originalname, MEMBERSHIP_TYPES[ext], file.size, ++max);
+    saved.push(info.lastInsertRowid);
+  }
+  res.json({ ok: true, added: saved.length });
+});
+
+app.delete('/api/admin/membership/:id', requireAdmin, (req, res) => {
+  const row = db.prepare('SELECT * FROM membership_files WHERE id = ?').get(req.params.id);
+  if (!row) return res.status(404).json({ error: 'Document introuvable' });
+  try {
+    fs.unlinkSync(path.join(MEMBERSHIP_DIR, row.filename));
+  } catch {
+    /* fichier déjà absent : on supprime quand même la métadonnée */
+  }
+  db.prepare('DELETE FROM membership_files WHERE id = ?').run(req.params.id);
+  res.json({ ok: true });
+});
+
+app.put('/api/admin/membership/reorder', requireAdmin, (req, res) => {
+  reorderRows('membership_files', req.body?.ids);
+  res.json({ ok: true });
+});
+
 // --- Réglages admin ---
 app.get('/api/admin/settings', requireAdmin, (req, res) => {
   const rows = db.prepare('SELECT key, value FROM settings').all();
@@ -532,13 +763,27 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     'site_title',
     'footer_text',
     'default_lang',
+    'infos_title',
+    'infos_sub',
+    'calendar_enabled',
+    'ics_filename',
+    'join_title',
+    'join_text',
     'admin_password',
   ];
+  // Clés où une valeur vide est significative (réinitialisation / choix
+  // explicite) et ne doit donc PAS être ignorée comme « préserver l'existant ».
+  const allowEmpty = new Set([
+    'default_lang',
+    'infos_title',
+    'infos_sub',
+    'ics_filename',
+    'join_title',
+    'join_text',
+  ]);
   for (const [k, v] of Object.entries(req.body || {})) {
     if (!allowed.includes(k) || v === undefined) continue;
-    // On ignore les valeurs vides (préserve l'existant), SAUF default_lang où
-    // « vide » est un choix valide signifiant « Auto (navigateur) ».
-    if (v === '' && k !== 'default_lang') continue;
+    if (v === '' && !allowEmpty.has(k)) continue;
     if (k === 'admin_password') {
       // Ne jamais stocker le mot de passe en clair : on le hache (Argon2id).
       setSetting.run(k, await hashPassword(String(v)));

@@ -10,31 +10,6 @@ import { parseMyludo } from './myludo.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// --- Lieux par défaut -----------------------------------------------------
-// Coordonnées "lat,lon" stockées en base ; le lien Google Maps est dérivé
-// de ces coordonnées dans l'interface (plus aucune URL saisie à la main).
-const locations = [
-  {
-    name: 'Salle Festive',
-    address: 'Espace Sportif Pierre Lacroix, 38780 Estrablin',
-    coords: '45.5150286,4.9563041',
-    description: 'Grand espace pour 20+ personnes. Cuisine équipée, parking gratuit, accès handicapé. Utilisée pour les grandes soirées (sans inscription).',
-  },
-  {
-    name: 'Local de la MJC',
-    address: 'Impasse du cimetière, 93 Rue de l\'Europe, 38780 Estrablin',
-    coords: '45.5171848,4.9652353',
-    description: 'Espace intimiste (14 personnes max), ambiance conviviale, parfait pour apprendre les jeux. Utilisé pour les petites soirées (sur inscription).',
-  },
-];
-
-const insLoc = db.prepare(
-  `INSERT INTO locations (name, address, coords, description) VALUES (?,?,?,?)
-   ON CONFLICT(name) DO NOTHING`
-);
-for (const l of locations) insLoc.run(l.name, l.address, l.coords, l.description);
-console.log(`Lieux : ${db.prepare('SELECT COUNT(*) c FROM locations').get().c}`);
-
 // --- Sélection de jeux d'exemple (12 jeux, dont quelques extensions) -------
 const sampleCsv = path.join(__dirname, '..', 'import-data', 'collection.csv');
 if (db.prepare('SELECT COUNT(*) c FROM games').get().c === 0 && fs.existsSync(sampleCsv)) {

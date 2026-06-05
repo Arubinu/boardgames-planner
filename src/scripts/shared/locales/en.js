@@ -50,20 +50,13 @@ export default {
   infos: {
     title: 'Practical info',
     sub: 'Two event formats, two vibes. The choice is yours!',
-    types_title: 'Two types of events',
-    types_desc_html:
-      '<p><strong>Big nights</strong> — start of the month, 7–11pm, function room, no registration, bring a dish + a drink.</p><p><strong>Small nights</strong> — mid-month, 8–11pm, MJC premises, registration required (14 max), food optional.</p>',
-    locations_title: 'Our venues',
     locations_soon: 'Coming soon.',
     location_map_link: 'View on the map ↗',
-    contact_title: 'Contact & registration',
-    email_html:
-      'Email: <a href="mailto:mjc.estrablin38@gmail.com">mjc.estrablin38@gmail.com</a>',
-    contact_wa: 'Registration for the small nights is done through the WhatsApp group.',
     wa_main: '"Game Nights" group',
     wa_mjc: 'MJC Estrablin group',
     wa_todo: 'WhatsApp links to be configured in administration.',
     calendar_desc: 'Add upcoming events to your calendar:',
+    calendar_title: 'Add to your calendar',
     calendar_ics: '📅 Download (.ics)',
     calendar_copy: '🔗 Copy the subscription link',
     calendar_hint: 'Paste this link into "Add by URL" in Google/Apple Calendar for an automatically updated subscription.',
@@ -71,34 +64,11 @@ export default {
     faq_title: 'Frequently asked questions',
   },
 
-  faq: [
-    {
-      q: 'What is the difference between the two types of nights?',
-      a: "The big nights (start of the month) are open to everyone with no registration, in a function room, with a dish and a drink to bring. The small nights (mid-month) are for adults and require registration (14 places), at the MJC premises, food optional.",
-    },
-    {
-      q: 'How do I register for the small nights?',
-      a: 'Through the "Game Nights" WhatsApp group or by email at mjc.estrablin38@gmail.com. Places are limited to 14 people, so remember to sign up in advance.',
-    },
-    {
-      q: 'Can I come without registering?',
-      a: 'Yes for the big nights at the start of the month. For the small nights, registration is required (limited places).',
-    },
-    {
-      q: 'Are there games for beginners?',
-      a: 'Of course! The game library covers all levels, and the small nights are ideal for learning at a relaxed pace.',
-    },
-    {
-      q: 'Can I come on my own?',
-      a: "Absolutely — it's the perfect chance to meet other enthusiasts. We form the tables based on what everyone feels like playing.",
-    },
-  ],
-
   join: {
     title: 'Join the MJC',
     desc_1: 'MJC membership gives access to all activities, including the board game nights.',
     desc_2: 'Download the form, fill it in, and hand it in on site along with your payment.',
-    cta: 'Download the membership form (PDF)',
+    cta_base: 'Download the membership form',
   },
 
   event: {
@@ -189,6 +159,7 @@ export default {
     tab_games: '🎲 Games & import',
     tab_locations: '📍 Venues',
     tab_types: "🏷️ Event types",
+    tab_infos: '📋 Practical info',
     tab_settings: '⚙️ Settings',
 
     events_title: 'Events',
@@ -258,6 +229,89 @@ export default {
       'Do you really want to delete the type <strong>{label}</strong>? (refused if events are using it)',
     del_type_done: 'Type deleted',
 
+    // Practical info (tab)
+    ip_panel_title: 'Practical info',
+    ip_section_title: 'Section text',
+    ip_section_help:
+      'Title and subtitle shown at the top of the "Practical info" section on the home page. Leave empty to use the default translated text.',
+    ip_field_title: 'Section title',
+    ip_field_title_ph: 'Practical info',
+    ip_field_sub: 'Section subtitle',
+    ip_save_section: 'Save text',
+    ip_blocks_title: 'Information blocks',
+    ip_blocks_help:
+      'Each block has an emoji, a title and a body (links and bold allowed). The "Our venues" and "Contact" blocks automatically add their dynamic content and cannot be deleted.',
+    ip_new_block: '+ New block',
+    ip_th_emoji: 'Emoji',
+    ip_th_block: 'Title',
+    ip_th_kind: 'Type',
+    ip_kind_text: 'Free',
+    ip_kind_locations: 'Venues',
+    ip_kind_whatsapp: 'WhatsApp',
+    ip_no_blocks: 'No blocks.',
+    ip_cal_title: 'Calendar block (.ics)',
+    ip_cal_help:
+      'Shows a block letting visitors add upcoming events to a calendar (.ics download + subscription link).',
+    ip_cal_enabled: 'Show the add-to-calendar block',
+    ip_cal_filename: 'Downloaded .ics file name',
+    ip_cal_save: 'Save calendar block',
+    ip_join_title: 'Join the MJC',
+    ip_join_help:
+      'Title and text of the "Join" section. Links allowed in the text as [label](https://…).',
+    ip_join_field_title: 'Section title',
+    ip_join_field_title_ph: 'Join the MJC',
+    ip_join_field_text: 'Text (links allowed)',
+    ip_join_save: 'Save membership text',
+    ip_join_docs_help:
+      'No document: the "Join" section is hidden on the home page. Several documents: they are bundled into a ZIP archive (shown as "(ZIP)"). Accepted formats: PDF, JPG, JPEG, PNG.',
+    ip_join_upload: '📎 Add files',
+    ip_th_file: 'File',
+    ip_th_size: 'Size',
+    ip_no_docs: 'No document yet.',
+    ip_docs_single: 'direct download',
+    ip_docs_summary: '{count} document(s) · {format}',
+    ip_docs_chosen: 'Selection: {names}',
+    ip_faq_title: 'Frequently asked questions',
+    ip_faq_help: 'Links allowed in the answer as [label](https://…).',
+    ip_new_faq: '+ New question',
+    ip_th_question: 'Question',
+    ip_no_faq: 'No questions.',
+    move_up: 'Move up',
+    move_down: 'Move down',
+    // Information block modal
+    ibf_new: 'New block',
+    ibf_edit: 'Edit block',
+    ibf_special_note:
+      'Special block: its dynamic content (venue list or WhatsApp buttons) is added automatically below the text below.',
+    ibf_emoji: 'Emoji',
+    ibf_block_title: 'Title *',
+    ibf_body: 'Text',
+    ibf_body_help: 'Bold: **text**. Link: [label](https://…). Line breaks are kept.',
+    err_block_title: 'Title required',
+    saved_block: 'Block saved',
+    del_block_title: 'Delete block',
+    del_block_msg: 'Do you really want to delete the block <strong>{label}</strong>?',
+    del_block_done: 'Block deleted',
+    // FAQ modal
+    faqf_new: 'New question',
+    faqf_edit: 'Edit question',
+    faqf_question: 'Question *',
+    faqf_answer: 'Answer',
+    faqf_answer_help: 'Link allowed as [label](https://…).',
+    err_faq_question: 'Question required',
+    saved_faq: 'Question saved',
+    del_faq_title: 'Delete question',
+    del_faq_msg: 'Do you really want to delete the question <strong>{label}</strong>?',
+    del_faq_done: 'Question deleted',
+    // Membership documents
+    uploaded_docs: '{count} file(s) added',
+    del_doc_title: 'Delete document',
+    del_doc_msg: 'Do you really want to delete <strong>{label}</strong>?',
+    del_doc_done: 'Document deleted',
+    saved_section: 'Section text saved',
+    saved_calendar: 'Calendar block saved',
+    saved_join: 'Membership text saved',
+
     settings_title: 'Settings',
     settings_help:
       'The PWA manifest (static/site.webmanifest) and the favicons are not configured here: edit the file in a text editor (app name, colors, icons) and replace the images to match your own branding.',
@@ -284,7 +338,8 @@ export default {
     ef_title: 'Title *',
     ef_title_ph: 'Big game night',
     ef_date: 'Date *',
-    ef_type: 'Type',
+    ef_type: 'Type *',
+    ef_type_none: '— Choose a type —',
     ef_start: 'Start time',
     ef_end: 'End time',
     ef_location: 'Venue',
@@ -347,6 +402,7 @@ export default {
     unarchived: 'Venue unarchived',
     imported: '{count} games imported ✓',
     err_title_date: 'Title and date required',
+    err_type: 'Type required',
     err_name: 'Name required',
     file_prefix: '📄 {name}',
     dash: '—',

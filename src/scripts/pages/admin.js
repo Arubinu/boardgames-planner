@@ -53,6 +53,21 @@ let EVENT_TYPES = [];
 let pickerSelected = new Set();
 let pendingFile = null;
 
+// État « Infos pratiques ».
+let INFO_BLOCKS = [];
+let FAQ_ITEMS = [];
+let MEMBERSHIP_FILES = [];
+let pendingDocs = null; // FileList sélectionnée mais pas encore envoyée
+
+// Palette d'émojis « génériques », rendus de façon homogène sur tous les
+// navigateurs (jeu d'émojis ancien et largement pris en charge). Sert au
+// sélecteur d'émoji des blocs d'information.
+const EMOJI_CHOICES = [
+  '📅','🗓️','📍','🗺️','💬','✉️','📧','📞','☎️','🏠','🏛️','🚗','🅿️','ℹ️','❓','❗',
+  '⭐','✅','🎲','🃏','🎯','🎉','🎮','🧩','🍕','🍻','☕','👥','👋','🔗','📣','📌',
+  '📎','📝','📋','💡','⏰','🕐','🎨','🏆','🎁','🔔','📢','🤝','😀','🌟','♟️','🎟️',
+];
+
 // État de la carte de sélection de coordonnées (modale lieu).
 let coordMap = null;
 let coordMarker = null;
@@ -109,6 +124,33 @@ const DELETE_CONFIG = {
         populateTypeSelect();
         renderEventsTable();
       }),
+  },
+  infoBlock: {
+    title: () => t('admin.del_block_title'),
+    msg: (label) => t('admin.del_block_msg', { label: esc(label) }),
+    confirmKey: 'admin.delete',
+    url: (id) => '/api/admin/info-blocks/' + id,
+    method: 'DELETE',
+    done: () => t('admin.del_block_done'),
+    reload: () => loadInfoBlocks(),
+  },
+  faq: {
+    title: () => t('admin.del_faq_title'),
+    msg: (label) => t('admin.del_faq_msg', { label: esc(label) }),
+    confirmKey: 'admin.delete',
+    url: (id) => '/api/admin/faq/' + id,
+    method: 'DELETE',
+    done: () => t('admin.del_faq_done'),
+    reload: () => loadFaq(),
+  },
+  membershipDoc: {
+    title: () => t('admin.del_doc_title'),
+    msg: (label) => t('admin.del_doc_msg', { label: esc(label) }),
+    confirmKey: 'admin.delete',
+    url: (id) => '/api/admin/membership/' + id,
+    method: 'DELETE',
+    done: () => t('admin.del_doc_done'),
+    reload: () => loadMembership(),
   },
 };
 
@@ -174,6 +216,9 @@ async function loadAll() {
   await loadEventTypes();
   await Promise.all([loadEvents(), loadGames(), loadLocations()]);
   loadSettings();
+  loadInfoBlocks();
+  loadFaq();
+  loadMembership();
   document.getElementById('stat-events').textContent = EVENTS.length;
   document.getElementById('stat-games').textContent = GAMES.length;
   document.getElementById('stat-locations').textContent = LOCATIONS.length;
@@ -229,14 +274,23 @@ function renderEventsTable() {
 }
 
 // Remplit le sélecteur de type à partir du registre chargé depuis l'API.
-function populateTypeSelect() {
+// Avec { placeholder: true }, on ajoute une option vide « — Choisir un type — »
+// sélectionnée par défaut : aucun type n'est présélectionné (cas création).
+function populateTypeSelect({ placeholder = false } = {}) {
   const sel = document.getElementById('ef-type');
   if (!sel) return;
-  const cur = sel.value || defaultType();
-  sel.innerHTML = eventTypeOrder()
+  const cur = sel.value;
+  const opts = eventTypeOrder()
     .map((type) => `<option value="${type}">${esc(typeOption(type))}</option>`)
     .join('');
-  sel.value = typeKey(cur);
+  sel.innerHTML = placeholder
+    ? `<option value="" disabled selected hidden>${esc(t('admin.ef_type_none'))}</option>` + opts
+    : opts;
+  if (placeholder) {
+    sel.value = '';
+  } else {
+    sel.value = typeKey(cur || defaultType());
+  }
 }
 
 async function openEventForm(id, opts = {}) {
@@ -245,7 +299,9 @@ async function openEventForm(id, opts = {}) {
   locSel.innerHTML =
     `<option value="">${t('admin.ef_location_none')}</option>` +
     LOCATIONS.map((l) => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
-  populateTypeSelect();
+  // Création « vierge » : aucun type présélectionné. En édition/duplication on
+  // garde le type de l'évènement source, présélectionné juste après.
+  populateTypeSelect({ placeholder: !id });
   pickerSelected = new Set();
 
   if (id) {
@@ -268,7 +324,6 @@ async function openEventForm(id, opts = {}) {
     ['ef-id', 'ef-title-in', 'ef-date', 'ef-start', 'ef-end', 'ef-desc', 'ef-wa'].forEach(
       (i) => (document.getElementById(i).value = '')
     );
-    document.getElementById('ef-type').value = defaultType();
   }
   document.getElementById('gp-search').value = '';
   renderPicker();
@@ -320,6 +375,10 @@ async function saveEvent() {
   };
   if (!payload.title || !payload.date) {
     toast(t('admin.err_title_date'), true);
+    return;
+  }
+  if (!payload.type) {
+    toast(t('admin.err_type'), true);
     return;
   }
   const id = document.getElementById('ef-id').value;
@@ -726,6 +785,13 @@ async function loadSettings() {
     document.getElementById('set-wa-main').value = s.whatsapp_main || '';
     document.getElementById('set-wa-mjc').value = s.whatsapp_mjc || '';
     document.getElementById('set-myludo').value = s.myludo_profile || '';
+    // Champs « Infos pratiques » (onglet dédié).
+    document.getElementById('ip-infos-title').value = s.infos_title || '';
+    document.getElementById('ip-infos-sub').value = s.infos_sub || '';
+    document.getElementById('ip-cal-enabled').checked = s.calendar_enabled !== '0';
+    document.getElementById('ip-ics-filename').value = s.ics_filename || '';
+    document.getElementById('ip-join-title').value = s.join_title || '';
+    document.getElementById('ip-join-text').value = s.join_text || '';
   } catch {}
 }
 
@@ -767,6 +833,291 @@ async function saveSettings() {
   }
 }
 
+// =========================================================================
+//  INFOS PRATIQUES (blocs, agenda, adhésion, FAQ)
+// =========================================================================
+
+// Réordonnancement : déplace l'élément `id` d'un cran puis persiste l'ordre.
+function moveAndPersist(arr, id, dir, url, rerender) {
+  const i = arr.findIndex((x) => x.id === id);
+  const j = dir === 'up' ? i - 1 : i + 1;
+  if (i < 0 || j < 0 || j >= arr.length) return;
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+  rerender();
+  API.send(url, 'PUT', { ids: arr.map((x) => x.id) }, PWD).catch((e) => toast(e.message, true));
+}
+
+// Boutons monter/descendre communs aux listes ordonnables.
+function moveButtons(attr, id, index, total) {
+  return `
+    <button class="btn btn-ghost btn-icon" data-${attr}="${id}" data-dir="up" ${
+    index === 0 ? 'disabled' : ''
+  } title="${t('admin.move_up')}" aria-label="${t('admin.move_up')}">▲</button>
+    <button class="btn btn-ghost btn-icon" data-${attr}="${id}" data-dir="down" ${
+    index === total - 1 ? 'disabled' : ''
+  } title="${t('admin.move_down')}" aria-label="${t('admin.move_down')}">▼</button>`;
+}
+
+function fmtSize(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+}
+
+// --- Blocs d'information --------------------------------------------------
+async function loadInfoBlocks() {
+  INFO_BLOCKS = await API.get('/api/info-blocks');
+  renderInfoBlocksTable();
+}
+
+function blockKindLabel(kind) {
+  if (kind === 'locations') return t('admin.ip_kind_locations');
+  if (kind === 'whatsapp') return t('admin.ip_kind_whatsapp');
+  return t('admin.ip_kind_text');
+}
+
+function renderInfoBlocksTable() {
+  const el = document.getElementById('info-blocks-table');
+  if (!el) return;
+  const rows = INFO_BLOCKS.map((b, i) => {
+    const del = `<button class="btn btn-ghost btn-icon" data-del-ib="${b.id}" title="${t(
+      'admin.delete'
+    )}" data-label-text="${esc(b.title)}"><img src="/assets/icons/delete.svg" alt="" /></button>`;
+    return `<tr>
+      <td data-label="${t('admin.ip_th_emoji')}" style="font-size:1.4rem">${esc(b.icon)}</td>
+      <td data-label="${t('admin.ip_th_block')}"><strong>${esc(b.title)}</strong></td>
+      <td data-label="${t('admin.ip_th_kind')}">${esc(blockKindLabel(b.kind))}</td>
+      <td class="cell-actions"><div class="row-actions">
+        ${moveButtons('move-ib', b.id, i, INFO_BLOCKS.length)}
+        <button class="btn btn-ghost btn-icon" data-edit-ib="${b.id}" title="${t(
+      'admin.edit'
+    )}" aria-label="${t('admin.edit')}"><img src="/assets/icons/edit.svg" alt="" /></button>
+        ${del}
+      </div></td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = INFO_BLOCKS.length
+    ? `<table class="responsive"><thead><tr><th>${t('admin.ip_th_emoji')}</th><th>${t(
+        'admin.ip_th_block'
+      )}</th><th>${t('admin.ip_th_kind')}</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+    : `<div class="empty">${t('admin.ip_no_blocks')}</div>`;
+}
+
+let selectedEmoji = '📌';
+function renderEmojiGrid() {
+  const grid = document.getElementById('ib-emoji-grid');
+  if (!grid) return;
+  grid.innerHTML = EMOJI_CHOICES.map(
+    (e) =>
+      `<button type="button" class="emoji-btn${
+        e === selectedEmoji ? ' selected' : ''
+      }" data-emoji="${e}">${e}</button>`
+  ).join('');
+  document.getElementById('ib-icon-preview').textContent = selectedEmoji;
+}
+
+function openInfoBlockForm(id) {
+  const b = id ? INFO_BLOCKS.find((x) => x.id === id) : null;
+  document.getElementById('ibf-title').textContent = b
+    ? t('admin.ibf_edit')
+    : t('admin.ibf_new');
+  document.getElementById('ib-id').value = b ? b.id : '';
+  document.getElementById('ib-title-in').value = b ? b.title : '';
+  document.getElementById('ib-body').value = b ? b.body : '';
+  selectedEmoji = b ? b.icon || '📌' : '📌';
+  renderEmojiGrid();
+  // Note pour les blocs spéciaux (contenu dynamique ajouté automatiquement).
+  document.getElementById('ib-special-note').style.display =
+    b && b.kind !== 'text' ? '' : 'none';
+  openModal('infoblock-form-modal');
+}
+
+async function saveInfoBlock() {
+  const payload = {
+    icon: selectedEmoji,
+    title: document.getElementById('ib-title-in').value.trim(),
+    body: document.getElementById('ib-body').value,
+  };
+  if (!payload.title) {
+    toast(t('admin.err_block_title'), true);
+    return;
+  }
+  const id = document.getElementById('ib-id').value;
+  try {
+    if (id) await API.send('/api/admin/info-blocks/' + id, 'PUT', payload, PWD);
+    else await API.send('/api/admin/info-blocks', 'POST', payload, PWD);
+    closeModal('infoblock-form-modal');
+    toast(t('admin.saved_block'));
+    loadInfoBlocks();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+// --- Questions fréquentes -------------------------------------------------
+async function loadFaq() {
+  FAQ_ITEMS = await API.get('/api/faq');
+  renderFaqTable();
+}
+
+function renderFaqTable() {
+  const el = document.getElementById('faq-table');
+  if (!el) return;
+  const rows = FAQ_ITEMS.map(
+    (f, i) => `<tr>
+      <td data-label="${t('admin.ip_th_question')}"><strong>${esc(f.question)}</strong></td>
+      <td class="cell-actions"><div class="row-actions">
+        ${moveButtons('move-faq', f.id, i, FAQ_ITEMS.length)}
+        <button class="btn btn-ghost btn-icon" data-edit-faq="${f.id}" title="${t(
+      'admin.edit'
+    )}" aria-label="${t('admin.edit')}"><img src="/assets/icons/edit.svg" alt="" /></button>
+        <button class="btn btn-ghost btn-icon" data-del-faq="${f.id}" title="${t(
+      'admin.delete'
+    )}" data-label-text="${esc(f.question)}"><img src="/assets/icons/delete.svg" alt="" /></button>
+      </div></td>
+    </tr>`
+  ).join('');
+  el.innerHTML = FAQ_ITEMS.length
+    ? `<table class="responsive"><thead><tr><th>${t(
+        'admin.ip_th_question'
+      )}</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+    : `<div class="empty">${t('admin.ip_no_faq')}</div>`;
+}
+
+function openFaqForm(id) {
+  const f = id ? FAQ_ITEMS.find((x) => x.id === id) : null;
+  document.getElementById('faqf-title').textContent = f
+    ? t('admin.faqf_edit')
+    : t('admin.faqf_new');
+  document.getElementById('faqf-id').value = f ? f.id : '';
+  document.getElementById('faqf-question').value = f ? f.question : '';
+  document.getElementById('faqf-answer').value = f ? f.answer : '';
+  openModal('faq-form-modal');
+}
+
+async function saveFaq() {
+  const payload = {
+    question: document.getElementById('faqf-question').value.trim(),
+    answer: document.getElementById('faqf-answer').value,
+  };
+  if (!payload.question) {
+    toast(t('admin.err_faq_question'), true);
+    return;
+  }
+  const id = document.getElementById('faqf-id').value;
+  try {
+    if (id) await API.send('/api/admin/faq/' + id, 'PUT', payload, PWD);
+    else await API.send('/api/admin/faq', 'POST', payload, PWD);
+    closeModal('faq-form-modal');
+    toast(t('admin.saved_faq'));
+    loadFaq();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+// --- Document(s) d'adhésion -----------------------------------------------
+async function loadMembership() {
+  MEMBERSHIP_FILES = await API.send('/api/admin/membership', 'GET', null, PWD);
+  renderMembershipTable();
+}
+
+function renderMembershipTable() {
+  const el = document.getElementById('membership-table');
+  if (!el) return;
+  if (!MEMBERSHIP_FILES.length) {
+    el.innerHTML = `<div class="empty">${t('admin.ip_no_docs')}</div>`;
+    return;
+  }
+  const fmt = MEMBERSHIP_FILES.length > 1 ? 'ZIP' : '';
+  const summary = `<p class="help" style="margin:0 0 .6rem">${esc(
+    t('admin.ip_docs_summary', {
+      count: MEMBERSHIP_FILES.length,
+      format: fmt || t('admin.ip_docs_single'),
+    })
+  )}</p>`;
+  const rows = MEMBERSHIP_FILES.map(
+    (f, i) => `<tr>
+      <td data-label="${t('admin.ip_th_file')}"><strong>${esc(f.original_name)}</strong></td>
+      <td data-label="${t('admin.ip_th_size')}">${esc(fmtSize(f.size))}</td>
+      <td class="cell-actions"><div class="row-actions">
+        ${moveButtons('move-doc', f.id, i, MEMBERSHIP_FILES.length)}
+        <button class="btn btn-ghost btn-icon" data-del-doc="${f.id}" title="${t(
+      'admin.delete'
+    )}" data-label-text="${esc(f.original_name)}"><img src="/assets/icons/delete.svg" alt="" /></button>
+      </div></td>
+    </tr>`
+  ).join('');
+  el.innerHTML =
+    summary +
+    `<table class="responsive"><thead><tr><th>${t('admin.ip_th_file')}</th><th>${t(
+      'admin.ip_th_size'
+    )}</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+async function uploadDocs() {
+  if (!pendingDocs || !pendingDocs.length) {
+    document.getElementById('ip-doc-input').click();
+    return;
+  }
+  const fd = new FormData();
+  for (const f of pendingDocs) fd.append('files', f);
+  try {
+    const r = await fetch('/api/admin/membership', {
+      method: 'POST',
+      headers: { 'x-admin-password': PWD },
+      body: fd,
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || r.statusText);
+    pendingDocs = null;
+    document.getElementById('ip-doc-input').value = '';
+    document.getElementById('ip-doc-chosen').textContent = '';
+    toast(t('admin.uploaded_docs', { count: data.added }));
+    loadMembership();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+// --- Enregistrement des réglages « Infos pratiques » ----------------------
+async function saveInfosSettings(payload, okKey) {
+  try {
+    await API.send('/api/admin/settings', 'PUT', payload, PWD);
+    toast(t(okKey));
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+function saveInfosSection() {
+  saveInfosSettings(
+    {
+      infos_title: document.getElementById('ip-infos-title').value.trim(),
+      infos_sub: document.getElementById('ip-infos-sub').value.trim(),
+    },
+    'admin.saved_section'
+  );
+}
+function saveCalendarBlock() {
+  saveInfosSettings(
+    {
+      calendar_enabled: document.getElementById('ip-cal-enabled').checked ? '1' : '0',
+      ics_filename: document.getElementById('ip-ics-filename').value.trim(),
+    },
+    'admin.saved_calendar'
+  );
+}
+function saveJoinBlock() {
+  saveInfosSettings(
+    {
+      join_title: document.getElementById('ip-join-title').value.trim(),
+      join_text: document.getElementById('ip-join-text').value.trim(),
+    },
+    'admin.saved_join'
+  );
+}
+
 // --- Changement de langue : rafraîchit le contenu dynamique --------------
 function onLanguageChanged() {
   if (!dashboardVisible()) return;
@@ -775,6 +1126,9 @@ function onLanguageChanged() {
   renderGamesTable();
   renderLocationsTables();
   renderEventTypesTable();
+  renderInfoBlocksTable();
+  renderFaqTable();
+  renderMembershipTable();
 }
 
 // --- Câblage des événements (aucun handler inline) -----------------------
@@ -790,9 +1144,9 @@ function wireHandlers() {
 
   document.querySelectorAll('.theme-toggle').forEach((b) => b.addEventListener('click', toggleTheme));
   document.getElementById('logout-btn').addEventListener('click', logout);
-  document.getElementById('login-btn').addEventListener('click', doLogin);
-  document.getElementById('login-pwd').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doLogin();
+  document.getElementById('login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    doLogin();
   });
 
   document.querySelectorAll('.tab').forEach((tab) =>
@@ -803,12 +1157,41 @@ function wireHandlers() {
   document.getElementById('new-location-btn').addEventListener('click', () => openLocationForm());
   document.getElementById('new-type-btn')?.addEventListener('click', () => openEventTypeForm());
   document.getElementById('save-type-btn')?.addEventListener('click', saveEventType);
+
+  // Infos pratiques.
+  document.getElementById('ip-save-section')?.addEventListener('click', saveInfosSection);
+  document.getElementById('ip-save-calendar')?.addEventListener('click', saveCalendarBlock);
+  document.getElementById('ip-save-join')?.addEventListener('click', saveJoinBlock);
+  document.getElementById('ip-new-block')?.addEventListener('click', () => openInfoBlockForm());
+  document.getElementById('save-infoblock-btn')?.addEventListener('click', saveInfoBlock);
+  document.getElementById('ip-new-faq')?.addEventListener('click', () => openFaqForm());
+  document.getElementById('save-faq-btn')?.addEventListener('click', saveFaq);
+  // Sélecteur d'émoji (boutons générés).
+  document.getElementById('ib-emoji-grid')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-emoji]');
+    if (!btn) return;
+    selectedEmoji = btn.dataset.emoji;
+    renderEmojiGrid();
+  });
+  // Documents d'adhésion.
+  document.getElementById('ip-upload-docs')?.addEventListener('click', uploadDocs);
+  document.getElementById('ip-doc-input')?.addEventListener('change', (e) => {
+    pendingDocs = e.target.files;
+    const names = Array.from(pendingDocs || []).map((f) => f.name).join(', ');
+    document.getElementById('ip-doc-chosen').textContent = names
+      ? t('admin.ip_docs_chosen', { names })
+      : '';
+    if (pendingDocs && pendingDocs.length) uploadDocs();
+  });
   document.getElementById('ef-type').addEventListener('change', onTypeChange);
   document.getElementById('gp-search').addEventListener('input', renderPicker);
   document.getElementById('save-event-btn').addEventListener('click', saveEvent);
   document.getElementById('save-location-btn').addEventListener('click', saveLocation);
   document.getElementById('save-game-btn').addEventListener('click', saveGame);
-  document.getElementById('save-settings-btn').addEventListener('click', saveSettings);
+  document.getElementById('settings-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveSettings();
+  });
   document.getElementById('import-btn').addEventListener('click', doImport);
   document.getElementById('games-search').addEventListener('input', renderGamesTable);
 
@@ -853,7 +1236,7 @@ function wireHandlers() {
   // Délégation pour les tableaux (générés dynamiquement).
   document.getElementById('dashboard').addEventListener('click', (e) => {
     const el = e.target.closest(
-      '[data-edit-event],[data-dup-event],[data-del-event],[data-edit-game],[data-del-game],[data-edit-loc],[data-del-loc],[data-unarchive-loc],[data-edit-type],[data-del-type]'
+      '[data-edit-event],[data-dup-event],[data-del-event],[data-edit-game],[data-del-game],[data-edit-loc],[data-del-loc],[data-unarchive-loc],[data-edit-type],[data-del-type],[data-edit-ib],[data-del-ib],[data-move-ib],[data-edit-faq],[data-del-faq],[data-move-faq],[data-del-doc],[data-move-doc]'
     );
     if (!el) return;
     if (el.dataset.editEvent) return openEventForm(Number(el.dataset.editEvent));
@@ -870,6 +1253,39 @@ function wireHandlers() {
     if (el.dataset.editType) return openEventTypeForm(Number(el.dataset.editType));
     if (el.dataset.delType)
       return confirmDelete('eventType', Number(el.dataset.delType), el.dataset.labelText);
+    // Infos pratiques.
+    if (el.dataset.editIb) return openInfoBlockForm(Number(el.dataset.editIb));
+    if (el.dataset.delIb)
+      return confirmDelete('infoBlock', Number(el.dataset.delIb), el.dataset.labelText);
+    if (el.dataset.moveIb)
+      return moveAndPersist(
+        INFO_BLOCKS,
+        Number(el.dataset.moveIb),
+        el.dataset.dir,
+        '/api/admin/info-blocks/reorder',
+        renderInfoBlocksTable
+      );
+    if (el.dataset.editFaq) return openFaqForm(Number(el.dataset.editFaq));
+    if (el.dataset.delFaq)
+      return confirmDelete('faq', Number(el.dataset.delFaq), el.dataset.labelText);
+    if (el.dataset.moveFaq)
+      return moveAndPersist(
+        FAQ_ITEMS,
+        Number(el.dataset.moveFaq),
+        el.dataset.dir,
+        '/api/admin/faq/reorder',
+        renderFaqTable
+      );
+    if (el.dataset.delDoc)
+      return confirmDelete('membershipDoc', Number(el.dataset.delDoc), el.dataset.labelText);
+    if (el.dataset.moveDoc)
+      return moveAndPersist(
+        MEMBERSHIP_FILES,
+        Number(el.dataset.moveDoc),
+        el.dataset.dir,
+        '/api/admin/membership/reorder',
+        renderMembershipTable
+      );
   });
 }
 
