@@ -204,6 +204,8 @@ ensureSetting.run(
 );
 // Langue par défaut du site : '' = se fier au navigateur (auto).
 ensureSetting.run('default_lang', '');
+// Année du copyright affichée dans le pied de page : '' = année courante.
+ensureSetting.run('footer_year', '');
 
 // --- Configuration par variables d'environnement --------------------------
 // Appliquée à CHAQUE démarrage du conteneur :

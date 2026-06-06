@@ -779,6 +779,7 @@ async function loadSettings() {
     populateDefaultLangSelect(s.default_lang);
     document.getElementById('set-site-title').value = s.site_title || '';
     document.getElementById('set-footer-text').value = s.footer_text || '';
+    document.getElementById('set-footer-year').value = s.footer_year || '';
     setSiteIdentity(s.site_name, s.site_holder);
     document.getElementById('set-myludo').value = s.myludo_profile || '';
     // Champs « Infos pratiques » (onglet dédié).
@@ -810,6 +811,7 @@ async function saveSettings() {
     default_lang: document.getElementById('set-default-lang').value,
     site_title: document.getElementById('set-site-title').value.trim(),
     footer_text: document.getElementById('set-footer-text').value.trim(),
+    footer_year: document.getElementById('set-footer-year').value.trim(),
     myludo_profile: document.getElementById('set-myludo').value.trim(),
   };
   const np = document.getElementById('set-pwd').value.trim();

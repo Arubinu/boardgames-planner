@@ -60,6 +60,19 @@ export function hasUserLang() {
 // pages internes ; l'accueil (préfixe vide) prend le nom complet.
 let siteName = '';
 let siteHolder = '';
+// Année affichée dans le copyright du pied de page. Vide => année courante.
+// Conservée en module pour résister aux ré-applications (changement de langue).
+let footerYear = '';
+function applyFooterYear(root = document) {
+  const y = footerYear || new Date().getFullYear();
+  root.querySelectorAll('[data-year]').forEach((el) => {
+    el.textContent = y;
+  });
+}
+export function setFooterYear(year) {
+  footerYear = year ? String(year) : '';
+  applyFooterYear();
+}
 function siteFull() {
   return siteHolder ? (siteName ? `${siteName} — ${siteHolder}` : siteHolder) : siteName;
 }
@@ -78,6 +91,8 @@ function applyDocTitle() {
 }
 // Marque (logo) : [data-site-brand] = Nom + <small>Détenteur</small> ;
 // [data-site-name] = nom complet en texte simple.
+// Une marque portant data-site-brand="page" affiche plutôt « titre de la page
+// courante + nom du site » — réservé au back-office (administration).
 function applySiteBrand() {
   if (!siteName && !siteHolder) return;
   const e = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -96,6 +111,11 @@ function applySiteBrand() {
   document.querySelectorAll('[data-site-name]').forEach((el) => {
     el.textContent = full;
   });
+  // Entité du copyright (pied de page) : le détenteur, sinon le nom du site.
+  const holder = siteHolder || siteName;
+  document.querySelectorAll('[data-site-holder]').forEach((el) => {
+    el.textContent = holder;
+  });
 }
 
 // Applique la langue par défaut du site (réglage admin) tant que le visiteur
@@ -109,6 +129,7 @@ export async function applySiteDefaultLang() {
     const s = await r.json();
     if (!s) return;
     setSiteIdentity(s.site_name, s.site_holder);
+    setFooterYear(s.footer_year);
     if (!hasUserLang() && s.default_lang && DICTS[s.default_lang]) {
       setLang(s.default_lang, { persist: false });
     }
@@ -187,7 +208,7 @@ export function tp(key, count, params = {}) {
 //  - data-i18n-html      → innerHTML (textes balisés)
 //  - data-i18n-ph        → attribut placeholder
 //  - data-i18n-aria      → attribut aria-label
-//  - data-year           → année courante (pieds de page)
+//  - data-year           → année du copyright (réglage footer_year, sinon courante)
 export function applyI18n(root = document) {
   root.querySelectorAll('[data-i18n]').forEach((el) => {
     el.textContent = t(el.dataset.i18n);
@@ -202,7 +223,7 @@ export function applyI18n(root = document) {
     el.setAttribute('aria-label', t(el.dataset.i18nAria));
   });
   root.querySelectorAll('[data-year]').forEach((el) => {
-    el.textContent = new Date().getFullYear();
+    el.textContent = footerYear || new Date().getFullYear();
   });
   if (root === document) {
     applyDocTitle();

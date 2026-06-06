@@ -154,6 +154,7 @@ app.get('/api/public-settings', (req, res) => {
     site_holder: setting('site_holder'),
     site_title: setting('site_title'),
     footer_text: setting('footer_text'),
+    footer_year: setting('footer_year'),
     infos_title: setting('infos_title'),
     infos_sub: setting('infos_sub'),
     calendar_enabled: setting('calendar_enabled') !== '0',
@@ -758,6 +759,7 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     'og_image',
     'site_title',
     'footer_text',
+    'footer_year',
     'default_lang',
     'infos_title',
     'infos_sub',
@@ -771,6 +773,7 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
   // explicite) et ne doit donc PAS être ignorée comme « préserver l'existant ».
   const allowEmpty = new Set([
     'default_lang',
+    'footer_year',
     'infos_title',
     'infos_sub',
     'ics_filename',
