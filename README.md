@@ -55,9 +55,15 @@ services:
       - ./data:/app/data # persisted SQLite database
     environment:
       TRUST_PROXY: 1
+      DEFAULT_LANG: ''
       #ADMIN_PASSWORD: admin
+      #SITE_NAME: Boardgames Planner
+      #SITE_TITLE: Boardgames Planner
+      #SITE_DESCRIPTION: Board game night calendar, toy library, and practical information for the MJC Estrablin.
+      #SITE_HOLDER: MJC Estrablin
       LOGIN_RETRY_DELAY: 10
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
+      #ICS_FILENAME: boardgames-planner.ics
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/healthz']
       interval: 30s
@@ -107,14 +113,17 @@ Two families of variables, all taken into account **on every startup** of the co
 | `ADMIN_PASSWORD` | (Re)defines the admin password, hashed with Argon2id. |
 | `DEFAULT_LANG` | Site default language (`fr`, `en`, …; empty = browser detection). |
 | `SITE_NAME` | Site name (nav brand, page titles, share previews). |
+| `SITE_HOLDER` | Site holder (nav brand and footer copyright). |
 | `SITE_TITLE` | Home (hero) title; `[text]` for highlighted parts. |
-| `FOOTER_TEXT` | Footer text; links in `[label](url)` format. |
+| `SITE_DESCRIPTION` | Site description (share previews / SEO). |
+| `OG_IMAGE` | Open Graph share image (URL or `/assets/…` path). |
 | `MYLUDO_PROFILE` | Public MyLudo profile. |
-| `WHATSAPP_MAIN` / `WHATSAPP_MJC` | WhatsApp sign-up links. |
+| `FOOTER_TEXT` | Footer text; links in `[label](url)` format. |
+| `ICS_FILENAME` | Filename of the downloaded `.ics` calendar. |
 
-> `ADMIN_PASSWORD` is active by default. To enable `MYLUDO_PROFILE`,
-> `WHATSAPP_MAIN` or `WHATSAPP_MJC`, uncomment the matching entry in the
-> `ENV_SETTINGS` table in `server/db.js`.
+> `ADMIN_PASSWORD` is handled separately (hashed). All the other variables above
+> are wired in the `ENV_SETTINGS` table in `server/db.js`: just set them in the
+> environment and they apply on every startup.
 
 ---
 

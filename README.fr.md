@@ -55,9 +55,15 @@ services:
       - ./data:/app/data # base SQLite persistée
     environment:
       TRUST_PROXY: 1
+      DEFAULT_LANG: ''
       #ADMIN_PASSWORD: admin
+      #SITE_NAME: Soirées Jeux
+      #SITE_TITLE: Soirées jeux de société
+      #SITE_DESCRIPTION: Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.
+      #SITE_HOLDER: MJC Estrablin
       LOGIN_RETRY_DELAY: 10
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
+      #ICS_FILENAME: boardgames-planner.ics
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/healthz']
       interval: 30s
@@ -107,14 +113,17 @@ Deux familles de variables, toutes prises en compte **à chaque démarrage** du 
 | `ADMIN_PASSWORD` | (Re)définit le mot de passe administrateur, haché en Argon2id. |
 | `DEFAULT_LANG` | Langue par défaut du site (`fr`, `en`, … ; vide = détection navigateur). |
 | `SITE_NAME` | Nom du site (marque de navigation, titres de page, aperçus de partage). |
+| `SITE_HOLDER` | Détenteur du site (marque de navigation et copyright du pied de page). |
 | `SITE_TITLE` | Titre d'accueil (hero) ; `[texte]` pour les portions colorées. |
-| `FOOTER_TEXT` | Texte du pied de page ; liens au format `[libellé](url)`. |
+| `SITE_DESCRIPTION` | Description du site (aperçus de partage / SEO). |
+| `OG_IMAGE` | Image de partage Open Graph (URL ou chemin `/assets/…`). |
 | `MYLUDO_PROFILE` | Profil MyLudo public. |
-| `WHATSAPP_MAIN` / `WHATSAPP_MJC` | Liens d'inscription WhatsApp. |
+| `FOOTER_TEXT` | Texte du pied de page ; liens au format `[libellé](url)`. |
+| `ICS_FILENAME` | Nom du fichier de l'agenda `.ics` téléchargé. |
 
-> `ADMIN_PASSWORD` est actif par défaut. Pour activer `MYLUDO_PROFILE`,
-> `WHATSAPP_MAIN` ou `WHATSAPP_MJC`, décommente l'entrée correspondante du tableau
-> `ENV_SETTINGS` dans `server/db.js`.
+> `ADMIN_PASSWORD` est géré à part (haché). Toutes les autres variables ci-dessus
+> sont reliées dans le tableau `ENV_SETTINGS` de `server/db.js` : il suffit de les
+> renseigner dans l'environnement pour qu'elles s'appliquent à chaque démarrage.
 
 ---
 
