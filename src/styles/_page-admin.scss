@@ -119,6 +119,7 @@ body.dark .cell-actions .btn-icon img {
   font-size: 0.82rem;
   color: var(--muted);
   margin-top: 0.3rem;
+  white-space: pre-line;
 }
 
 // --- Zone de dépôt d'import ------------------------------------------------
@@ -177,11 +178,6 @@ body.dark .cell-actions .btn-icon img {
 }
 
 // =====================  COMPATIBILITÉ MOBILE  =============================
-// Sur petit écran, la barre d'administration propose un menu déroulant
-// (burger) identique au reste du site. Les tableaux denses, eux, deviennent
-// illisibles : on les transforme en « cartes »
-// empilées grâce aux libellés data-label, sans changer le HTML généré côté
-// largeurs de colonnes (qui restent fixes sur desktop).
 @include v.below(v.$bp-md) {
   .admin-main {
     padding-top: 80px;
@@ -251,8 +247,6 @@ body.dark .cell-actions .btn-icon img {
 }
 
 // --- Ligne « case à cocher + libellé » (modales) --------------------------
-// Garde la case à sa taille naturelle (sinon la règle globale input{width:100%}
-// l'étirerait) et aligne le libellé à droite de la case.
 .checkbox-line {
   display: inline-flex;
   align-items: center;

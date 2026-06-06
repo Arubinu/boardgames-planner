@@ -272,6 +272,10 @@ textarea {
   }
 }
 
+#footer-tagline {
+  white-space: pre-line;
+}
+
 // --- Divers ---------------------------------------------------------------
 .spinner {
   border: 3px solid var(--border);

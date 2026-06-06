@@ -154,7 +154,7 @@
           <button class="btn btn-primary" id="new-type-btn" data-i18n="admin.new_type">+ Nouveau type</button>
         </div>
         <p class="help" data-i18n="admin.types_help">
-          Chaque type définit un libellé, une mention, une couleur et s'il propose une inscription WhatsApp.
+          Chaque type définit un libellé, une mention, une couleur et s'il nécessite une inscription.
         </p>
         <div class="card card-pad"><div id="types-table"><div class="spinner"></div></div></div>
       </section>
@@ -165,10 +165,10 @@
 
         <!-- Texte de la section (one-page) -->
         <h3 class="font-display" style="margin: 1.2rem 0 .6rem" data-i18n="admin.ip_section_title">Texte de la section</h3>
-        <p class="help" data-i18n="admin.ip_section_help">Titre et sous-titre affichés en tête de la section « Infos pratiques » de l'accueil. Laissez vide pour utiliser le texte traduit par défaut.</p>
+        <p class="help" data-i18n="admin.ip_section_help">Titre et texte affichés en tête de la section « Infos pratiques » de l'accueil. Liens autorisés dans le texte au format <code>[libellé](https://…)</code>. Laissez vide pour utiliser le texte traduit par défaut.</p>
         <div class="card card-pad">
           <label class="field"><span data-i18n="admin.ip_field_title">Titre de la section</span><input id="ip-infos-title" data-i18n-ph="admin.ip_field_title_ph" placeholder="Infos pratiques" /></label>
-          <label class="field"><span data-i18n="admin.ip_field_sub">Sous-titre de la section</span><input id="ip-infos-sub" /></label>
+          <label class="field"><span data-i18n="admin.ip_field_sub">Texte (liens autorisés)</span><textarea id="ip-infos-sub" rows="3"></textarea></label>
           <button class="btn btn-primary" id="ip-save-section" data-i18n="admin.ip_save_section">Enregistrer le texte</button>
         </div>
 
@@ -195,7 +195,7 @@
         <div class="card card-pad" style="margin-bottom: 1.2rem">
           <label class="field"><span data-i18n="admin.ip_join_field_title">Titre de la section</span><input id="ip-join-title" data-i18n-ph="admin.ip_join_field_title_ph" placeholder="Adhérer à la MJC" /></label>
           <label class="field"><span data-i18n="admin.ip_join_field_text">Texte (liens autorisés)</span><textarea id="ip-join-text" rows="3"></textarea></label>
-          <button class="btn btn-primary" id="ip-save-join" data-i18n="admin.ip_join_save">Enregistrer le texte d'adhésion</button>
+          <button class="btn btn-primary" id="ip-save-join" data-i18n="admin.ip_join_save">Enregistrer le texte</button>
         </div>
         <p class="help" data-i18n="admin.ip_join_docs_help">Aucun document : la section « Adhérer » est masquée sur l'accueil. Plusieurs documents : ils sont regroupés dans une archive ZIP (mention « (ZIP) »). Formats acceptés : PDF, JPG, JPEG, PNG.</p>
         <div class="card card-pad">
@@ -259,14 +259,6 @@
           <p class="help" data-i18n="admin.set_footer_text_help">Liens autorisés au format <code>[libellé](https://…)</code>.</p>
           <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0" />
           <label class="field"
-            ><span data-i18n="admin.set_wa_main">Lien groupe WhatsApp « Soirées Jeux »</span>
-            <input id="set-wa-main" placeholder="https://chat.whatsapp.com/..."
-          /></label>
-          <label class="field"
-            ><span data-i18n="admin.set_wa_mjc">Lien groupe WhatsApp « MJC Estrablin »</span>
-            <input id="set-wa-mjc" placeholder="https://chat.whatsapp.com/..."
-          /></label>
-          <label class="field"
             ><span data-i18n="admin.set_myludo">Profil MyLudo (lien public)</span>
             <input id="set-myludo" placeholder="https://www.myludo.fr/#!/profil/..."
           /></label>
@@ -304,10 +296,6 @@
         </div>
         <label class="field"><span data-i18n="admin.ef_location">Lieu</span><select id="ef-location"></select></label>
         <label class="field"><span data-i18n="admin.ef_desc">Description</span><textarea id="ef-desc" rows="2"></textarea></label>
-        <label class="field"
-          ><span data-i18n="admin.ef_wa">Lien WhatsApp d'inscription (optionnel)</span
-          ><input id="ef-wa" data-i18n-ph="admin.ef_wa_ph" placeholder="Laisser vide pour utiliser le lien par défaut"
-        /></label>
 
         <div style="margin-top: 0.5rem">
           <span style="font-weight: 600; font-size: 0.85rem"
@@ -365,7 +353,7 @@
         <div class="grid grid-2" style="gap: 1rem">
           <label class="field"><span data-i18n="admin.tf_color">Couleur</span><input type="color" id="tf-color" value="#8b9a6b" style="height: 42px; padding: 2px" /></label>
           <label class="field" style="justify-content: flex-end">
-            <span class="checkbox-line"><input type="checkbox" id="tf-signup" /> <span data-i18n="admin.tf_signup">Propose une inscription WhatsApp</span></span>
+            <span class="checkbox-line"><input type="checkbox" id="tf-signup" /> <span data-i18n="admin.tf_signup">Inscription obligatoire</span></span>
           </label>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.6rem">
@@ -405,7 +393,6 @@
           <button class="modal-close" data-close-modal="infoblock-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
         </div>
         <input type="hidden" id="ib-id" />
-        <p class="help" id="ib-special-note" style="display: none" data-i18n="admin.ibf_special_note">Bloc spécial : son contenu dynamique (liste des lieux ou boutons WhatsApp) est ajouté automatiquement sous le texte ci-dessous.</p>
         <label class="field"><span data-i18n="admin.ibf_emoji">Émoji</span></label>
         <div class="emoji-field">
           <span class="emoji-preview" id="ib-icon-preview">📌</span>

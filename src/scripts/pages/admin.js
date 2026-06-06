@@ -317,11 +317,10 @@ async function openEventForm(id, opts = {}) {
     document.getElementById('ef-end').value = e.end_time;
     document.getElementById('ef-location').value = e.location_id || '';
     document.getElementById('ef-desc').value = e.description;
-    document.getElementById('ef-wa').value = e.whatsapp_url;
     e.games.forEach((g) => pickerSelected.add(g.id));
   } else {
     document.getElementById('ef-title').textContent = t('admin.ef_new');
-    ['ef-id', 'ef-title-in', 'ef-date', 'ef-start', 'ef-end', 'ef-desc', 'ef-wa'].forEach(
+    ['ef-id', 'ef-title-in', 'ef-date', 'ef-start', 'ef-end', 'ef-desc'].forEach(
       (i) => (document.getElementById(i).value = '')
     );
   }
@@ -370,7 +369,6 @@ async function saveEvent() {
     end_time: document.getElementById('ef-end').value,
     location_id: document.getElementById('ef-location').value || null,
     description: document.getElementById('ef-desc').value.trim(),
-    whatsapp_url: document.getElementById('ef-wa').value.trim(),
     game_ids: [...pickerSelected],
   };
   if (!payload.title || !payload.date) {
@@ -782,8 +780,6 @@ async function loadSettings() {
     document.getElementById('set-site-title').value = s.site_title || '';
     document.getElementById('set-footer-text').value = s.footer_text || '';
     setSiteIdentity(s.site_name, s.site_holder);
-    document.getElementById('set-wa-main').value = s.whatsapp_main || '';
-    document.getElementById('set-wa-mjc').value = s.whatsapp_mjc || '';
     document.getElementById('set-myludo').value = s.myludo_profile || '';
     // Champs « Infos pratiques » (onglet dédié).
     document.getElementById('ip-infos-title').value = s.infos_title || '';
@@ -814,8 +810,6 @@ async function saveSettings() {
     default_lang: document.getElementById('set-default-lang').value,
     site_title: document.getElementById('set-site-title').value.trim(),
     footer_text: document.getElementById('set-footer-text').value.trim(),
-    whatsapp_main: document.getElementById('set-wa-main').value.trim(),
-    whatsapp_mjc: document.getElementById('set-wa-mjc').value.trim(),
     myludo_profile: document.getElementById('set-myludo').value.trim(),
   };
   const np = document.getElementById('set-pwd').value.trim();
@@ -871,12 +865,6 @@ async function loadInfoBlocks() {
   renderInfoBlocksTable();
 }
 
-function blockKindLabel(kind) {
-  if (kind === 'locations') return t('admin.ip_kind_locations');
-  if (kind === 'whatsapp') return t('admin.ip_kind_whatsapp');
-  return t('admin.ip_kind_text');
-}
-
 function renderInfoBlocksTable() {
   const el = document.getElementById('info-blocks-table');
   if (!el) return;
@@ -887,7 +875,6 @@ function renderInfoBlocksTable() {
     return `<tr>
       <td data-label="${t('admin.ip_th_emoji')}" style="font-size:1.4rem">${esc(b.icon)}</td>
       <td data-label="${t('admin.ip_th_block')}"><strong>${esc(b.title)}</strong></td>
-      <td data-label="${t('admin.ip_th_kind')}">${esc(blockKindLabel(b.kind))}</td>
       <td class="cell-actions"><div class="row-actions">
         ${moveButtons('move-ib', b.id, i, INFO_BLOCKS.length)}
         <button class="btn btn-ghost btn-icon" data-edit-ib="${b.id}" title="${t(
@@ -900,7 +887,7 @@ function renderInfoBlocksTable() {
   el.innerHTML = INFO_BLOCKS.length
     ? `<table class="responsive"><thead><tr><th>${t('admin.ip_th_emoji')}</th><th>${t(
         'admin.ip_th_block'
-      )}</th><th>${t('admin.ip_th_kind')}</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+      )}</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
     : `<div class="empty">${t('admin.ip_no_blocks')}</div>`;
 }
 
@@ -927,9 +914,6 @@ function openInfoBlockForm(id) {
   document.getElementById('ib-body').value = b ? b.body : '';
   selectedEmoji = b ? b.icon || '📌' : '📌';
   renderEmojiGrid();
-  // Note pour les blocs spéciaux (contenu dynamique ajouté automatiquement).
-  document.getElementById('ib-special-note').style.display =
-    b && b.kind !== 'text' ? '' : 'none';
   openModal('infoblock-form-modal');
 }
 

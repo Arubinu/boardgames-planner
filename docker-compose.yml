@@ -12,8 +12,6 @@ services:
       #ADMIN_PASSWORD: admin
       LOGIN_RETRY_DELAY: 10
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
-      #WHATSAPP_MAIN: https://chat.whatsapp.com/[...]
-      #WHATSAPP_MJC: https://chat.whatsapp.com/[...]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
       interval: 30s

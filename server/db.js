@@ -85,7 +85,6 @@ db.exec(`
     type         TEXT DEFAULT 'petite',
     location_id  INTEGER,
     description  TEXT DEFAULT '',
-    whatsapp_url TEXT DEFAULT '',
     created_at   TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE SET NULL
   );
@@ -110,12 +109,6 @@ db.exec(`
     value TEXT DEFAULT ''
   );
   -- Blocs « Infos pratiques » de l'accueil, gérés depuis l'administration
-  -- (contenu mono-langue, sans traduction). kind :
-  --   'text'      → bloc libre (émoji + titre + texte) ;
-  --   'locations' → bloc spécial : la liste des lieux est ajoutée
-  --                 automatiquement sous le texte (non supprimable) ;
-  --   'whatsapp'  → bloc spécial : les boutons WhatsApp sont ajoutés
-  --                 automatiquement sous le texte (non supprimable).
   CREATE TABLE IF NOT EXISTS info_blocks (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     kind       TEXT NOT NULL DEFAULT 'text',
@@ -188,8 +181,6 @@ const ensureSetting = db.prepare(
   `INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO NOTHING`
 );
 ensureSetting.run('admin_password', 'admin');
-ensureSetting.run('whatsapp_main', '');
-ensureSetting.run('whatsapp_mjc', '');
 ensureSetting.run('myludo_profile', 'https://www.myludo.fr/#!/profil/christophe-t-81487');
 // Identité du site (réutilisée par la marque, les balises OpenGraph, le .ics).
 // Nom + Détenteur séparés ; recombinés en « Nom — Détenteur » au besoin.
@@ -225,8 +216,6 @@ const ENV_SETTINGS = [
   { env: 'SITE_NAME',      key: 'site_name' },
   { env: 'SITE_TITLE',     key: 'site_title' },
   { env: 'FOOTER_TEXT',    key: 'footer_text' },
-  { env: 'WHATSAPP_MAIN',  key: 'whatsapp_main' },
-  { env: 'WHATSAPP_MJC',   key: 'whatsapp_mjc' },
   { env: 'MYLUDO_PROFILE', key: 'myludo_profile' },
 ];
 
@@ -243,15 +232,12 @@ for (const { env, key } of ENV_SETTINGS) {
   }
 }
 
-// Migration : ancien format où « Nom du site » contenait « Nom — Détenteur ».
-// On le scinde une seule fois en deux réglages distincts (l'opération est
-// idempotente : après coup, site_name ne contient plus de « — »).
+// « Nom — Détenteur »
 const legacyName = db.prepare('SELECT value FROM settings WHERE key = ?').get('site_name')?.value || '';
 if (legacyName.includes(' — ')) {
   const [nm, ...rest] = legacyName.split(' — ');
   setSetting.run('site_name', nm.trim());
   setSetting.run('site_holder', rest.join(' — ').trim());
-  console.log('[db] migration : « site_name » scindé en site_name + site_holder');
 }
 
 // --- Sécurité : mot de passe administrateur (Argon2id) --------------------
@@ -280,8 +266,6 @@ if (legacyName.includes(' — ')) {
 }
 
 // --- Types de soirées : amorçage au premier lancement ---------------------
-// Reprend les deux types historiques (Grande / Petite) avec leur couleur et
-// leur comportement. Ensuite, tout est géré depuis l'administration.
 {
   const count = db.prepare('SELECT COUNT(*) AS c FROM event_types').get().c;
   if (count === 0) {
@@ -296,9 +280,6 @@ if (legacyName.includes(' — ')) {
 }
 
 // --- Blocs « Infos pratiques » : amorçage au premier lancement ------------
-// Reprend les trois cadres historiques. « Nos lieux » et « Contact » sont des
-// blocs spéciaux (kind locations/whatsapp) : leur contenu dynamique est ajouté
-// automatiquement sur l'accueil et ils ne peuvent pas être supprimés.
 {
   const count = db.prepare('SELECT COUNT(*) AS c FROM info_blocks').get().c;
   if (count === 0) {
@@ -312,13 +293,12 @@ if (legacyName.includes(' — ')) {
       '**Grandes soirées** — début du mois, 19h-23h, salle festive, sans inscription, plat + boisson à apporter.\n\n**Petites soirées** — mi-mois, 20h-23h, local de la MJC, sur inscription (14 max), nourriture facultative.',
       1
     );
-    ins.run('locations', '📍', 'Nos lieux', '', 2);
     ins.run(
-      'whatsapp',
+      'text',
       '💬',
       'Contact & inscription',
-      'Email : [mjc.estrablin38@gmail.com](mailto:mjc.estrablin38@gmail.com)\n\nLes inscriptions aux petites soirées se font via le groupe WhatsApp.',
-      3
+      "Email : [mjc.estrablin38@gmail.com](mailto:mjc.estrablin38@gmail.com)\n\nLes petites soirées sont **sur inscription** : l'inscription se fait via le groupe WhatsApp réservé aux adhérent·es de la MJC (invitation transmise après adhésion).",
+      2
     );
     console.log('[db] blocs « Infos pratiques » initialisés');
   }

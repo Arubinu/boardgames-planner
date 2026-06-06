@@ -145,11 +145,9 @@ function checkAdmin(provided) {
 
 // =====================  API PUBLIQUE  =====================================
 
-// Réglages publics utiles au front (liens WhatsApp, profil MyLudo).
+// Réglages publics utiles au front (profil MyLudo, identité, textes…).
 app.get('/api/public-settings', (req, res) => {
   res.json({
-    whatsapp_main: setting('whatsapp_main'),
-    whatsapp_mjc: setting('whatsapp_mjc'),
     myludo_profile: setting('myludo_profile'),
     default_lang: setting('default_lang'),
     site_name: setting('site_name'),
@@ -501,11 +499,11 @@ app.post('/api/admin/events', requireAdmin, (req, res) => {
   const b = req.body || {};
   if (!b.title || !b.date) return res.status(400).json({ error: 'Titre et date requis' });
   const info = db.prepare(`
-    INSERT INTO events (title, date, start_time, end_time, type, location_id, description, whatsapp_url)
-    VALUES (?,?,?,?,?,?,?,?)
+    INSERT INTO events (title, date, start_time, end_time, type, location_id, description)
+    VALUES (?,?,?,?,?,?,?)
   `).run(
     b.title.trim(), b.date, b.start_time || '', b.end_time || '',
-    b.type || 'petite', b.location_id || null, b.description || '', b.whatsapp_url || ''
+    b.type || 'petite', b.location_id || null, b.description || ''
   );
   const id = info.lastInsertRowid;
   if (Array.isArray(b.game_ids)) setEventGames(id, b.game_ids);
@@ -516,11 +514,11 @@ app.put('/api/admin/events/:id', requireAdmin, (req, res) => {
   const b = req.body || {};
   if (!b.title || !b.date) return res.status(400).json({ error: 'Titre et date requis' });
   db.prepare(`
-    UPDATE events SET title=?, date=?, start_time=?, end_time=?, type=?, location_id=?, description=?, whatsapp_url=?
+    UPDATE events SET title=?, date=?, start_time=?, end_time=?, type=?, location_id=?, description=?
     WHERE id=?
   `).run(
     b.title.trim(), b.date, b.start_time || '', b.end_time || '',
-    b.type || 'petite', b.location_id || null, b.description || '', b.whatsapp_url || '',
+    b.type || 'petite', b.location_id || null, b.description || '',
     req.params.id
   );
   if (Array.isArray(b.game_ids)) setEventGames(req.params.id, b.game_ids);
@@ -657,7 +655,7 @@ app.put('/api/admin/info-blocks/:id', requireAdmin, (req, res) => {
   res.json(db.prepare('SELECT * FROM info_blocks WHERE id = ?').get(req.params.id));
 });
 
-// Suppression : interdite pour les blocs spéciaux (lieux / WhatsApp).
+// Suppression d'un bloc d'information (tous les blocs sont supprimables).
 app.delete('/api/admin/info-blocks/:id', requireAdmin, (req, res) => {
   const row = db.prepare('SELECT id FROM info_blocks WHERE id = ?').get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Bloc introuvable' });
@@ -753,8 +751,6 @@ app.get('/api/admin/settings', requireAdmin, (req, res) => {
 
 app.put('/api/admin/settings', requireAdmin, async (req, res) => {
   const allowed = [
-    'whatsapp_main',
-    'whatsapp_mjc',
     'myludo_profile',
     'site_name',
     'site_holder',

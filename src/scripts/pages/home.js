@@ -25,7 +25,6 @@ import {
   typeLabel,
   typeSub,
   typeColor,
-  typeSignup,
 } from '../shared/eventTypes.js';
 import { gameThumb, wireThumbFallbacks } from '../shared/gameThumb.js';
 import { openGameModal } from '../shared/gameModal.js';
@@ -343,7 +342,6 @@ async function openEvent(id) {
     const time = e.start_time
       ? `${e.start_time}${e.end_time ? ' – ' + e.end_time : ''}`
       : t('event.time_tbd');
-    const wa = e.whatsapp_url || (typeSignup(e.type) ? SETTINGS.whatsapp_main : '');
     const coords = parseCoords(e.location_coords);
     const gamesHtml = e.games.length
       ? `<div class="grid grid-4" style="gap:.8rem;margin-top:.6rem">${e.games
@@ -375,15 +373,6 @@ async function openEvent(id) {
           : ''
       }
       ${e.description ? `<p>${esc(e.description)}</p>` : ''}
-      ${
-        typeSignup(e.type) && wa
-          ? `<a class="btn btn-olive" href="${esc(
-              wa
-            )}" target="_blank" rel="noopener" style="margin:.5rem 0">${esc(
-              t('event.register_wa')
-            )}</a>`
-          : ''
-      }
       <h4 class="font-display" style="margin:1.4rem 0 .3rem">${esc(
         t('event.available', { count: e.games.length })
       )}</h4>
@@ -426,7 +415,7 @@ function renderGamesPreviewSub() {
       : t('gamesPreview.sub_count', { count: GAMES_COUNT });
 }
 
-// --- Infos pratiques : blocs + lieux + WhatsApp + agenda + FAQ + adhésion --
+// --- Infos pratiques : blocs + agenda + FAQ + adhésion --------------------
 async function loadInfos() {
   const [locs, blocks, faq, membership] = await Promise.all([
     API.get('/api/locations').catch(() => []),
@@ -454,43 +443,6 @@ function renderRich(str) {
     .replace(/\n/g, '<br>');
 }
 
-// Liste dynamique des lieux (bloc spécial « locations »).
-function locationsListHtml() {
-  if (!LOCS.length) return `<p class="muted">${esc(t('infos.locations_soon'))}</p>`;
-  return LOCS.map((l) => {
-    const coords = parseCoords(l.coords);
-    const link = coords
-      ? `<br><a href="${googleMapsUrl(coords)}" target="_blank" rel="noopener" style="font-size:.85rem">${esc(
-          t('infos.location_map_link')
-        )}</a>`
-      : '';
-    return `<div style="margin-bottom:.8rem"><strong>${esc(l.name)}</strong>${
-      l.address ? `<br><span class="muted" style="font-size:.85rem">${esc(l.address)}</span>` : ''
-    }${link}</div>`;
-  }).join('');
-}
-
-// Boutons WhatsApp (bloc spécial « whatsapp »), depuis les réglages.
-function whatsappActionsHtml() {
-  const parts = [];
-  if (SETTINGS.whatsapp_main)
-    parts.push(
-      `<a class="btn btn-olive btn-sm" href="${esc(SETTINGS.whatsapp_main)}" target="_blank" rel="noopener">${esc(
-        t('infos.wa_main')
-      )}</a>`
-    );
-  if (SETTINGS.whatsapp_mjc)
-    parts.push(
-      `<a class="btn btn-ghost btn-sm" href="${esc(SETTINGS.whatsapp_mjc)}" target="_blank" rel="noopener">${esc(
-        t('infos.wa_mjc')
-      )}</a>`
-    );
-  const inner =
-    parts.join('') ||
-    `<span class="muted" style="font-size:.85rem">${esc(t('infos.wa_todo'))}</span>`;
-  return `<div style="margin-top:1rem;display:flex;flex-direction:column;gap:.6rem">${inner}</div>`;
-}
-
 // Carte « Ajouter à l'agenda » (.ics) — bloc cohérent, activable en admin.
 function calendarCardHtml(colorClass) {
   return `<div class="card card-pad fade-in">
@@ -509,24 +461,23 @@ const INFO_ICON_VARIANTS = ['info-icon--terracotta', 'info-icon--olive', 'info-i
 
 function infoBlockHtml(b, i) {
   const variant = INFO_ICON_VARIANTS[i % INFO_ICON_VARIANTS.length];
-  let extra = '';
-  if (b.kind === 'locations') extra = locationsListHtml();
-  else if (b.kind === 'whatsapp') extra = whatsappActionsHtml();
   const body = b.body && b.body.trim() ? `<div>${renderRich(b.body)}</div>` : '';
   return `<div class="card card-pad fade-in">
       <div class="info-icon ${variant}">${esc(b.icon || '📌')}</div>
       <h3 class="font-display">${esc(b.title)}</h3>
       ${body}
-      ${extra}
     </div>`;
 }
 
 function renderInfos() {
-  // Titre / sous-titre de la section : réglage admin sinon repli i18n.
+  // Titre de la section : réglage admin sinon repli i18n.
   const titleEl = document.getElementById('infos-title');
   if (titleEl) titleEl.textContent = SETTINGS.infos_title || t('infos.title');
+  // Texte de la section : réglage admin (liens [libellé](https://…) autorisés)
+  // sinon repli i18n.
   const subEl = document.getElementById('infos-sub');
-  if (subEl) subEl.textContent = SETTINGS.infos_sub || t('infos.sub');
+  if (subEl)
+    subEl.innerHTML = SETTINGS.infos_sub ? renderRich(SETTINGS.infos_sub) : esc(t('infos.sub'));
 
   // Grille des blocs (+ carte agenda optionnelle).
   const grid = document.getElementById('info-grid');
