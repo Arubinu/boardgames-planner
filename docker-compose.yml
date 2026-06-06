@@ -8,10 +8,15 @@ services:
       - ./data:/app/data
     environment:
       TRUST_PROXY: 1
-      DEFAULT_LANG: ''
+      #DEFAULT_LANG: 'FR'
       #ADMIN_PASSWORD: admin
+      #SITE_NAME: Soirées Jeux
+      #SITE_TITLE: Soirées jeux de société
+      #SITE_DESCRIPTION: Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.
+      #SITE_HOLDER: MJC Estrablin
       LOGIN_RETRY_DELAY: 10
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
+      #ICS_FILENAME: boardgames-planner.ics
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
       interval: 30s

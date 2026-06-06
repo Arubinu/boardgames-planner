@@ -214,11 +214,15 @@ ensureSetting.run('footer_year', '');
 // Pour exposer une nouvelle option plus tard, il suffit d'ajouter une ligne
 // à ce tableau (la variable d'environnement -> la clé en base).
 const ENV_SETTINGS = [
-  { env: 'DEFAULT_LANG',   key: 'default_lang' },
-  { env: 'SITE_NAME',      key: 'site_name' },
-  { env: 'SITE_TITLE',     key: 'site_title' },
-  { env: 'FOOTER_TEXT',    key: 'footer_text' },
-  { env: 'MYLUDO_PROFILE', key: 'myludo_profile' },
+  { env: 'DEFAULT_LANG',     key: 'default_lang' },
+  { env: 'SITE_NAME',        key: 'site_name' },
+  { env: 'SITE_HOLDER',      key: 'site_holder' },
+  { env: 'SITE_TITLE',       key: 'site_title' },
+  { env: 'SITE_DESCRIPTION', key: 'site_description' },
+  { env: 'OG_IMAGE',         key: 'og_image' },
+  { env: 'MYLUDO_PROFILE',   key: 'myludo_profile' },
+  { env: 'FOOTER_TEXT',      key: 'footer_text' },
+  { env: 'ICS_FILENAME',     key: 'ics_filename' },
 ];
 
 // Upsert générique : insère la clé si absente, sinon met à jour sa valeur.
