@@ -81,15 +81,16 @@ function applyDocTitle() {
 function applySiteBrand() {
   if (!siteName && !siteHolder) return;
   const e = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  // Titre propre à la page (meta), comme le <title> de l'onglet :
-  // Jeux/Admin affichent leur nom ; l'accueil (préfixe vide) montre le nom du site.
+  // Variante « identité du site » (pages publiques).
+  const siteBrandHtml = e(siteName) + (siteHolder ? `<small>${e(siteHolder)}</small>` : '');
+  // Variante « page » (admin) : titre de la page (meta) + nom du site.
   const tk = document.querySelector('title[data-title-key]')?.dataset.titleKey;
   const prefix = tk ? t('meta.' + tk) : '';
-  const main = prefix || siteName;
-  const sub = prefix ? siteName : siteHolder;
-  const brandHtml = e(main) + (sub ? `<small>${e(sub)}</small>` : '');
+  const pageMain = prefix || siteName;
+  const pageSub = prefix ? siteName : siteHolder;
+  const pageBrandHtml = e(pageMain) + (pageSub ? `<small>${e(pageSub)}</small>` : '');
   document.querySelectorAll('[data-site-brand]').forEach((el) => {
-    el.innerHTML = brandHtml;
+    el.innerHTML = el.dataset.siteBrand === 'page' ? pageBrandHtml : siteBrandHtml;
   });
   const full = siteFull();
   document.querySelectorAll('[data-site-name]').forEach((el) => {
