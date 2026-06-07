@@ -269,9 +269,32 @@ new language.
 
 ## Backup
 
+### Copying files
+
 All data fits in the `data/boardgames-planner.db` file. To back it up, simply
 copy this file (ideally with the server stopped, or also copy the `-wal`/`-shm`
-files if they exist).
+files if they exist). Also include the `data/uploads/` folder if you offer
+membership documents: they are stored on disk, not in the database.
+
+### Export / Import from the admin
+
+The **"💾 Backup"** admin tab lets you export and re-import data without
+touching files on the server.
+
+- **Export** downloads a JSON snapshot of the whole database: settings, event
+  types, venues, games, events (and the game ↔ event associations), "Practical
+  info" blocks, FAQ and membership documents (embedded as base64). The admin
+  password is never included.
+- **Import** is **selective**. After picking an export file, a preview shows the
+  number of items per category (plus the list of venues and blocks). You then
+  tick the categories to **replace**: only those are overwritten with the file
+  contents, the others stay unchanged. This lets you import only the games, only
+  the settings, and so on.
+
+> Import **replaces** the contents of the ticked categories (a confirmation is
+> requested first). The admin password is always preserved, and references that
+> become orphaned — for instance an event pointing to a venue missing from the
+> import, or a non-existent game — are cleaned up automatically.
 
 ---
 

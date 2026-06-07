@@ -273,9 +273,35 @@ nouvelle langue.
 
 ## Sauvegarde
 
+### Copie de fichiers
+
 Toutes les données tiennent dans le fichier `data/boardgames-planner.db`. Pour
 sauvegarder, copiez simplement ce fichier (idéalement serveur arrêté, ou
-copiez aussi les fichiers `-wal`/`-shm` s'ils existent).
+copiez aussi les fichiers `-wal`/`-shm` s'ils existent). Pensez à inclure le
+dossier `data/uploads/` si vous proposez des documents d'adhésion : ils sont
+stockés sur disque, pas dans la base.
+
+### Export / Import depuis l'administration
+
+L'onglet **« 💾 Sauvegarde »** de l'administration permet d'exporter et de
+réimporter les données sans manipuler de fichiers sur le serveur.
+
+- **Exporter** télécharge un instantané JSON de toute la base : réglages, types
+  d'évènements, lieux, jeux, évènements (et l'association jeux ↔ évènements),
+  blocs « Infos pratiques », FAQ et documents d'adhésion (joints en base64). Le
+  mot de passe administrateur n'est jamais inclus.
+- **Importer** est **sélectif**. Après avoir choisi un fichier d'export, un
+  aperçu affiche le nombre d'éléments par catégorie (ainsi que la liste des
+  lieux et des blocs). Vous cochez ensuite les catégories à **remplacer** :
+  seules celles-ci sont écrasées par le contenu du fichier, les autres restent
+  inchangées. Vous pouvez ainsi n'importer que les jeux, uniquement les
+  réglages, etc.
+
+> L'import **remplace** le contenu des catégories cochées (une confirmation est
+> demandée au préalable). Le mot de passe administrateur est toujours préservé,
+> et les références devenues orphelines — par exemple un évènement pointant vers
+> un lieu absent de l'import, ou un jeu inexistant — sont automatiquement
+> nettoyées.
 
 ---
 
