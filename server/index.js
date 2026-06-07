@@ -70,6 +70,8 @@ app.use(helmet({
 app.use(express.json({ limit: '5mb' }));
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+// Import de base : le fichier JSON peut être volumineux (documents en base64).
+const importUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 64 * 1024 * 1024 } });
 
 // --- Helpers réglages -----------------------------------------------------
 const getSetting = db.prepare('SELECT value FROM settings WHERE key = ?');
@@ -740,6 +742,155 @@ app.delete('/api/admin/membership/:id', requireAdmin, (req, res) => {
 app.put('/api/admin/membership/reorder', requireAdmin, (req, res) => {
   reorderRows('membership_files', req.body?.ids);
   res.json({ ok: true });
+});
+
+// --- Export / Import de la base -------------------------------------------
+// Export : un instantané JSON de toutes les tables (le mot de passe admin est
+// exclu ; les documents d'adhésion sont joints en base64). Import : remplace
+// uniquement les catégories choisies (réglages, jeux, lieux, etc.).
+const TABLE_COLUMNS = {
+  settings: ['key', 'value'],
+  event_types: ['id', 'key', 'label', 'sub', 'color', 'signup', 'sort_order'],
+  locations: ['id', 'name', 'address', 'coords', 'maps_url', 'description', 'archived', 'created_at'],
+  games: ['id', 'title', 'subtitle', 'type', 'players', 'duration', 'age', 'categories', 'themes', 'mechanisms', 'authors', 'publishers', 'rating', 'image_url', 'details_url', 'owner', 'created_at', 'updated_at'],
+  events: ['id', 'title', 'date', 'start_time', 'end_time', 'type', 'location_id', 'description', 'created_at'],
+  event_games: ['event_id', 'game_id'],
+  info_blocks: ['id', 'kind', 'icon', 'title', 'body', 'sort_order'],
+  faq: ['id', 'question', 'answer', 'sort_order'],
+  membership_files: ['id', 'filename', 'original_name', 'mime', 'size', 'sort_order', 'created_at'],
+};
+const EXPORT_TABLES = Object.keys(TABLE_COLUMNS);
+// Catégorie d'import → table(s) remplacée(s).
+const IMPORT_CATEGORIES = {
+  settings: ['settings'],
+  event_types: ['event_types'],
+  locations: ['locations'],
+  games: ['games'],
+  events: ['events', 'event_games'],
+  info_blocks: ['info_blocks'],
+  faq: ['faq'],
+  membership: ['membership_files'],
+};
+
+app.get('/api/admin/db-export', requireAdmin, (req, res) => {
+  const data = {};
+  for (const tbl of EXPORT_TABLES) {
+    let rows = db.prepare(`SELECT * FROM ${tbl}`).all();
+    if (tbl === 'settings') rows = rows.filter((r) => r.key !== 'admin_password');
+    if (tbl === 'membership_files') {
+      rows = rows.map((r) => {
+        let content = '';
+        try { content = fs.readFileSync(path.join(MEMBERSHIP_DIR, r.filename)).toString('base64'); }
+        catch { /* fichier manquant : métadonnée seule */ }
+        return { ...r, _content: content };
+      });
+    }
+    data[tbl] = rows;
+  }
+  const payload = JSON.stringify(
+    { type: 'boardgames-planner-export', version: 1, exported_at: new Date().toISOString(), data },
+    null,
+    2
+  );
+  const stamp = new Date().toISOString().slice(0, 10);
+  res.set('Content-Type', 'application/json; charset=utf-8');
+  res.set('Content-Disposition', `attachment; filename="boardgames-planner-${stamp}.json"`);
+  res.send(payload);
+});
+
+function importRows(table, rows) {
+  if (!Array.isArray(rows)) return;
+  const cols = TABLE_COLUMNS[table];
+  db.prepare(`DELETE FROM ${table}`).run();
+  for (const row of rows) {
+    if (!row || typeof row !== 'object') continue;
+    const keys = cols.filter((c) => Object.prototype.hasOwnProperty.call(row, c));
+    if (!keys.length) continue;
+    db.prepare(
+      `INSERT INTO ${table} (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`
+    ).run(...keys.map((k) => row[k]));
+  }
+}
+
+function importSettings(rows) {
+  if (!Array.isArray(rows)) return;
+  // On préserve le mot de passe admin courant.
+  db.prepare("DELETE FROM settings WHERE key <> 'admin_password'").run();
+  const ins = db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?,?)');
+  for (const r of rows) {
+    if (!r || typeof r.key !== 'string' || r.key === 'admin_password') continue;
+    ins.run(r.key, r.value == null ? '' : String(r.value));
+  }
+}
+
+function importMembership(rows) {
+  const existing = db.prepare('SELECT filename FROM membership_files').all();
+  db.prepare('DELETE FROM membership_files').run();
+  for (const r of existing) {
+    try { fs.unlinkSync(path.join(MEMBERSHIP_DIR, r.filename)); } catch { /* déjà absent */ }
+  }
+  if (!Array.isArray(rows)) return;
+  const cols = TABLE_COLUMNS.membership_files;
+  for (const row of rows) {
+    if (!row || typeof row !== 'object') continue;
+    const safe = path.basename(String(row.filename || '')); // anti-traversal
+    if (!safe) continue;
+    if (row._content) {
+      try { fs.writeFileSync(path.join(MEMBERSHIP_DIR, safe), Buffer.from(row._content, 'base64')); }
+      catch { /* contenu illisible : on garde la métadonnée */ }
+    }
+    const merged = { ...row, filename: safe };
+    const keys = cols.filter((c) => Object.prototype.hasOwnProperty.call(merged, c));
+    db.prepare(
+      `INSERT INTO membership_files (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`
+    ).run(...keys.map((k) => merged[k]));
+  }
+}
+
+app.post('/api/admin/db-import', requireAdmin, importUpload.single('backup'), (req, res) => {
+  let parsed;
+  try {
+    parsed = JSON.parse(req.file ? req.file.buffer.toString('utf8') : req.body.data || '');
+  } catch {
+    return res.status(400).json({ error: 'Fichier invalide (JSON illisible).' });
+  }
+  if (!parsed || parsed.type !== 'boardgames-planner-export' || !parsed.data) {
+    return res.status(400).json({ error: "Ce fichier n'est pas un export valide." });
+  }
+  let cats = [];
+  try { cats = JSON.parse(req.body.categories || '[]'); } catch { /* ignore */ }
+  cats = (Array.isArray(cats) ? cats : []).filter((c) => IMPORT_CATEGORIES[c]);
+  if (!cats.length) return res.status(400).json({ error: 'Aucun élément sélectionné.' });
+
+  const data = parsed.data;
+  // Les clés étrangères ne peuvent être basculées que hors transaction.
+  db.pragma('foreign_keys = OFF');
+  try {
+    const run = db.transaction(() => {
+      for (const cat of cats) {
+        if (cat === 'settings') importSettings(data.settings);
+        else if (cat === 'membership') importMembership(data.membership_files);
+        else if (cat === 'events') {
+          importRows('events', data.events);
+          importRows('event_games', data.event_games);
+        } else importRows(cat, data[cat]);
+      }
+      // Sanitation finale : retire les références devenues orphelines, quelle
+      // que soit la combinaison de catégories importées.
+      db.prepare(
+        'UPDATE events SET location_id = NULL WHERE location_id IS NOT NULL AND location_id NOT IN (SELECT id FROM locations)'
+      ).run();
+      db.prepare(
+        'DELETE FROM event_games WHERE event_id NOT IN (SELECT id FROM events) OR game_id NOT IN (SELECT id FROM games)'
+      ).run();
+    });
+    run();
+  } catch (e) {
+    return res.status(500).json({ error: "Échec de l'import : " + e.message });
+  } finally {
+    db.pragma('foreign_keys = ON');
+  }
+  res.json({ ok: true, imported: cats });
 });
 
 // --- Réglages admin ---

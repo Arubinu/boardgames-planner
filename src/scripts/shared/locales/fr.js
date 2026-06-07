@@ -154,11 +154,12 @@ export default {
     stat_locations: 'lieux',
 
     tab_events: '📅 Évènements',
-    tab_games: '🎲 Jeux & import',
+    tab_games: '🎲 Jeux',
     tab_locations: '📍 Lieux',
     tab_types: '🏷️ Types d\'évènements',
     tab_infos: '📋 Infos pratiques',
     tab_settings: '⚙️ Réglages',
+    tab_backup: '💾 Sauvegarde',
 
     events_title: 'Évènements',
     upcoming_events_title: 'À venir',
@@ -324,6 +325,35 @@ export default {
     set_myludo: 'Profil MyLudo (lien public)',
     set_pwd: 'Nouveau mot de passe admin (laisser vide pour ne pas changer)',
     save_settings: 'Enregistrer les réglages',
+
+    // Sauvegarde (export / import)
+    bk_export_title: 'Exporter',
+    bk_export_help:
+      "Télécharge une sauvegarde complète de la base (réglages, jeux, lieux, évènements, infos pratiques, FAQ et documents d'adhésion) dans un fichier JSON.",
+    bk_export_btn: 'Exporter la base (JSON)',
+    bk_exported: 'Export téléchargé',
+    bk_import_title: 'Importer',
+    bk_import_help:
+      "Sélectionnez un fichier d'export, puis cochez les éléments à remplacer. Seules les catégories cochées seront écrasées par le contenu du fichier ; les autres restent inchangées.",
+    bk_file: "Fichier d'export (.json)",
+    bk_categories: 'Éléments à importer',
+    bk_select_all: 'Tout sélectionner',
+    bk_cat_settings: 'Réglages',
+    bk_cat_event_types: "Types d'évènements",
+    bk_cat_locations: 'Lieux',
+    bk_cat_games: 'Jeux',
+    bk_cat_events: 'Évènements (et leurs jeux)',
+    bk_cat_info_blocks: 'Blocs « Infos pratiques »',
+    bk_cat_faq: 'FAQ',
+    bk_cat_membership: "Documents d'adhésion",
+    bk_import_btn: 'Importer la sélection',
+    bk_no_file: "Sélectionnez d'abord un fichier d'export.",
+    bk_no_cat: 'Cochez au moins un élément à importer.',
+    bk_bad_preview: "Fichier d'export invalide ou illisible.",
+    bk_confirm_title: 'Confirmer l\'import',
+    bk_confirm_msg:
+      'Cette opération va <strong>remplacer définitivement</strong> {count} catégorie(s) par le contenu du fichier. Les données actuelles de ces catégories seront perdues. Continuer ?',
+    bk_imported: 'Import terminé ({count} catégorie(s))',
 
     ef_new: 'Nouvel évènement',
     ef_edit: 'Modifier l\'évènement',

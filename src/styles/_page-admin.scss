@@ -19,7 +19,7 @@
   border-bottom: 1px solid var(--border);
 }
 .tab {
-  padding: 0.7rem 1.1rem;
+  padding: 0.7rem 1rem;
   border: none;
   background: none;
   cursor: pointer;
@@ -256,6 +256,56 @@ body.dark .cell-actions .btn-icon img {
   input[type='checkbox'] {
     width: auto;
     margin: 0;
+  }
+}
+
+// --- Sauvegarde : liste « Éléments à importer » --------------------------
+// Une option par ligne, séparateurs fins et cases aux couleurs de la marque.
+#panel-backup fieldset {
+  display: flex;
+  flex-direction: column;
+}
+#panel-backup .checkbox-line {
+  display: flex; // chaque option occupe sa propre ligne
+  width: 100%;
+  padding: 0.55rem 0.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--border); // séparateur entre les lignes
+
+  &:hover {
+    background: color-mix(in srgb, var(--terracotta) 8%, transparent);
+  }
+
+  input[type='checkbox'] {
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--terracotta); // case aux couleurs du site
+    cursor: pointer;
+  }
+}
+#panel-backup .checkbox-line:last-of-type {
+  border-bottom: none;
+}
+// Compteur d'éléments « (N) » à la suite du libellé.
+#panel-backup .bk-count {
+  margin-left: 0.35rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+// Liste des noms (lieux, blocs) sous la case associée.
+#panel-backup .bk-list {
+  margin-left: 1.95rem;
+
+  ul {
+    margin: 0.1rem 0 0.5rem;
+    padding-left: 1rem;
+  }
+  li {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
   }
 }
 

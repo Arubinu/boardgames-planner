@@ -75,6 +75,7 @@
         <button class="tab" data-tab="types" data-i18n="admin.tab_types">🏷️ Types d'évènements</button>
         <button class="tab" data-tab="infos" data-i18n="admin.tab_infos">📋 Infos pratiques</button>
         <button class="tab" data-tab="settings" data-i18n="admin.tab_settings">⚙️ Réglages</button>
+        <button class="tab" data-tab="backup" data-i18n="admin.tab_backup">💾 Sauvegarde</button>
       </div>
 
       <!-- Onglet Soirées -->
@@ -274,6 +275,38 @@
           /></label>
           <button class="btn btn-primary" type="submit" id="save-settings-btn" data-i18n="admin.save_settings">Enregistrer les réglages</button>
         </form>
+      </section>
+
+      <section class="panel" id="panel-backup">
+        <h2 class="font-display" style="margin: 0 0 .3rem" data-i18n="admin.bk_export_title">Exporter</h2>
+        <p class="help" data-i18n="admin.bk_export_help">Télécharge une sauvegarde complète de la base (réglages, jeux, lieux, évènements, infos pratiques, FAQ et documents d'adhésion) dans un fichier JSON.</p>
+        <button class="btn btn-primary" id="bk-export-btn" data-i18n="admin.bk_export_btn">Exporter la base (JSON)</button>
+
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 2rem 0" />
+
+        <h2 class="font-display" style="margin: 0 0 .3rem" data-i18n="admin.bk_import_title">Importer</h2>
+        <p class="help" data-i18n="admin.bk_import_help">Sélectionne un fichier d'export, puis coche les éléments à remplacer. Seules les catégories cochées seront écrasées par le contenu du fichier ; les autres restent inchangées.</p>
+        <div class="card card-pad">
+          <label class="field"
+            ><span data-i18n="admin.bk_file">Fichier d'export (.json)</span>
+            <input type="file" id="bk-file" accept="application/json,.json" />
+          </label>
+          <fieldset id="bk-cats" style="border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin: .5rem 0">
+            <legend style="padding: 0 .4rem; font-weight: 600; font-size: .9rem" data-i18n="admin.bk_categories">Éléments à importer</legend>
+            <span class="checkbox-line"><input type="checkbox" id="bk-all" /> <span data-i18n="admin.bk_select_all"><strong>Tout sélectionner</strong></span></span>
+            <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="settings" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_settings">Réglages</span><span class="bk-count" data-count="settings"></span></span></span>
+            <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="event_types" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_event_types">Types d'évènements</span><span class="bk-count" data-count="event_types"></span></span></span>
+            <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="locations" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_locations">Lieux</span><span class="bk-count" data-count="locations"></span></span></span>
+            <div class="bk-list" id="bk-list-locations"></div>
+            <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="games" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_games">Jeux</span><span class="bk-count" data-count="games"></span></span></span>
+            <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="events" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_events">Évènements (et leurs jeux)</span><span class="bk-count" data-count="events"></span></span></span>
+            <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="info_blocks" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_info_blocks">Blocs « Infos pratiques »</span><span class="bk-count" data-count="info_blocks"></span></span></span>
+            <div class="bk-list" id="bk-list-info_blocks"></div>
+            <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="faq" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_faq">FAQ</span><span class="bk-count" data-count="faq"></span></span></span>
+            <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="membership" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_membership">Documents d'adhésion</span><span class="bk-count" data-count="membership"></span></span></span>
+          </fieldset>
+          <button class="btn btn-primary" id="bk-import-btn" data-i18n="admin.bk_import_btn">Importer la sélection</button>
+        </div>
       </section>
     </main>
 

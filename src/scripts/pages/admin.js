@@ -22,6 +22,7 @@ import {
   getLocale,
   LANGUAGES,
   setSiteIdentity,
+  applySiteDefaultLang,
 } from '../shared/i18n.js';
 import {
   setEventTypes,
@@ -1067,6 +1068,120 @@ async function uploadDocs() {
   }
 }
 
+// --- Export / Import de la base -------------------------------------------
+const BK_COUNT_KEYS = {
+  settings: 'settings',
+  event_types: 'event_types',
+  locations: 'locations',
+  games: 'games',
+  events: 'events',
+  info_blocks: 'info_blocks',
+  faq: 'faq',
+  membership: 'membership_files',
+};
+
+function clearBackupPreview() {
+  document.querySelectorAll('.bk-count').forEach((el) => (el.textContent = ''));
+  ['bk-list-locations', 'bk-list-info_blocks'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+}
+
+function renderBkList(id, names) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const items = (names || []).filter((n) => n && String(n).trim());
+  el.innerHTML = items.length
+    ? `<ul>${items.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>`
+    : '';
+}
+
+async function previewBackup() {
+  clearBackupPreview();
+  const fileInput = document.getElementById('bk-file');
+  const file = fileInput.files && fileInput.files[0];
+  if (!file) return;
+  let parsed;
+  try {
+    parsed = JSON.parse(await file.text());
+  } catch {
+    return toast(t('admin.bk_bad_preview'), true);
+  }
+  if (!parsed || parsed.type !== 'boardgames-planner-export' || !parsed.data) {
+    return toast(t('admin.bk_bad_preview'), true);
+  }
+  const d = parsed.data;
+  document.querySelectorAll('.bk-count').forEach((el) => {
+    const arr = d[BK_COUNT_KEYS[el.dataset.count]];
+    el.textContent = Array.isArray(arr) ? ` (${arr.length})` : '';
+  });
+  renderBkList('bk-list-locations', (d.locations || []).map((l) => l.name));
+  renderBkList('bk-list-info_blocks', (d.info_blocks || []).map((b) => b.title));
+}
+
+async function doExport() {
+  try {
+    const r = await fetch('/api/admin/db-export', { headers: { 'x-admin-password': PWD } });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.statusText);
+    const blob = await r.blob();
+    const cd = r.headers.get('Content-Disposition') || '';
+    const m = cd.match(/filename="([^"]+)"/);
+    const name = m ? m[1] : 'boardgames-planner.json';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast(t('admin.bk_exported'));
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+function doDbImport() {
+  const fileInput = document.getElementById('bk-file');
+  const file = fileInput.files && fileInput.files[0];
+  const cats = [...document.querySelectorAll('.bk-cat:checked')].map((c) => c.value);
+  if (!file) return toast(t('admin.bk_no_file'), true);
+  if (!cats.length) return toast(t('admin.bk_no_cat'), true);
+
+  // Confirmation (action destructive) via la modale partagée.
+  document.getElementById('cm-title').textContent = t('admin.bk_confirm_title');
+  document.getElementById('cm-message').innerHTML = t('admin.bk_confirm_msg', { count: cats.length });
+  const btn = document.getElementById('cm-confirm-btn');
+  btn.textContent = t('admin.bk_import_btn');
+  btn.onclick = async () => {
+    const fd = new FormData();
+    fd.append('backup', file);
+    fd.append('categories', JSON.stringify(cats));
+    try {
+      const r = await fetch('/api/admin/db-import', {
+        method: 'POST',
+        headers: { 'x-admin-password': PWD },
+        body: fd,
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || r.statusText);
+      closeModal('confirm-modal');
+      // Réinitialise le formulaire d'import.
+      fileInput.value = '';
+      clearBackupPreview();
+      document.querySelectorAll('.bk-cat').forEach((c) => (c.checked = false));
+      const allBox = document.getElementById('bk-all');
+      if (allBox) allBox.checked = false;
+      toast(t('admin.bk_imported', { count: (data.imported || cats).length }));
+      loadAll();
+    } catch (e) {
+      toast(e.message, true);
+    }
+  };
+  openModal('confirm-modal');
+}
+
 // --- Enregistrement des réglages « Infos pratiques » ----------------------
 async function saveInfosSettings(payload, okKey) {
   try {
@@ -1170,6 +1285,21 @@ function wireHandlers() {
     if (pendingDocs && pendingDocs.length) uploadDocs();
   });
   document.getElementById('ef-type').addEventListener('change', onTypeChange);
+
+  // Sauvegarde (export / import).
+  document.getElementById('bk-export-btn')?.addEventListener('click', doExport);
+  document.getElementById('bk-import-btn')?.addEventListener('click', doDbImport);
+  document.getElementById('bk-file')?.addEventListener('change', previewBackup);
+  document.getElementById('bk-all')?.addEventListener('change', (e) => {
+    document.querySelectorAll('.bk-cat').forEach((c) => (c.checked = e.target.checked));
+  });
+  document.querySelectorAll('.bk-cat').forEach((c) =>
+    c.addEventListener('change', () => {
+      const all = [...document.querySelectorAll('.bk-cat')];
+      const allBox = document.getElementById('bk-all');
+      if (allBox) allBox.checked = all.every((x) => x.checked);
+    })
+  );
   document.getElementById('gp-search').addEventListener('input', renderPicker);
   document.getElementById('save-event-btn').addEventListener('click', saveEvent);
   document.getElementById('save-location-btn').addEventListener('click', saveLocation);
@@ -1278,6 +1408,7 @@ function wireHandlers() {
 document.addEventListener('DOMContentLoaded', async () => {
   initI18n();
   applyI18n(document);
+  applySiteDefaultLang();
   mountLangSwitchers();
   initTheme();
   wireHandlers();

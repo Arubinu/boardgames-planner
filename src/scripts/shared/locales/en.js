@@ -151,11 +151,12 @@ export default {
     stat_locations: 'venues',
 
     tab_events: '📅 Events',
-    tab_games: '🎲 Games & import',
+    tab_games: '🎲 Games',
     tab_locations: '📍 Venues',
     tab_types: "🏷️ Event types",
     tab_infos: '📋 Practical info',
     tab_settings: '⚙️ Settings',
+    tab_backup: '💾 Backup',
 
     events_title: 'Events',
     upcoming_events_title: 'Upcoming',
@@ -320,6 +321,35 @@ export default {
     set_myludo: 'MyLudo profile (public link)',
     set_pwd: 'New admin password (leave empty to keep it unchanged)',
     save_settings: 'Save settings',
+
+    // Backup (export / import)
+    bk_export_title: 'Export',
+    bk_export_help:
+      'Downloads a full backup of the database (settings, games, venues, events, practical info, FAQ and membership documents) as a JSON file.',
+    bk_export_btn: 'Export database (JSON)',
+    bk_exported: 'Export downloaded',
+    bk_import_title: 'Import',
+    bk_import_help:
+      'Pick an export file, then tick the items to replace. Only the checked categories are overwritten with the file contents; the others stay unchanged.',
+    bk_file: 'Export file (.json)',
+    bk_categories: 'Items to import',
+    bk_select_all: 'Select all',
+    bk_cat_settings: 'Settings',
+    bk_cat_event_types: 'Event types',
+    bk_cat_locations: 'Venues',
+    bk_cat_games: 'Games',
+    bk_cat_events: 'Events (and their games)',
+    bk_cat_info_blocks: '"Practical info" blocks',
+    bk_cat_faq: 'FAQ',
+    bk_cat_membership: 'Membership documents',
+    bk_import_btn: 'Import selection',
+    bk_no_file: 'Select an export file first.',
+    bk_no_cat: 'Tick at least one item to import.',
+    bk_bad_preview: 'Invalid or unreadable export file.',
+    bk_confirm_title: 'Confirm import',
+    bk_confirm_msg:
+      'This will <strong>permanently replace</strong> {count} categorie(s) with the file contents. The current data in those categories will be lost. Continue?',
+    bk_imported: 'Import complete ({count} categorie(s))',
 
     ef_new: 'New event',
     ef_edit: 'Edit event',

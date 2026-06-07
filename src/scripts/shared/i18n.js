@@ -91,18 +91,23 @@ function applyDocTitle() {
 }
 // Marque (logo) : [data-site-brand] = Nom + <small>Détenteur</small> ;
 // [data-site-name] = nom complet en texte simple.
-// Une marque portant data-site-brand="page" affiche plutôt « titre de la page
-// courante + nom du site » — réservé au back-office (administration).
+// Par défaut, [data-site-brand] affiche l'identité du site (Nom + Détenteur),
+// identique sur toutes les pages publiques (accueil, ludothèque). Une marque
+// portant data-site-brand="page" affiche plutôt « titre de la page courante +
+// nom du site » — réservé au back-office (administration).
 function applySiteBrand() {
   if (!siteName && !siteHolder) return;
   const e = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   // Variante « identité du site » (pages publiques).
   const siteBrandHtml = e(siteName) + (siteHolder ? `<small>${e(siteHolder)}</small>` : '');
-  // Variante « page » (admin) : titre de la page (meta) + nom du site.
+  // Variante « page » (admin) : titre de la page (meta) + « Nom (Détenteur) ».
   const tk = document.querySelector('title[data-title-key]')?.dataset.titleKey;
   const prefix = tk ? t('meta.' + tk) : '';
   const pageMain = prefix || siteName;
-  const pageSub = prefix ? siteName : siteHolder;
+  // Sur une page interne : le nom du site, suivi du détenteur entre parenthèses.
+  const pageSub = prefix
+    ? siteName + (siteHolder ? ` (${siteHolder})` : '')
+    : siteHolder;
   const pageBrandHtml = e(pageMain) + (pageSub ? `<small>${e(pageSub)}</small>` : '');
   document.querySelectorAll('[data-site-brand]').forEach((el) => {
     el.innerHTML = el.dataset.siteBrand === 'page' ? pageBrandHtml : siteBrandHtml;
