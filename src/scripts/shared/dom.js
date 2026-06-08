@@ -26,18 +26,38 @@ export function gameInitial(title) {
 }
 
 // --- Thème clair / sombre, persisté dans localStorage --------------------
+const prefersDark = () =>
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(prefers-color-scheme: dark)').matches;
+
 export function initTheme() {
-  if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+  // Choix explicite mémorisé ('dark'/'light') sinon on suit le système.
+  const stored = localStorage.getItem('theme');
+  applyDark(stored ? stored === 'dark' : prefersDark());
+  // Tant qu'aucun choix explicite n'a été fait, suivre les changements système.
+  if (!stored && typeof window.matchMedia === 'function') {
+    window
+      .matchMedia('(prefers-color-scheme: dark)')
+      .addEventListener?.('change', (e) => {
+        if (!localStorage.getItem('theme')) applyDark(e.matches);
+      });
+  }
+}
+function applyDark(dark) {
+  document.body.classList.toggle('dark', dark);
   updateThemeIcon();
 }
 export function toggleTheme() {
-  document.body.classList.toggle('dark');
-  localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-  updateThemeIcon();
+  const dark = !document.body.classList.contains('dark');
+  applyDark(dark);
+  // Le bouton fige un choix explicite (qui prime sur le thème système).
+  localStorage.setItem('theme', dark ? 'dark' : 'light');
 }
 function updateThemeIcon() {
   const icon = document.getElementById('themeIcon');
-  if (icon) icon.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+  if (icon) {
+    icon.innerHTML = '<img src="/assets/icons/' + (document.body.classList.contains('dark') ? 'light' : 'dark') + '.webp" />';
+  }
 }
 
 // --- Petites aides DOM ----------------------------------------------------

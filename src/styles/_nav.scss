@@ -72,10 +72,10 @@
 .theme-toggle {
   width: 38px;
   height: 38px;
+  background: none;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  background: var(--cream);
   display: grid;
   place-items: center;
   font-size: 1.05rem;
@@ -84,18 +84,23 @@
   &:hover {
     transform: scale(1.1);
   }
+
+  img {
+    height: 28px;
+    vertical-align: middle;
+  }
 }
 
 // Sélecteur de langue : pilule compacte, cohérente avec le bouton de thème.
 .lang-select {
   appearance: none;
-  border: 1px solid var(--border);
-  background: var(--cream);
+  background: none;
+  border: none;
   color: var(--dark-text);
   font: inherit;
-  font-size: 0.82rem;
   font-weight: 600;
   line-height: 1;
+  text-align: center;
   padding: 0.45rem 0.6rem;
   border-radius: 999px;
   cursor: pointer;
@@ -106,8 +111,7 @@
     color: var(--terracotta);
   }
   &:focus-visible {
-    outline: 2px solid var(--terracotta);
-    outline-offset: 2px;
+    outline: none;
   }
 }
 

@@ -3,6 +3,7 @@
 @use 'variables' as v;
 
 :root {
+  color-scheme: light;
   --terracotta: #{v.$terracotta};
   --terracotta-light: #{v.$terracotta-light};
   --terracotta-dark: #{v.$terracotta-dark};
@@ -19,6 +20,7 @@
 }
 
 body.dark {
+  color-scheme: dark;
   --cream: #232323;
   --dark-text: #e8e8e8;
   --light-bg: #161616;
