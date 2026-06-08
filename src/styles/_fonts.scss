@@ -15,7 +15,7 @@
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url('fonts/Caveat-VariableFont_wght.ttf') format('truetype-variations');
+  src: url('/assets/fonts/Caveat-VariableFont_wght.woff2') format('woff2');
 }
 
 // --- Comic Neue (titres)
@@ -24,12 +24,12 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('fonts/ComicNeue-Regular.woff2') format('woff2');
+  src: url('/assets/fonts/ComicNeue-Regular.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Comic Neue';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('fonts/ComicNeue-Bold.woff2') format('woff2');
+  src: url('/assets/fonts/ComicNeue-Bold.woff2') format('woff2');
 }
