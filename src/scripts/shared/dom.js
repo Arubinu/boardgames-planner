@@ -56,7 +56,9 @@ export function toggleTheme() {
 function updateThemeIcon() {
   const icon = document.getElementById('themeIcon');
   if (icon) {
-    icon.innerHTML = '<img src="/assets/icons/' + (document.body.classList.contains('dark') ? 'light' : 'dark') + '.webp" />';
+    const alt = document.body.classList.contains('dark') ? 'Light mode' : 'Dark mode';
+    const theme = document.body.classList.contains('dark') ? 'light' : 'dark';
+    icon.innerHTML = `<img alt="${alt}" src="/assets/icons/${theme}.webp" />`;
   }
 }
 

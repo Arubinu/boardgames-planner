@@ -29,19 +29,30 @@ import {
 import { gameThumb, wireThumbFallbacks } from '../shared/gameThumb.js';
 import { openGameModal } from '../shared/gameModal.js';
 import { parseCoords, googleMapsUrl } from '../shared/maps.js';
-// Mini-carte en Leaflet (remplace l'ancien iframe d'embed OpenStreetMap, dont
-// le pied de page n'était pas personnalisable car servi en cross-origin).
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-// Correctif des icônes de marqueur Leaflet sous bundler (Vite).
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+
+let L = null; // instance Leaflet, peuplée au premier usage
+let leafletReady = null;
+function ensureLeaflet() {
+  if (!leafletReady) {
+    leafletReady = Promise.all([
+      import('leaflet'),
+      import('leaflet/dist/leaflet.css'),
+    ]).then(([mod]) => {
+      L = mod.default;
+      // Correctif des icônes de marqueur Leaflet sous bundler (Vite).
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: markerIcon2x,
+        iconUrl: markerIcon,
+        shadowUrl: markerShadow,
+      });
+      return L;
+    });
+  }
+  return leafletReady;
+}
 
 let SETTINGS = {};
 let ALL_EVENTS = [];
@@ -244,7 +255,8 @@ function destroyLocationMap() {
 // créée une seule fois puis recentrée d'un événement à l'autre. L'attribution
 // est réduite à un court « © OpenStreetMap » et le lien « Leaflet » est retiré
 // (voir le complément SCSS pour réduire encore la taille de ce texte).
-function renderLocationMap(embed, coords) {
+async function renderLocationMap(embed, coords) {
+  await ensureLeaflet();
   // Si le panneau contenait autre chose (message « coordonnées manquantes »
   // ou panneau vidé), on recrée le conteneur de carte.
   if (!document.getElementById('map-leaflet')) {

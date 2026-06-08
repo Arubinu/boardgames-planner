@@ -8,8 +8,6 @@
 // mobile (burger) permet de quitter l'administration depuis un téléphone, à
 // l'identique du reste du site.
 import '../../styles/admin.scss';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 import { API } from '../shared/api.js';
 import { esc, initTheme, toggleTheme, toast, openModal, closeModal } from '../shared/dom.js';
 import {
@@ -35,15 +33,33 @@ import {
   typeColor,
 } from '../shared/eventTypes.js';
 
-// Correctif des icônes de marqueur Leaflet sous bundler (Vite).
+// Carte Leaflet (sélection des coordonnées d'un lieu) : chargée à la demande
+// pour ne pas bloquer le rendu initial. Les images de marqueur restent des
+// imports statiques (simples URLs).
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+
+let L = null; // instance Leaflet, peuplée au premier usage
+let leafletReady = null;
+function ensureLeaflet() {
+  if (!leafletReady) {
+    leafletReady = Promise.all([
+      import('leaflet'),
+      import('leaflet/dist/leaflet.css'),
+    ]).then(([mod]) => {
+      L = mod.default;
+      // Correctif des icônes de marqueur Leaflet sous bundler (Vite).
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: markerIcon2x,
+        iconUrl: markerIcon,
+        shadowUrl: markerShadow,
+      });
+      return L;
+    });
+  }
+  return leafletReady;
+}
 
 let PWD = sessionStorage.getItem('admin_pwd') || '';
 let GAMES = [];
@@ -600,7 +616,8 @@ async function unarchiveLocation(id) {
 }
 
 // Initialise (ou réinitialise) la carte de sélection des coordonnées.
-function setupCoordMap(initialCoords) {
+async function setupCoordMap(initialCoords) {
+  await ensureLeaflet();
   coordValue = initialCoords || '';
   const start = parseLatLon(initialCoords) || ESTRABLIN;
 
