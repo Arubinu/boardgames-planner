@@ -965,6 +965,7 @@ function injectOpenGraph(html, req) {
   const url = origin + req.originalUrl;
   const e = htmlEscapeAttr;
   const tags = [
+    desc && `<meta name="description" content="${e(desc)}" />`,
     '<meta property="og:type" content="website" />',
     name && `<meta property="og:site_name" content="${e(name)}" />`,
     name && `<meta property="og:title" content="${e(name)}" />`,
