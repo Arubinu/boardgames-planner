@@ -1,6 +1,8 @@
 // server/index.js
 // Serveur unique : sert le site statique + l'API REST (events, locations, games, import).
 import express from 'express';
+import compression from 'compression';
+import expressStaticGzip from 'express-static-gzip';
 import multer from 'multer';
 import helmet from 'helmet';
 import { fileURLToPath } from 'url';
@@ -45,6 +47,12 @@ function parseTrustProxy(v) {
   return v;
 }
 app.set('trust proxy', parseTrustProxy(process.env.TRUST_PROXY));
+
+// --- Compression HTTP (gzip) ----------------------------------------------
+// Compresse à la volée les réponses texte (HTML, CSS, JS, JSON, SVG…). Les
+// fichiers déjà compressés (woff2, images, .ics) sont ignorés automatiquement
+// (type non « compressible »), donc pas de double compression inutile.
+app.use(compression());
 
 // --- Sécurité : en-têtes HTTP (helmet) ------------------------------------
 // CSP adaptée : on autorise les tuiles OpenStreetMap (cartes Leaflet) et les
@@ -1031,13 +1039,14 @@ app.get('/robots.txt', (req, res) => {
 });
 
 app.use(
-  express.static(PUBLIC_DIR, {
-    setHeaders(res) {
-      // Autorise le chargement cross-origin des fichiers publics (image
-      // OpenGraph, favicons, images…). Sinon CORP:same-origin (posé par
-      // helmet) bloque les aperçus de partage et les tests OpenGraph
-      // chargés depuis une autre origine dans le navigateur.
-      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  expressStaticGzip(PUBLIC_DIR, {
+    enableBrotli: true,
+    orderPreference: ['br', 'gz'],
+    index: false, // les pages '/', '/index.html', '/games.html' sont servies plus haut
+    serveStatic: {
+      setHeaders(res) {
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      },
     },
   })
 );

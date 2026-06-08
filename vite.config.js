@@ -9,6 +9,7 @@
 // sont copiés tels quels (ex. /assets/boardgames.webp).
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { compression } from 'vite-plugin-compression2';
 
 const root = resolve(__dirname, 'src/pages');
 
@@ -16,6 +17,15 @@ export default defineConfig({
   root,
   publicDir: resolve(__dirname, 'static'),
   base: '/',
+  plugins: [
+    compression({
+      algorithms: ['brotliCompress', 'gzip'],
+      exclude: [/\.(woff2?|png|jpe?g|webp|avif|gif|ico)$/i],
+      threshold: 1024, // inutile de compresser les tout petits fichiers
+      skipIfLargerOrEqual: true, // si la version compressée n'aide pas, on l'ignore
+      deleteOriginalAssets: false, // garder l'original (repli + nécessaire au service)
+    }),
+  ],
   build: {
     outDir: resolve(__dirname, 'public'),
     emptyOutDir: true,
