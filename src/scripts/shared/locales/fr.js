@@ -313,6 +313,9 @@ export default {
     set_site_holder: 'Détenteur',
     set_site_desc: 'Description (aperçu de partage)',
     set_og_image: 'Image de partage (URL ou chemin /assets/…)',
+    set_meta_keywords: 'Mots-clés (SEO)',
+    set_meta_keywords_help:
+      'Séparés par des virgules. Laissez vide pour ne pas générer la balise.',
     set_default_lang: 'Langue par défaut du site',
     lang_auto: 'Auto (navigateur)',
     set_site_title: "Titre d'accueil (page principale)",

@@ -148,11 +148,21 @@ label.field {
   display: block;
   margin-bottom: 1rem;
 
+  &:has(+ .help) {
+    margin-bottom: 0;
+  }
+
   > span {
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
     margin-bottom: 0.35rem;
+  }
+
+  > input,
+  > select,
+  > textarea {
+    display: block;
   }
 }
 

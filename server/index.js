@@ -908,6 +908,7 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     'site_holder',
     'site_description',
     'og_image',
+    'meta_keywords',
     'site_title',
     'footer_text',
     'footer_year',
@@ -925,6 +926,7 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
   const allowEmpty = new Set([
     'default_lang',
     'footer_year',
+    'meta_keywords',
     'infos_title',
     'infos_sub',
     'ics_filename',
@@ -955,17 +957,27 @@ function htmlEscapeAttr(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+// Origine absolue du site déduite de la requête (derrière un proxy : honore
+// x-forwarded-proto / x-forwarded-host).
+function siteOrigin(req) {
+  const proto = req.get('x-forwarded-proto') || req.protocol;
+  const host = req.get('x-forwarded-host') || req.get('host');
+  return `${proto}://${host}`;
+}
 function injectOpenGraph(html, req) {
   const name = siteFullName();
   const desc = setting('site_description');
+  const keywords = setting('meta_keywords');
   let image = setting('og_image');
-  const host = req.get('x-forwarded-host') || req.get('host');
-  const origin = `${req.protocol}://${host}`;
+  const origin = siteOrigin(req);
   if (image && image.startsWith('/')) image = origin + image; // chemin → URL absolue
   const url = origin + req.originalUrl;
   const e = htmlEscapeAttr;
   const tags = [
+    // SEO de base.
     desc && `<meta name="description" content="${e(desc)}" />`,
+    keywords && `<meta name="keywords" content="${e(keywords)}" />`,
+    // Partage (OpenGraph / Twitter).
     '<meta property="og:type" content="website" />',
     name && `<meta property="og:site_name" content="${e(name)}" />`,
     name && `<meta property="og:title" content="${e(name)}" />`,
@@ -994,6 +1006,29 @@ function servePublicHtml(file) {
 }
 app.get(['/', '/index.html'], servePublicHtml('index.html'));
 app.get('/games.html', servePublicHtml('games.html'));
+
+// --- sitemap.xml + robots.txt (générés selon l'URL d'accès) ----------------
+const SITEMAP_PATHS = ['/', '/games.html']; // pages publiques (hors admin)
+app.get('/sitemap.xml', (req, res) => {
+  const origin = siteOrigin(req);
+  const e = htmlEscapeAttr;
+  const lastmod = new Date().toISOString().slice(0, 10); // AAAA-MM-JJ
+  const urls = SITEMAP_PATHS.map(
+    (p) => `  <url>\n    <loc>${e(origin + p)}</loc>\n    <lastmod>${lastmod}</lastmod>\n  </url>`
+  ).join('\n');
+  res
+    .type('application/xml')
+    .send(
+      `<?xml version="1.0" encoding="UTF-8"?>\n` +
+        `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`
+    );
+});
+app.get('/robots.txt', (req, res) => {
+  const origin = siteOrigin(req);
+  res
+    .type('text/plain')
+    .send(`User-agent: *\nAllow: /\nDisallow: /admin.html\nSitemap: ${origin}/sitemap.xml\n`);
+});
 
 app.use(
   express.static(PUBLIC_DIR, {

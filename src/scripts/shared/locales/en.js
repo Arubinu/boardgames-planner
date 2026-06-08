@@ -305,10 +305,13 @@ export default {
     settings_title: 'Settings',
     settings_help:
       'The PWA manifest (static/site.webmanifest) and the favicons are not configured here: edit the file in a text editor (app name, colors, icons) and replace the images to match your own branding.',
-    set_site_name: 'Nom du site',
-    set_site_holder: 'Détenteur',
+    set_site_name: 'Site name',
+    set_site_holder: 'Owner',
     set_site_desc: 'Description (sharing preview)',
     set_og_image: 'Sharing image (URL or /assets/… path)',
+    set_meta_keywords: 'Keywords (SEO)',
+    set_meta_keywords_help:
+      'Comma-separated. Leave empty to omit the tag.',
     set_default_lang: 'Site default language',
     lang_auto: 'Auto (browser)',
     set_site_title: 'Home title (main page)',

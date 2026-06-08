@@ -206,6 +206,8 @@ ensureSetting.run(
 ensureSetting.run('default_lang', '');
 // Année du copyright affichée dans le pied de page : '' = année courante.
 ensureSetting.run('footer_year', '');
+// Mots-clés meta (SEO) : '' = balise <meta name="keywords"> omise.
+ensureSetting.run('meta_keywords', '');
 
 // --- Configuration par variables d'environnement --------------------------
 // Appliquée à CHAQUE démarrage du conteneur :
@@ -220,6 +222,7 @@ const ENV_SETTINGS = [
   { env: 'SITE_TITLE',       key: 'site_title' },
   { env: 'SITE_DESCRIPTION', key: 'site_description' },
   { env: 'OG_IMAGE',         key: 'og_image' },
+  { env: 'META_KEYWORDS',    key: 'meta_keywords' },
   { env: 'MYLUDO_PROFILE',   key: 'myludo_profile' },
   { env: 'FOOTER_TEXT',      key: 'footer_text' },
   { env: 'ICS_FILENAME',     key: 'ics_filename' },

@@ -14,6 +14,7 @@ services:
       #SITE_TITLE: Soirées jeux de société
       #SITE_DESCRIPTION: Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.
       #SITE_HOLDER: MJC Estrablin
+      META_KEYWORDS: boardgames, jeux de société, dates, calendar, calendrier, ludothèque
       LOGIN_RETRY_DELAY: 10
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
       #ICS_FILENAME: boardgames-planner.ics

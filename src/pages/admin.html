@@ -2,6 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <meta name="robots" content="noindex, nofollow" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <meta name="darkreader-lock" />
@@ -240,6 +241,11 @@
             ><span data-i18n="admin.set_og_image">Image de partage (URL ou chemin /assets/…)</span>
             <input id="set-og-image" placeholder="/assets/boardgames.webp"
           /></label>
+          <label class="field"
+            ><span data-i18n="admin.set_meta_keywords">Mots-clés (SEO)</span>
+            <input id="set-meta-keywords" placeholder="jeux de société, soirées jeux, ludothèque"
+          /></label>
+          <p class="help" data-i18n="admin.set_meta_keywords_help">Séparés par des virgules. Laissez vide pour ne pas générer la balise.</p>
           <label class="field"
             ><span data-i18n="admin.set_default_lang">Langue par défaut du site</span>
             <select id="set-default-lang"></select>

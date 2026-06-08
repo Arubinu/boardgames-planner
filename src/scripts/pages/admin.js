@@ -794,6 +794,7 @@ async function loadSettings() {
     document.getElementById('set-site-holder').value = s.site_holder || '';
     document.getElementById('set-site-desc').value = s.site_description || '';
     document.getElementById('set-og-image').value = s.og_image || '';
+    document.getElementById('set-meta-keywords').value = s.meta_keywords || '';
     populateDefaultLangSelect(s.default_lang);
     document.getElementById('set-site-title').value = s.site_title || '';
     document.getElementById('set-footer-text').value = s.footer_text || '';
@@ -826,6 +827,7 @@ async function saveSettings() {
     site_holder: document.getElementById('set-site-holder').value.trim(),
     site_description: document.getElementById('set-site-desc').value.trim(),
     og_image: document.getElementById('set-og-image').value.trim(),
+    meta_keywords: document.getElementById('set-meta-keywords').value.trim(),
     default_lang: document.getElementById('set-default-lang').value,
     site_title: document.getElementById('set-site-title').value.trim(),
     footer_text: document.getElementById('set-footer-text').value.trim(),
