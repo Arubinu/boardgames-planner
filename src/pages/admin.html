@@ -15,6 +15,7 @@
     <script type="module" src="../scripts/pages/admin.js"></script>
   </head>
   <body>
+    <!-- Navigation -->
     <nav class="nav">
       <div class="wrap nav-inner">
         <div class="brand">
@@ -39,6 +40,10 @@
         <h2 class="font-display center" style="margin-top: 0" data-i18n="admin.login_title">Espace administration</h2>
         <p class="muted center" data-i18n="admin.login_sub">Entrez le mot de passe pour gérer les dates et la ludothèque.</p>
         <form id="login-form">
+          <input type="text" name="username" autocomplete="username" value="admin"
+            aria-hidden="true" tabindex="-1" readonly
+            style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;"
+          />
           <label class="field"
             ><span data-i18n="admin.login_pwd">Mot de passe</span>
             <input type="password" id="login-pwd" autocomplete="current-password" autofocus
@@ -226,24 +231,24 @@
           <div style="display: flex; gap: 1rem; flex-wrap: wrap">
             <label class="field" style="flex: 1; min-width: 12rem"
               ><span data-i18n="admin.set_site_name">Nom du site</span>
-              <input id="set-site-name" placeholder="Soirées Jeux"
+              <input id="set-site-name" autocomplete="off" placeholder="Soirées Jeux"
             /></label>
             <label class="field" style="flex: 1; min-width: 12rem"
               ><span data-i18n="admin.set_site_holder">Détenteur</span>
-              <input id="set-site-holder" placeholder="MJC Estrablin"
+              <input id="set-site-holder" autocomplete="off" placeholder="MJC Estrablin"
             /></label>
           </div>
           <label class="field"
             ><span data-i18n="admin.set_site_desc">Description (aperçu de partage)</span>
-            <input id="set-site-desc" placeholder="Calendrier des soirées jeux de société…"
+            <input id="set-site-desc" autocomplete="off" placeholder="Calendrier des soirées jeux de société…"
           /></label>
           <label class="field"
             ><span data-i18n="admin.set_og_image">Image de partage (URL ou chemin /assets/…)</span>
-            <input id="set-og-image" placeholder="/assets/boardgames.webp"
+            <input id="set-og-image" autocomplete="off" placeholder="/assets/boardgames.webp"
           /></label>
           <label class="field"
             ><span data-i18n="admin.set_meta_keywords">Mots-clés (SEO)</span>
-            <input id="set-meta-keywords" placeholder="jeux de société, soirées jeux, ludothèque"
+            <input id="set-meta-keywords" autocomplete="off" placeholder="jeux de société, soirées jeux, ludothèque"
           /></label>
           <p class="help" data-i18n="admin.set_meta_keywords_help">Séparés par des virgules. Laissez vide pour ne pas générer la balise.</p>
           <label class="field"
@@ -252,7 +257,7 @@
           </label>
           <label class="field"
             ><span data-i18n="admin.set_site_title">Titre d'accueil (page principale)</span>
-            <input id="set-site-title" placeholder="Les [soirées jeux] de la MJC Estrablin"
+            <input id="set-site-title" autocomplete="off" placeholder="Les [soirées jeux] de la MJC Estrablin"
           /></label>
           <p class="help" data-i18n="admin.set_site_title_help">Entourez de crochets le texte à colorer : <code>Les [soirées jeux] de la MJC</code>.</p>
           <label class="field"
@@ -262,13 +267,13 @@
           <p class="help" data-i18n="admin.set_footer_text_help">Liens autorisés au format <code>[libellé](https://…)</code>.</p>
           <label class="field"
             ><span data-i18n="admin.set_footer_year">Année du copyright (pied de page)</span>
-            <input id="set-footer-year" data-i18n-ph="admin.set_footer_year_ph" placeholder="ex. 2025 ou 2024–2026"
+            <input id="set-footer-year" autocomplete="off" data-i18n-ph="admin.set_footer_year_ph" placeholder="ex. 2025 ou 2024–2026"
           /></label>
           <p class="help" data-i18n="admin.set_footer_year_help">Laissez vide pour afficher automatiquement l'année courante.</p>
           <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0" />
           <label class="field"
             ><span data-i18n="admin.set_myludo">Profil MyLudo (lien public)</span>
-            <input id="set-myludo" placeholder="https://www.myludo.fr/#!/profil/..."
+            <input id="set-myludo" autocomplete="off" placeholder="https://www.myludo.fr/#!/profil/..."
           /></label>
           <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0" />
           <label class="field"

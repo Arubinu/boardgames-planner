@@ -5,6 +5,7 @@ import compression from 'compression';
 import expressStaticGzip from 'express-static-gzip';
 import multer from 'multer';
 import helmet from 'helmet';
+import { rateLimit } from 'express-rate-limit';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'node:fs';
@@ -77,6 +78,10 @@ app.use(helmet({
 
 app.use(express.json({ limit: '5mb' }));
 
+// Enveloppe un handler async pour que ses exceptions (promesse rejetée) soient
+// transmises au gestionnaire d'erreurs global (Express 4 ne le fait pas seul).
+const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 // Import de base : le fichier JSON peut être volumineux (documents en base64).
 const importUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 64 * 1024 * 1024 } });
@@ -103,6 +108,19 @@ const LOGIN_RETRY_DELAY = Math.max(
   0,
   parseInt(process.env.LOGIN_RETRY_DELAY || '0', 10) || 0
 );
+// Plafond de volume (express-rate-limit), par IP :
+//   ADMIN_RATE_LIMIT_MAX    : nb max de tentatives ÉCHOUÉES par fenêtre.
+//                             0 = limiteur désactivé. Défaut : 20.
+//   ADMIN_RATE_LIMIT_WINDOW : durée de la fenêtre en MINUTES. Défaut : 15.
+// (Entrée invalide → valeur par défaut, pour ne jamais désactiver par accident.)
+const ADMIN_RATE_LIMIT_MAX = (() => {
+  const n = parseInt(process.env.ADMIN_RATE_LIMIT_MAX ?? '', 10);
+  return Number.isFinite(n) && n >= 0 ? n : 20;
+})();
+const ADMIN_RATE_LIMIT_WINDOW_MIN = (() => {
+  const n = parseInt(process.env.ADMIN_RATE_LIMIT_WINDOW ?? '', 10);
+  return Number.isFinite(n) && n >= 1 ? n : 15;
+})();
 const lastFailedLogin = new Map(); // ip -> timestamp (ms) du dernier échec
 
 // Secondes restantes à patienter (0 = tentative autorisée).
@@ -140,12 +158,16 @@ function blockedByCooldown(req, res) {
 // Le front envoie le mot de passe dans l'en-tête "x-admin-password".
 // La valeur stockée en base est un hash Argon2id : on vérifie via argon2.verify.
 async function requireAdmin(req, res, next) {
-  if (blockedByCooldown(req, res)) return;
-  const provided = req.get('x-admin-password') || req.query.pwd || '';
-  const ok = !!provided && (await verifyPassword(setting('admin_password'), provided));
-  recordLoginResult(req.ip, ok);
-  if (ok) return next();
-  return res.status(401).json({ error: 'Non autorisé' });
+  try {
+    if (blockedByCooldown(req, res)) return;
+    const provided = req.get('x-admin-password') || '';
+    const ok = !!provided && (await verifyPassword(setting('admin_password'), provided));
+    recordLoginResult(req.ip, ok);
+    if (ok) return next();
+    return res.status(401).json({ error: 'Non autorisé' });
+  } catch (e) {
+    return next(e);
+  }
 }
 
 // Vérifie un mot de passe admin fourni (helper réutilisable).
@@ -176,14 +198,14 @@ app.get('/api/public-settings', (req, res) => {
 
 // Liste des lieux. Par défaut : seulement les lieux actifs (non archivés).
 // Avec ?include_archived=1 (réservé à l'admin) : tous les lieux.
-app.get('/api/locations', async (req, res) => {
+app.get('/api/locations', wrap(async (req, res) => {
   const includeArchived = req.query.include_archived === '1' &&
     await checkAdmin(req.get('x-admin-password') || '');
   const sql = includeArchived
     ? 'SELECT * FROM locations ORDER BY archived, name'
     : 'SELECT * FROM locations WHERE archived = 0 ORDER BY name';
   res.json(db.prepare(sql).all());
-});
+}));
 
 // Types de soirées (publics) : utilisés par l'accueil et l'administration.
 app.get('/api/event-types', (req, res) => {
@@ -407,15 +429,29 @@ app.get('/membership-download', (req, res) => {
 
 // =====================  API ADMIN  ========================================
 
+// Limitation de débit sur toute l'API admin
+const adminLimiter =
+  ADMIN_RATE_LIMIT_MAX > 0
+    ? rateLimit({
+        windowMs: ADMIN_RATE_LIMIT_WINDOW_MIN * 60 * 1000,
+        limit: ADMIN_RATE_LIMIT_MAX,
+        skipSuccessfulRequests: true,
+        standardHeaders: true,
+        legacyHeaders: false,
+        message: { error: 'Trop de tentatives, réessayez plus tard.' },
+      })
+    : (req, res, next) => next(); // ADMIN_RATE_LIMIT_MAX=0 → désactivé
+app.use('/api/admin', adminLimiter);
+
 // Vérification du mot de passe (pour le formulaire de connexion admin).
-app.post('/api/admin/login', async (req, res) => {
+app.post('/api/admin/login', wrap(async (req, res) => {
   if (blockedByCooldown(req, res)) return;
   const { password } = req.body || {};
   const ok = !!password && (await verifyPassword(setting('admin_password'), password));
   recordLoginResult(req.ip, ok);
   if (ok) return res.json({ ok: true });
   return res.status(401).json({ error: 'Mot de passe incorrect' });
-});
+}));
 
 // --- Lieux ---
 app.post('/api/admin/locations', requireAdmin, (req, res) => {
@@ -909,7 +945,7 @@ app.get('/api/admin/settings', requireAdmin, (req, res) => {
   res.json(obj);
 });
 
-app.put('/api/admin/settings', requireAdmin, async (req, res) => {
+app.put('/api/admin/settings', requireAdmin, wrap(async (req, res) => {
   const allowed = [
     'myludo_profile',
     'site_name',
@@ -952,7 +988,7 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     }
   }
   res.json({ ok: true });
-});
+}));
 
 // =====================  STATIQUE  =========================================
 // --- OpenGraph / Twitter : injection des balises depuis les réglages -------
@@ -1050,6 +1086,41 @@ app.use(
     },
   })
 );
+
+// --- 404 : aucune route ni fichier ne correspond --------------------------
+app.use((req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Ressource introuvable' });
+  }
+  // Page 404 habillée (construite par Vite). Repli texte si absente.
+  const page = path.join(PUBLIC_DIR, '404.html');
+  if (fs.existsSync(page)) return res.status(404).sendFile(page);
+  res.status(404).type('text/plain; charset=utf-8').send('Page introuvable');
+});
+
+// --- Gestionnaire d'erreurs global (doit être le DERNIER middleware) -------
+app.use((err, req, res, next) => {
+  let status = err.status || err.statusCode || 500;
+  let message = 'Erreur interne du serveur';
+  if (err.type === 'entity.parse.failed') {
+    status = 400;
+    message = 'Corps de requête invalide (JSON malformé).';
+  } else if (err.type === 'entity.too.large' || err.code === 'LIMIT_FILE_SIZE') {
+    status = 413;
+    message = 'Fichier ou requête trop volumineux.';
+  } else if (err.name === 'MulterError') {
+    status = 400;
+    message = 'Téléversement invalide.';
+  } else if (status < 500) {
+    message = err.message || 'Requête invalide.';
+  }
+  if (status >= 500) {
+    console.error('[error]', req.method, req.originalUrl, '—', err && err.stack ? err.stack : err);
+  }
+  if (res.headersSent) return next(err); // réponse déjà entamée → handler par défaut
+  if (req.path.startsWith('/api/')) return res.status(status).json({ error: message });
+  res.status(status).type('text/plain; charset=utf-8').send(message);
+});
 
 // Démarrage.
 app.listen(PORT, () => {

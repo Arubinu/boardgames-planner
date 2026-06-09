@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="darkreader-lock" />
+    <title data-title-key="notfound_title">Page introuvable</title>
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <script type="module" src="../scripts/pages/notfound.js"></script>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="nav">
+      <div class="wrap nav-inner">
+        <div class="brand">
+          <span class="logo">🎲</span>
+          <span data-site-brand>Évènements Jeux<small>MJC Estrablin</small></span>
+        </div>
+        <button class="nav-burger" data-i18n-aria="nav.menu" aria-label="Menu">☰</button>
+        <div class="nav-links" id="navlinks">
+          <a href="/" data-i18n="nav.home">Accueil</a>
+          <a href="/#dates" data-i18n="nav.dates">Prochaines dates</a>
+          <a href="/games.html" data-i18n="nav.games">Nos jeux</a>
+          <a href="/#infos" data-i18n="nav.infos">Infos pratiques</a>
+          <select class="lang-select" data-i18n-aria="nav.lang" aria-label="Langue"></select>
+          <button class="theme-toggle" data-i18n-aria="nav.theme" aria-label="Thème"><span id="themeIcon"></span></button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="notfound">
+      <div class="wrap">
+        <p class="notfound__script" data-i18n="notfound.script">Oups !</p>
+        <p class="notfound__code">404</p>
+        <h1 class="font-display notfound__title" data-i18n="notfound.title">Cette page n'existe pas</h1>
+        <p class="notfound__lead" data-i18n="notfound.lead">
+          La page que vous cherchez a peut-être été déplacée, ou n'existe plus.
+        </p>
+        <div class="notfound__actions">
+          <a class="btn btn-primary" href="/" data-i18n="notfound.home">Retour à l'accueil</a>
+          <a class="btn btn-ghost" href="/games.html" data-i18n="notfound.games">Parcourir les jeux</a>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">
+        <div class="brand" style="justify-content: center; color: #fff; margin-bottom: 1rem">
+          <span class="logo">🎲</span><span data-site-name>Évènements Jeux — MJC Estrablin</span>
+        </div>
+        <p style="color: #777; font-size: 0.85rem">
+          © <span data-year>2025</span> <span data-site-holder>MJC Estrablin</span> ·
+          <a href="/admin.html" data-i18n="footer.admin_link">Administration</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

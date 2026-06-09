@@ -19,6 +19,7 @@
     "better-sqlite3": "^11.3.0",
     "compression": "^1.8.1",
     "express": "^4.22.2",
+    "express-rate-limit": "^8.5.2",
     "express-static-gzip": "^3.0.1",
     "helmet": "^8.2.0",
     "leaflet": "^1.9.4",

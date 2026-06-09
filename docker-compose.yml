@@ -8,6 +8,9 @@ services:
       - ./data:/app/data
     environment:
       TRUST_PROXY: 1
+      #LOGIN_RETRY_DELAY: 10
+      #ADMIN_RATE_LIMIT_MAX: 20
+      #ADMIN_RATE_LIMIT_WINDOW: 15
       #DEFAULT_LANG: 'FR'
       #ADMIN_PASSWORD: admin
       #SITE_NAME: Soirées Jeux
@@ -15,7 +18,6 @@ services:
       #SITE_DESCRIPTION: Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.
       #SITE_HOLDER: MJC Estrablin
       META_KEYWORDS: boardgames, jeux de société, dates, calendar, calendrier, ludothèque
-      LOGIN_RETRY_DELAY: 10
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
       #ICS_FILENAME: boardgames-planner.ics
     healthcheck:
