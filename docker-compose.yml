@@ -11,6 +11,7 @@ services:
       #LOGIN_RETRY_DELAY: 10
       #ADMIN_RATE_LIMIT_MAX: 20
       #ADMIN_RATE_LIMIT_WINDOW: 15
+      #INDEXNOW_KEY: key
       #DEFAULT_LANG: 'FR'
       #ADMIN_PASSWORD: admin
       #SITE_NAME: Soirées Jeux

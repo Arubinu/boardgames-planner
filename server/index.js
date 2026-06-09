@@ -1074,6 +1074,15 @@ app.get('/robots.txt', (req, res) => {
     .send(`User-agent: *\nAllow: /\nDisallow: /admin.html\nSitemap: ${origin}/sitemap.xml\n`);
 });
 
+// --- IndexNow : fichier de vérification de clé ----------------------------
+// Si INDEXNOW_KEY est défini, on sert /<clé>.txt (contenant la clé)
+const INDEXNOW_KEY = (process.env.INDEXNOW_KEY || '').trim();
+if (INDEXNOW_KEY) {
+  app.get(`/${INDEXNOW_KEY}.txt`, (req, res) => {
+    res.type('text/plain; charset=utf-8').send(INDEXNOW_KEY);
+  });
+}
+
 app.use(
   expressStaticGzip(PUBLIC_DIR, {
     enableBrotli: true,
