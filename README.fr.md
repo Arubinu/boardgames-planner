@@ -16,7 +16,7 @@ Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass
 
 **Côté visiteurs** (page unique avec défilement) :
 - Aperçu de la ludothèque + page dédiée `/games.html` avec recherche, filtres (jeux de base / extensions) et tri par note.
-- Infos pratiques, lieux, contact et liens d'inscription **WhatsApp** pour les évènements qui le proposent.
+- Infos pratiques, lieux et contact.
 - **Section adhésion** : téléchargement du bulletin d'adhésion (PDF) à remplir et à régler sur place.
 - **Ajout à l'agenda** : depuis les infos pratiques, télécharger les prochains évènements au format `.ics`, ou copier le lien du flux pour un abonnement mis à jour automatiquement (« ajouter par URL » de Google/Apple/Outlook).
 - **Calendrier interactif** : la légende est **dynamique** (seuls les types d'évènements présents dans le mois affiché y figurent, avec leur couleur). Cliquer sur une carte d'évènement recadre le calendrier sur la date et affiche le lieu sur une **mini-carte** (OpenStreetMap) ; le bouton « Voir les jeux de cet évènement » ouvre le détail. Un évènement passée sans jeux renseignés affiche un message au passé plutôt que « à venir ».
@@ -25,12 +25,12 @@ Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass
 
 **Côté administration** (`/admin.html`, protégée par mot de passe) :
 - Créer / modifier / dupliquer / supprimer des évènements (présentées en **deux tableaux** : à venir et passées), choisir leur lieu et cocher les jeux disponibles ce soir-là.
-- Gérer les **types d'évènement** depuis un onglet dédié : libellé, mention (« sur inscription »…), **couleur** et proposition d'inscription WhatsApp. Les types alimentent le formulaire d'évènement, le calendrier et les badges.
+- Gérer les **types d'évènement** depuis un onglet dédié : libellé, mention (« sur inscription »…), **couleur** et indication d'inscription obligatoire. Les types alimentent le formulaire d'évènement, le calendrier et les badges.
 - Gérer la liste des lieux (choix rapide à la création d'une date). Chaque lieu est **localisé d'un clic sur une carte Leaflet** (OpenStreetMap) : les coordonnées sont enregistrées et le lien Google Maps en est dérivé automatiquement (plus aucune URL à coller). « Supprimer » un lieu l'**archive** : il disparaît du site public mais reste désarchivable.
 - Importer la collection depuis un export **MyLudo** (CSV ou JSON). La **date de création** de chaque jeu est conservée d'un import à l'autre ; la date de modification est mise à jour.
 - Ajouter une image et un « apporté par » à chaque jeu (conservés lors des ré-imports), ou supprimer un jeu.
 - Régler l'**identité du site** : le **nom** et le **détenteur** (ex. « Soirées Jeux » / « MJC Estrablin »), utilisés pour la marque de la barre de navigation, les titres de page et les aperçus de partage ; ainsi que la description et l'image de partage (OpenGraph), le **titre d'accueil** (avec parties `[colorées]`) et le **texte du pied de page** (avec liens `[libellé](url)`).
-- Choisir la **langue par défaut du site** (ou la laisser sur *auto / navigateur*), les liens WhatsApp, le profil MyLudo et le mot de passe.
+- Choisir la **langue par défaut du site** (ou la laisser sur *auto / navigateur*), le profil MyLudo et le mot de passe.
 
 ---
 
@@ -55,14 +55,20 @@ services:
       - ./data:/app/data # base SQLite persistée
     environment:
       TRUST_PROXY: 1
-      DEFAULT_LANG: ''
+      #LOGIN_RETRY_DELAY: 10
+      #ADMIN_RATE_LIMIT_MAX: 20
+      #ADMIN_RATE_LIMIT_WINDOW: 15
+      #INDEXNOW_KEY: key
+      DEFAULT_LANG: 'fr'
       #ADMIN_PASSWORD: admin
       #SITE_NAME: Soirées Jeux
+      #SITE_HOLDER: MJC Estrablin
       #SITE_TITLE: Soirées jeux de société
       #SITE_DESCRIPTION: Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.
-      #SITE_HOLDER: MJC Estrablin
-      LOGIN_RETRY_DELAY: 10
+      #OG_IMAGE: /assets/boardgames.webp
+      #META_KEYWORDS: boardgames, jeux de société, dates, calendar, calendrier, ludothèque
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
+      #FOOTER_TEXT: "Des soirées conviviales pour partager la passion des jeux de société.\n\nCe site est un projet open-source que tu peux retrouver ici: [https://github.com/Arubinu/boardgames-planner](https://github.com/Arubinu/boardgames-planner)"
       #ICS_FILENAME: boardgames-planner.ics
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/healthz']
@@ -103,6 +109,9 @@ Deux familles de variables, toutes prises en compte **à chaque démarrage** du 
 | --- | --- | --- |
 | `TRUST_PROXY` | Nombre de proxies de confiance pour les en-têtes `X-Forwarded-*` (`1` par défaut, `false` pour désactiver, ou un CIDR). |
 | `LOGIN_RETRY_DELAY` | Délai minimal (en secondes) avant de pouvoir réessayer après une connexion admin **échouée**, par adresse IP. `0` = désactivé. | `10` |
+| `ADMIN_RATE_LIMIT_MAX` | Nombre maximal de tentatives admin **échouées** par IP et par fenêtre (anti-bruteforce). `0` = désactivé. | `20` |
+| `ADMIN_RATE_LIMIT_WINDOW` | Durée de la fenêtre du plafond ci-dessus, en **minutes**. | `15` |
+| `INDEXNOW_KEY` | Clé IndexNow (8–128 caractères `a-z A-Z 0-9 -`). Si définie, le site sert `/<clé>.txt` pour la vérification de propriété IndexNow (Bing, Yandex…). Vide = désactivé. | _(vide)_ |
 | `PORT` | Port d'écoute interne du serveur (dans Docker, on mappe plutôt le port côté hôte). | `3000` |
 | `DATA_DIR` | Dossier de la base SQLite. | `./data` |
 
@@ -110,8 +119,8 @@ Deux familles de variables, toutes prises en compte **à chaque démarrage** du 
 
 | Variable | Rôle |
 | --- | --- |
-| `ADMIN_PASSWORD` | (Re)définit le mot de passe administrateur, haché en Argon2id. |
 | `DEFAULT_LANG` | Langue par défaut du site (`fr`, `en`, … ; vide = détection navigateur). |
+| `ADMIN_PASSWORD` | (Re)définit le mot de passe administrateur, haché en Argon2id. |
 | `SITE_NAME` | Nom du site (marque de navigation, titres de page, aperçus de partage). |
 | `SITE_HOLDER` | Détenteur du site (marque de navigation et copyright du pied de page). |
 | `SITE_TITLE` | Titre d'accueil (hero) ; `[texte]` pour les portions colorées. |
@@ -121,9 +130,9 @@ Deux familles de variables, toutes prises en compte **à chaque démarrage** du 
 | `FOOTER_TEXT` | Texte du pied de page ; liens au format `[libellé](url)`. |
 | `ICS_FILENAME` | Nom du fichier de l'agenda `.ics` téléchargé. |
 
-> `ADMIN_PASSWORD` est géré à part (haché). Toutes les autres variables ci-dessus
-> sont reliées dans le tableau `ENV_SETTINGS` de `server/db.js` : il suffit de les
-> renseigner dans l'environnement pour qu'elles s'appliquent à chaque démarrage.
+> `ADMIN_PASSWORD` est géré à part (toujours actif, haché). Les autres variables
+> de réglage correspondent aux entrées du tableau `ENV_SETTINGS` dans
+> `server/db.js` ; ajoutez-y une ligne pour exposer une nouvelle option.
 
 ---
 
@@ -142,15 +151,8 @@ Pour le développement front avec rechargement à chaud, lancez le serveur API
 (`npm run dev:server`) puis Vite (`npm run dev`) : Vite relaie les appels `/api`
 vers Express.
 
-Variables d'environnement utiles (prises en compte **à chaque démarrage**) :
-- `PORT` : port d'écoute (défaut `3000`).
-- `ADMIN_PASSWORD` : mot de passe admin. S'il est renseigné, il **(re)définit** le
-  mot de passe à chaque démarrage (haché automatiquement en Argon2id) ; s'il est
-  absent, le mot de passe stocké reste inchangé. Une base existante avec un ancien
-  mot de passe en clair est migrée toute seule.
-- `DATA_DIR` : dossier de la base SQLite (défaut `./data`).
-- `LOGIN_RETRY_DELAY` : délai (en secondes) avant de réessayer après une connexion
-  admin échouée (`0` = désactivé, défaut = `10`).
+La configuration se fait par variables d'environnement — voir la section
+« Configuration par variables d'environnement » plus haut pour la liste complète.
 
 ### Moteur SQLite
 

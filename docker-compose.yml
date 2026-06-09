@@ -12,14 +12,16 @@ services:
       #ADMIN_RATE_LIMIT_MAX: 20
       #ADMIN_RATE_LIMIT_WINDOW: 15
       #INDEXNOW_KEY: key
-      #DEFAULT_LANG: 'FR'
+      #DEFAULT_LANG: 'fr'
       #ADMIN_PASSWORD: admin
       #SITE_NAME: Soirées Jeux
+      #SITE_HOLDER: MJC Estrablin
       #SITE_TITLE: Soirées jeux de société
       #SITE_DESCRIPTION: Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.
-      #SITE_HOLDER: MJC Estrablin
-      META_KEYWORDS: boardgames, jeux de société, dates, calendar, calendrier, ludothèque
+      #OG_IMAGE: /assets/boardgames.webp
+      #META_KEYWORDS: boardgames, jeux de société, dates, calendar, calendrier, ludothèque
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
+      #FOOTER_TEXT: "Des soirées conviviales pour partager la passion des jeux de société.\n\nCe site est un projet open-source que tu peux retrouver ici: [https://github.com/Arubinu/boardgames-planner](https://github.com/Arubinu/boardgames-planner)"
       #ICS_FILENAME: boardgames-planner.ics
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]

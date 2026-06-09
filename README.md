@@ -16,7 +16,7 @@ The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (sty
 
 **For visitors** (single scrolling page):
 - Library preview + a dedicated `/games.html` page with search, filters (base games / expansions) and sorting by rating.
-- Practical info, venues, contact and **WhatsApp** sign-up links for the events that offer it.
+- Practical info, venues and contact.
 - **Membership section**: download the membership form (PDF) to fill in and pay on site.
 - **Add to calendar**: from the practical info section, download the upcoming events as an `.ics` file, or copy the feed link for an auto-updating subscription (Google/Apple/Outlook "add by URL").
 - **Interactive calendar**: the legend is **dynamic** (only the events types present in the displayed month appear, with their color). Clicking a event card re-centers the calendar on its date and shows the venue on a **mini-map** (OpenStreetMap); the "See this event's games" button opens the details. A past event with no recorded games shows a past-tense note rather than the "coming soon" one.
@@ -25,12 +25,12 @@ The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (sty
 
 **For administration** (`/admin.html`, password-protected):
 - Create / edit / duplicate / delete events (shown in **two tables**: upcoming and past), choose their venue and tick the games available that evening.
-- Manage **event types** from a dedicated tab: label, mention ("sign-up required"…), **color** and whether they offer WhatsApp sign-up. Types feed the event form, the calendar and the badges.
+- Manage **event types** from a dedicated tab: label, mention ("sign-up required"…), **color** and whether sign-up is required. Types feed the event form, the calendar and the badges.
 - Manage the list of venues (quick selection when creating a date). Each venue is **located by clicking on a Leaflet map** (OpenStreetMap): the coordinates are saved and the Google Maps link is derived automatically (no URL to paste). "Deleting" a venue **archives** it: it disappears from the public site but can be unarchived.
 - Import the collection from a **MyLudo** export (CSV or JSON). Each game's **creation date** is preserved across imports; the modification date is updated.
 - Add an image and a "brought by" note to each game (preserved across re-imports), or delete a game.
 - Configure the **site identity**: the **name** and **holder** (e.g. "Game Nights" / "MJC Estrablin"), used to build the nav brand, the page titles and the share previews; plus the description and share image (OpenGraph), the **home title** (with `[highlighted]` parts) and the **footer text** (with `[label](url)` links).
-- Set the **default site language** (or leave it on *auto / browser*), the WhatsApp links, the MyLudo profile and the password.
+- Set the **default site language** (or leave it on *auto / browser*), the MyLudo profile and the password.
 
 ---
 
@@ -55,14 +55,20 @@ services:
       - ./data:/app/data # persisted SQLite database
     environment:
       TRUST_PROXY: 1
-      DEFAULT_LANG: ''
+      #LOGIN_RETRY_DELAY: 10
+      #ADMIN_RATE_LIMIT_MAX: 20
+      #ADMIN_RATE_LIMIT_WINDOW: 15
+      #INDEXNOW_KEY: key
+      DEFAULT_LANG: 'en'
       #ADMIN_PASSWORD: admin
       #SITE_NAME: Boardgames Planner
+      #SITE_HOLDER: MJC Estrablin
       #SITE_TITLE: Boardgames Planner
       #SITE_DESCRIPTION: Board game night calendar, toy library, and practical information for the MJC Estrablin.
-      #SITE_HOLDER: MJC Estrablin
-      LOGIN_RETRY_DELAY: 10
+      #OG_IMAGE: /assets/boardgames.webp
+      #META_KEYWORDS: boardgames, dates, calendar
       #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
+      #FOOTER_TEXT: "Friendly evenings to share a passion for board games.\n\nThis website is an open-source project that you can find here: [https://github.com/Arubinu/boardgames-planner](https://github.com/Arubinu/boardgames-planner)"
       #ICS_FILENAME: boardgames-planner.ics
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/healthz']
@@ -103,6 +109,9 @@ Two families of variables, all taken into account **on every startup** of the co
 | --- | --- | --- |
 | `TRUST_PROXY` | Number of trusted proxies for the `X-Forwarded-*` headers (`1` by default, `false` to disable, or a CIDR). |
 | `LOGIN_RETRY_DELAY` | Minimum delay (in seconds) before retrying after a **failed** admin login, per IP address. `0` = disabled. | `10` |
+| `ADMIN_RATE_LIMIT_MAX` | Maximum number of **failed** admin attempts per IP per window (anti-bruteforce). `0` = disabled. | `20` |
+| `ADMIN_RATE_LIMIT_WINDOW` | Duration of the cap window above, in **minutes**. | `15` |
+| `INDEXNOW_KEY` | IndexNow key (8–128 chars `a-z A-Z 0-9 -`). If set, the site serves `/<key>.txt` for IndexNow ownership verification (Bing, Yandex…). Empty = disabled. | _(empty)_ |
 | `PORT` | Server's internal listening port (in Docker, you usually map the host port instead). | `3000` |
 | `DATA_DIR` | SQLite database folder. | `./data` |
 
@@ -110,8 +119,8 @@ Two families of variables, all taken into account **on every startup** of the co
 
 | Variable | Role |
 | --- | --- |
-| `ADMIN_PASSWORD` | (Re)defines the admin password, hashed with Argon2id. |
 | `DEFAULT_LANG` | Site default language (`fr`, `en`, …; empty = browser detection). |
+| `ADMIN_PASSWORD` | (Re)defines the admin password, hashed with Argon2id. |
 | `SITE_NAME` | Site name (nav brand, page titles, share previews). |
 | `SITE_HOLDER` | Site holder (nav brand and footer copyright). |
 | `SITE_TITLE` | Home (hero) title; `[text]` for highlighted parts. |
@@ -121,9 +130,9 @@ Two families of variables, all taken into account **on every startup** of the co
 | `FOOTER_TEXT` | Footer text; links in `[label](url)` format. |
 | `ICS_FILENAME` | Filename of the downloaded `.ics` calendar. |
 
-> `ADMIN_PASSWORD` is handled separately (hashed). All the other variables above
-> are wired in the `ENV_SETTINGS` table in `server/db.js`: just set them in the
-> environment and they apply on every startup.
+> `ADMIN_PASSWORD` is handled separately (always active, hashed). The other
+> setting variables map to the entries in the `ENV_SETTINGS` table in
+> `server/db.js`; add a line there to expose a new option.
 
 ---
 
@@ -142,15 +151,8 @@ For front-end development with hot reload, start the API server
 (`npm run dev:server`) then Vite (`npm run dev`): Vite proxies `/api` calls to
 Express.
 
-Useful environment variables (taken into account **on every startup**):
-- `PORT`: listening port (default `3000`).
-- `ADMIN_PASSWORD`: admin password. If it is set, it **(re)defines** the password
-  on each startup (automatically hashed with Argon2id); if it is absent, the
-  stored password stays unchanged. An existing database with an old plaintext
-  password is migrated automatically.
-- `DATA_DIR`: SQLite database folder (default `./data`).
-- `LOGIN_RETRY_DELAY`: delay (in seconds) before retrying after a failed admin
-  login (`0` = disabled, default = `10`).
+Configuration is done via environment variables — see the
+"Configuration via environment variables" section above for the full list.
 
 ### SQLite engine
 
