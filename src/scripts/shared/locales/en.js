@@ -136,6 +136,15 @@ export default {
     index_title: '',
     games_title: 'Our games',
     admin_title: 'Administration',
+    notfound_title: 'Page not found',
+  },
+
+  notfound: {
+    script: 'Oops!',
+    title: "This page doesn't exist",
+    lead: 'The page you are looking for may have been moved, or no longer exists.',
+    home: 'Back to home',
+    games: 'Browse the games',
   },
 
   admin: {

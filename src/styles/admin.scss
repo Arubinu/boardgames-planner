@@ -1,3 +1,359 @@
-// admin.scss — feuille du panneau d'administration (admin.html)
+// admin.scss — panneau d'administration (admin.html)
 @use 'core';
-@use 'page-admin';
+@use 'variables' as v;
+
+// Le tableau de bord garde une largeur de colonne FIXE (demande explicite),
+// centré dans la page quelle que soit la résolution.
+.admin-main {
+  padding-top: 88px;
+  width: 100%;
+  max-width: v.$admin-max-width;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.tab {
+  padding: 0.7rem 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  font-family: inherit;
+  font-size: 0.95rem;
+
+  &.active {
+    color: var(--terracotta);
+    border-bottom-color: var(--terracotta);
+  }
+}
+
+.panel {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
+
+// --- Tableaux -------------------------------------------------------------
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  text-align: left;
+  padding: 0.7rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.92rem;
+  vertical-align: top;
+}
+th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+.row-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+td.cell-actions {
+  vertical-align: middle;
+}
+
+body.dark .cell-actions .btn-icon img {
+  filter: invert(1);
+}
+
+#locations-table a {
+  text-decoration: none;
+}
+
+// --- Sélecteur de jeux (picker) ------------------------------------------
+.game-picker {
+  max-height: 340px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.6rem;
+}
+.gp-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--cream);
+  }
+  input {
+    width: auto;
+  }
+}
+.gp-selected-count {
+  font-weight: 700;
+  color: var(--terracotta);
+}
+
+.login-box {
+  max-width: 380px;
+  margin: 8rem auto 0;
+}
+.help {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 0.3rem;
+  white-space: pre-line;
+}
+
+// --- Zone de dépôt d'import ------------------------------------------------
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover,
+  &.drag {
+    border-color: var(--terracotta);
+    background: rgba(196, 112, 74, 0.05);
+  }
+}
+
+// --- Statistiques ----------------------------------------------------------
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+@include v.below(620px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.stat {
+  text-align: center;
+
+  .n {
+    font-family: 'Comic Neue', cursive;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--terracotta);
+  }
+}
+
+// --- Mini-carte de sélection des coordonnées (lieu) -----------------------
+.coord-map {
+  height: 280px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  cursor: crosshair;
+  z-index: 0; // garde Leaflet sous les modales
+}
+.coord-readout {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 0.4rem;
+}
+
+// =====================  COMPATIBILITÉ MOBILE  =============================
+@include v.below(v.$bp-md) {
+  .admin-main {
+    padding-top: 80px;
+  }
+
+  table.responsive {
+    border: 0;
+
+    thead {
+      // En-tête masqué : chaque cellule porte son propre libellé.
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.4rem 0.8rem;
+      background: var(--card-bg);
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding: 0.55rem 0;
+      text-align: right;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+
+      &::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--muted);
+        text-align: left;
+      }
+
+      // La cellule d'actions occupe toute la largeur, boutons alignés.
+      &.cell-actions {
+        text-align: left;
+
+        &::before {
+          display: none;
+        }
+        .row-actions {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// --- Ligne « case à cocher + libellé » (modales) --------------------------
+.checkbox-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 400;
+
+  input[type='checkbox'] {
+    width: auto;
+    margin: 0;
+  }
+}
+
+// --- Sauvegarde : liste « Éléments à importer » --------------------------
+// Une option par ligne, séparateurs fins et cases aux couleurs de la marque.
+#panel-backup fieldset {
+  display: flex;
+  flex-direction: column;
+}
+#panel-backup .checkbox-line {
+  display: flex; // chaque option occupe sa propre ligne
+  width: 100%;
+  padding: 0.55rem 0.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--border); // séparateur entre les lignes
+
+  &:hover {
+    background: color-mix(in srgb, var(--terracotta) 8%, transparent);
+  }
+
+  input[type='checkbox'] {
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--terracotta); // case aux couleurs du site
+    cursor: pointer;
+  }
+}
+#panel-backup .checkbox-line:last-of-type {
+  border-bottom: none;
+}
+// Compteur d'éléments « (N) » à la suite du libellé.
+#panel-backup .bk-count {
+  margin-left: 0.35rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+// Liste des noms (lieux, blocs) sous la case associée.
+#panel-backup .bk-list {
+  margin-left: 1.95rem;
+
+  ul {
+    margin: 0.1rem 0 0.5rem;
+    padding-left: 1rem;
+  }
+  li {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+}
+
+// --- Sélecteur d'émoji (bloc « Infos pratiques ») -------------------------
+.emoji-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+.emoji-preview {
+  font-size: 2rem;
+  line-height: 1;
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--cream);
+}
+.emoji-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(2.2rem, 1fr));
+  gap: 0.3rem;
+  max-height: 9.5rem;
+  overflow-y: auto;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.emoji-btn {
+  font-size: 1.3rem;
+  line-height: 1;
+  padding: 0.3rem 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: var(--cream);
+  }
+  &.selected {
+    border-color: var(--terracotta);
+    background: rgba(196, 112, 74, 0.12);
+  }
+}

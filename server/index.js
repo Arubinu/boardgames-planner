@@ -1093,7 +1093,7 @@ app.use((req, res) => {
     return res.status(404).json({ error: 'Ressource introuvable' });
   }
   // Page 404 habillée (construite par Vite). Repli texte si absente.
-  const page = path.join(PUBLIC_DIR, '404.html');
+  const page = path.join(PUBLIC_DIR, 'notfound.html');
   if (fs.existsSync(page)) return res.status(404).sendFile(page);
   res.status(404).type('text/plain; charset=utf-8').send('Page introuvable');
 });

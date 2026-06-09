@@ -34,6 +34,7 @@ export default defineConfig({
         index: resolve(root, 'index.html'),
         games: resolve(root, 'games.html'),
         admin: resolve(root, 'admin.html'),
+        notfound: resolve(root, 'notfound.html'),
       },
     },
   },
