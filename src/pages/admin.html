@@ -44,7 +44,7 @@
             aria-hidden="true" tabindex="-1" readonly
             style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;"
           />
-          <label class="field"
+          <label class="field" for="login-pwd"
             ><span data-i18n="admin.login_pwd">Mot de passe</span>
             <input type="password" id="login-pwd" autocomplete="current-password" autofocus
           /></label>
@@ -109,7 +109,7 @@
             <p class="help" id="file-name"></p>
           </div>
           <input type="file" id="file-input" accept=".csv,.json" style="display: none" />
-          <label class="field" style="margin-top: 1rem"
+          <label class="field" for="import-mode" style="margin-top: 1rem"
             ><span data-i18n="admin.import_mode">Mode d'import</span>
             <select id="import-mode">
               <option value="replace" data-i18n="admin.import_replace">Remplacer toute la collection</option>
@@ -170,8 +170,8 @@
         <h3 class="font-display" style="margin: 1.2rem 0 .6rem" data-i18n="admin.ip_section_title">Texte de la section</h3>
         <p class="help" data-i18n="admin.ip_section_help">Titre et texte affichés en tête de la section « Infos pratiques » de l'accueil. Liens autorisés dans le texte au format <code>[libellé](https://…)</code>. Laissez vide pour utiliser le texte traduit par défaut.</p>
         <div class="card card-pad">
-          <label class="field"><span data-i18n="admin.ip_field_title">Titre de la section</span><input id="ip-infos-title" data-i18n-ph="admin.ip_field_title_ph" placeholder="Infos pratiques" /></label>
-          <label class="field"><span data-i18n="admin.ip_field_sub">Texte (liens autorisés)</span><textarea id="ip-infos-sub" rows="3"></textarea></label>
+          <label class="field" for="ip-infos-title"><span data-i18n="admin.ip_field_title">Titre de la section</span><input id="ip-infos-title" data-i18n-ph="admin.ip_field_title_ph" placeholder="Infos pratiques" /></label>
+          <label class="field" for="ip-infos-sub"><span data-i18n="admin.ip_field_sub">Texte (liens autorisés)</span><textarea id="ip-infos-sub" rows="3"></textarea></label>
           <button class="btn btn-primary" id="ip-save-section" data-i18n="admin.ip_save_section">Enregistrer le texte</button>
         </div>
 
@@ -187,8 +187,8 @@
         <h3 class="font-display" style="margin: 2rem 0 .6rem" data-i18n="admin.ip_cal_title">Bloc agenda (.ics)</h3>
         <p class="help" data-i18n="admin.ip_cal_help">Affiche un bloc permettant d'ajouter les prochains évènements à un agenda (téléchargement .ics + lien d'abonnement).</p>
         <div class="card card-pad">
-          <label class="field" style="margin-bottom: .8rem"><span class="checkbox-line"><input type="checkbox" id="ip-cal-enabled" /> <span data-i18n="admin.ip_cal_enabled">Afficher le bloc d'ajout à l'agenda</span></span></label>
-          <label class="field"><span data-i18n="admin.ip_cal_filename">Nom du fichier .ics téléchargé</span><input id="ip-ics-filename" placeholder="soirees-jeux.ics" /></label>
+          <label class="field" for="ip-cal-enabled" style="margin-bottom: .8rem"><span class="checkbox-line"><input type="checkbox" id="ip-cal-enabled" /> <span data-i18n="admin.ip_cal_enabled">Afficher le bloc d'ajout à l'agenda</span></span></label>
+          <label class="field" for="ip-ics-filename"><span data-i18n="admin.ip_cal_filename">Nom du fichier .ics téléchargé</span><input id="ip-ics-filename" placeholder="soirees-jeux.ics" /></label>
           <button class="btn btn-primary" id="ip-save-calendar" data-i18n="admin.ip_cal_save">Enregistrer le bloc agenda</button>
         </div>
 
@@ -196,8 +196,8 @@
         <h3 class="font-display" style="margin: 2rem 0 .6rem" data-i18n="admin.ip_join_title">Adhérer à la MJC</h3>
         <p class="help" data-i18n="admin.ip_join_help">Titre et texte de la section « Adhérer ». Liens autorisés dans le texte au format <code>[libellé](https://…)</code>.</p>
         <div class="card card-pad" style="margin-bottom: 1.2rem">
-          <label class="field"><span data-i18n="admin.ip_join_field_title">Titre de la section</span><input id="ip-join-title" data-i18n-ph="admin.ip_join_field_title_ph" placeholder="Adhérer à la MJC" /></label>
-          <label class="field"><span data-i18n="admin.ip_join_field_text">Texte (liens autorisés)</span><textarea id="ip-join-text" rows="3"></textarea></label>
+          <label class="field" for="ip-join-title"><span data-i18n="admin.ip_join_field_title">Titre de la section</span><input id="ip-join-title" data-i18n-ph="admin.ip_join_field_title_ph" placeholder="Adhérer à la MJC" /></label>
+          <label class="field" for="ip-join-text"><span data-i18n="admin.ip_join_field_text">Texte (liens autorisés)</span><textarea id="ip-join-text" rows="3"></textarea></label>
           <button class="btn btn-primary" id="ip-save-join" data-i18n="admin.ip_join_save">Enregistrer le texte</button>
         </div>
         <p class="help" data-i18n="admin.ip_join_docs_help">Aucun document : la section « Adhérer » est masquée sur l'accueil. Plusieurs documents : ils sont regroupés dans une archive ZIP (mention « (ZIP) »). Formats acceptés : PDF, JPG, JPEG, PNG.</p>
@@ -229,54 +229,54 @@
         </p>
         <form class="card card-pad" id="settings-form">
           <div style="display: flex; gap: 1rem; flex-wrap: wrap">
-            <label class="field" style="flex: 1; min-width: 12rem"
+            <label class="field" for="set-site-name" style="flex: 1; min-width: 12rem"
               ><span data-i18n="admin.set_site_name">Nom du site</span>
               <input id="set-site-name" autocomplete="off" placeholder="Soirées Jeux"
             /></label>
-            <label class="field" style="flex: 1; min-width: 12rem"
+            <label class="field" for="set-site-holder" style="flex: 1; min-width: 12rem"
               ><span data-i18n="admin.set_site_holder">Détenteur</span>
               <input id="set-site-holder" autocomplete="off" placeholder="MJC Estrablin"
             /></label>
           </div>
-          <label class="field"
+          <label class="field" for="set-site-desc"
             ><span data-i18n="admin.set_site_desc">Description (aperçu de partage)</span>
             <input id="set-site-desc" autocomplete="off" placeholder="Calendrier des soirées jeux de société…"
           /></label>
-          <label class="field"
+          <label class="field" for="set-og-image"
             ><span data-i18n="admin.set_og_image">Image de partage (URL ou chemin /assets/…)</span>
             <input id="set-og-image" autocomplete="off" placeholder="/assets/boardgames.webp"
           /></label>
-          <label class="field"
+          <label class="field" for="set-meta-keywords"
             ><span data-i18n="admin.set_meta_keywords">Mots-clés (SEO)</span>
             <input id="set-meta-keywords" autocomplete="off" placeholder="jeux de société, soirées jeux, ludothèque"
           /></label>
           <p class="help" data-i18n="admin.set_meta_keywords_help">Séparés par des virgules. Laissez vide pour ne pas générer la balise.</p>
-          <label class="field"
+          <label class="field" for="set-default-lang"
             ><span data-i18n="admin.set_default_lang">Langue par défaut du site</span>
             <select id="set-default-lang"></select>
           </label>
-          <label class="field"
+          <label class="field" for="set-site-title"
             ><span data-i18n="admin.set_site_title">Titre d'accueil (page principale)</span>
             <input id="set-site-title" autocomplete="off" placeholder="Les [soirées jeux] de la MJC Estrablin"
           /></label>
           <p class="help" data-i18n="admin.set_site_title_help">Entourez de crochets le texte à colorer : <code>Les [soirées jeux] de la MJC</code>.</p>
-          <label class="field"
+          <label class="field" for="set-footer-text"
             ><span data-i18n="admin.set_footer_text">Texte du pied de page</span>
             <textarea id="set-footer-text" rows="2"></textarea>
           </label>
           <p class="help" data-i18n="admin.set_footer_text_help">Liens autorisés au format <code>[libellé](https://…)</code>.</p>
-          <label class="field"
+          <label class="field" for="set-footer-year"
             ><span data-i18n="admin.set_footer_year">Année du copyright (pied de page)</span>
             <input id="set-footer-year" autocomplete="off" data-i18n-ph="admin.set_footer_year_ph" placeholder="ex. 2025 ou 2024–2026"
           /></label>
           <p class="help" data-i18n="admin.set_footer_year_help">Laissez vide pour afficher automatiquement l'année courante.</p>
           <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0" />
-          <label class="field"
+          <label class="field" for="set-myludo"
             ><span data-i18n="admin.set_myludo">Profil MyLudo (lien public)</span>
             <input id="set-myludo" autocomplete="off" placeholder="https://www.myludo.fr/#!/profil/..."
           /></label>
           <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0" />
-          <label class="field"
+          <label class="field" for="set-pwd"
             ><span data-i18n="admin.set_pwd">Nouveau mot de passe admin (laisser vide pour ne pas changer)</span>
             <input type="password" id="set-pwd" autocomplete="new-password" placeholder="••••••"
           /></label>
@@ -294,7 +294,7 @@
         <h2 class="font-display" style="margin: 0 0 .3rem" data-i18n="admin.bk_import_title">Importer</h2>
         <p class="help" data-i18n="admin.bk_import_help">Sélectionne un fichier d'export, puis coche les éléments à remplacer. Seules les catégories cochées seront écrasées par le contenu du fichier ; les autres restent inchangées.</p>
         <div class="card card-pad">
-          <label class="field"
+          <label class="field" for="bk-file"
             ><span data-i18n="admin.bk_file">Fichier d'export (.json)</span>
             <input type="file" id="bk-file" accept="application/json,.json" />
           </label>
@@ -325,22 +325,22 @@
           <button class="modal-close" data-close-modal="event-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
         </div>
         <input type="hidden" id="ef-id" />
-        <label class="field"
+        <label class="field" for="ef-title-in"
           ><span data-i18n="admin.ef_title">Titre *</span><input id="ef-title-in" data-i18n-ph="admin.ef_title_ph" placeholder="Grande soirée jeux"
         /></label>
         <div class="grid grid-2" style="gap: 1rem">
-          <label class="field"><span data-i18n="admin.ef_date">Date *</span><input type="date" id="ef-date" /></label>
-          <label class="field"
+          <label class="field" for="ef-date"><span data-i18n="admin.ef_date">Date *</span><input type="date" id="ef-date" /></label>
+          <label class="field" for="ef-type"
             ><span data-i18n="admin.ef_type">Type</span
             ><select id="ef-type"></select></label
           >
         </div>
         <div class="grid grid-2" style="gap: 1rem">
-          <label class="field"><span data-i18n="admin.ef_start">Heure de début</span><input type="time" id="ef-start" /></label>
-          <label class="field"><span data-i18n="admin.ef_end">Heure de fin</span><input type="time" id="ef-end" /></label>
+          <label class="field" for="ef-start"><span data-i18n="admin.ef_start">Heure de début</span><input type="time" id="ef-start" /></label>
+          <label class="field" for="ef-end"><span data-i18n="admin.ef_end">Heure de fin</span><input type="time" id="ef-end" /></label>
         </div>
-        <label class="field"><span data-i18n="admin.ef_location">Lieu</span><select id="ef-location"></select></label>
-        <label class="field"><span data-i18n="admin.ef_desc">Description</span><textarea id="ef-desc" rows="2"></textarea></label>
+        <label class="field" for="ef-location"><span data-i18n="admin.ef_location">Lieu</span><select id="ef-location"></select></label>
+        <label class="field" for="ef-desc"><span data-i18n="admin.ef_desc">Description</span><textarea id="ef-desc" rows="2"></textarea></label>
 
         <div style="margin-top: 0.5rem">
           <span style="font-weight: 600; font-size: 0.85rem"
@@ -366,9 +366,9 @@
           <button class="modal-close" data-close-modal="location-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
         </div>
         <input type="hidden" id="lf-id" />
-        <label class="field"><span data-i18n="admin.lf_name">Nom *</span><input id="lf-name" data-i18n-ph="admin.lf_name_ph" placeholder="Salle festive" /></label>
-        <label class="field"><span data-i18n="admin.lf_address">Adresse</span><input id="lf-address" /></label>
-        <label class="field"><span data-i18n="admin.lf_desc">Description</span><textarea id="lf-desc" rows="2"></textarea></label>
+        <label class="field" for="lf-name"><span data-i18n="admin.lf_name">Nom *</span><input id="lf-name" data-i18n-ph="admin.lf_name_ph" placeholder="Salle festive" /></label>
+        <label class="field" for="lf-address"><span data-i18n="admin.lf_address">Adresse</span><input id="lf-address" /></label>
+        <label class="field" for="lf-desc"><span data-i18n="admin.lf_desc">Description</span><textarea id="lf-desc" rows="2"></textarea></label>
 
         <!-- Sélection des coordonnées par clic sur la carte (ping). -->
         <span style="font-weight: 600; font-size: 0.85rem" data-i18n="admin.lf_map_label">Emplacement sur la carte *</span>
@@ -393,11 +393,11 @@
           <button class="modal-close" data-close-modal="type-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
         </div>
         <input type="hidden" id="tf-id" />
-        <label class="field"><span data-i18n="admin.tf_label">Libellé *</span><input id="tf-label" data-i18n-ph="admin.tf_label_ph" placeholder="Grande soirée" /></label>
-        <label class="field"><span data-i18n="admin.tf_sub">Mention</span><input id="tf-sub" data-i18n-ph="admin.tf_sub_ph" placeholder="sur inscription" /></label>
+        <label class="field" for="tf-label"><span data-i18n="admin.tf_label">Libellé *</span><input id="tf-label" data-i18n-ph="admin.tf_label_ph" placeholder="Grande soirée" /></label>
+        <label class="field" for="tf-sub"><span data-i18n="admin.tf_sub">Mention</span><input id="tf-sub" data-i18n-ph="admin.tf_sub_ph" placeholder="sur inscription" /></label>
         <div class="grid grid-2" style="gap: 1rem">
-          <label class="field"><span data-i18n="admin.tf_color">Couleur</span><input type="color" id="tf-color" value="#8b9a6b" style="height: 42px; padding: 2px" /></label>
-          <label class="field" style="justify-content: flex-end">
+          <label class="field" for="tf-color"><span data-i18n="admin.tf_color">Couleur</span><input type="color" id="tf-color" value="#8b9a6b" style="height: 42px; padding: 2px" /></label>
+          <label class="field" for="tf-signup" style="justify-content: flex-end">
             <span class="checkbox-line"><input type="checkbox" id="tf-signup" /> <span data-i18n="admin.tf_signup">Inscription obligatoire</span></span>
           </label>
         </div>
@@ -416,13 +416,13 @@
           <button class="modal-close" data-close-modal="game-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
         </div>
         <input type="hidden" id="gf-id" />
-        <label class="field"
+        <label class="field" for="gf-image"
           ><span data-i18n="admin.gf_image">URL d'image (optionnel)</span><input id="gf-image" data-i18n-ph="admin.gf_image_ph" placeholder="https://..."
         /></label>
         <p class="help" data-i18n="admin.gf_image_help">
           Collez l'adresse d'une image de couverture.
         </p>
-        <label class="field"><span data-i18n="admin.gf_owner">Apporté par / propriétaire</span><input id="gf-owner" /></label>
+        <label class="field" for="gf-owner"><span data-i18n="admin.gf_owner">Apporté par / propriétaire</span><input id="gf-owner" /></label>
         <div style="display: flex; justify-content: flex-end; gap: 0.6rem">
           <button class="btn btn-ghost" data-close-modal="game-form-modal" data-i18n="admin.cancel">Annuler</button>
           <button class="btn btn-primary" id="save-game-btn" data-i18n="admin.save">Enregistrer</button>
@@ -438,13 +438,13 @@
           <button class="modal-close" data-close-modal="infoblock-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
         </div>
         <input type="hidden" id="ib-id" />
-        <label class="field"><span data-i18n="admin.ibf_emoji">Émoji</span></label>
-        <div class="emoji-field">
+        <label class="field" id="ib-emoji-label"><span data-i18n="admin.ibf_emoji">Émoji</span></label>
+        <div class="emoji-field" role="group" aria-labelledby="ib-emoji-label">
           <span class="emoji-preview" id="ib-icon-preview">📌</span>
           <div class="emoji-grid" id="ib-emoji-grid"></div>
         </div>
-        <label class="field" style="margin-top: 1rem"><span data-i18n="admin.ibf_block_title">Titre *</span><input id="ib-title-in" /></label>
-        <label class="field"><span data-i18n="admin.ibf_body">Texte</span><textarea id="ib-body" rows="4"></textarea></label>
+        <label class="field" for="ib-title-in" style="margin-top: 1rem"><span data-i18n="admin.ibf_block_title">Titre *</span><input id="ib-title-in" /></label>
+        <label class="field" for="ib-body"><span data-i18n="admin.ibf_body">Texte</span><textarea id="ib-body" rows="4"></textarea></label>
         <p class="help" data-i18n="admin.ibf_body_help">Gras : <code>**texte**</code>. Lien : <code>[libellé](https://…)</code>. Les retours à la ligne sont conservés.</p>
         <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1rem">
           <button class="btn btn-ghost" data-close-modal="infoblock-form-modal" data-i18n="admin.cancel">Annuler</button>
@@ -461,8 +461,8 @@
           <button class="modal-close" data-close-modal="faq-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
         </div>
         <input type="hidden" id="faqf-id" />
-        <label class="field"><span data-i18n="admin.faqf_question">Question *</span><input id="faqf-question" /></label>
-        <label class="field"><span data-i18n="admin.faqf_answer">Réponse</span><textarea id="faqf-answer" rows="4"></textarea></label>
+        <label class="field" for="faqf-question"><span data-i18n="admin.faqf_question">Question *</span><input id="faqf-question" /></label>
+        <label class="field" for="faqf-answer"><span data-i18n="admin.faqf_answer">Réponse</span><textarea id="faqf-answer" rows="4"></textarea></label>
         <p class="help" data-i18n="admin.faqf_answer_help">Lien autorisé au format <code>[libellé](https://…)</code>.</p>
         <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1rem">
           <button class="btn btn-ghost" data-close-modal="faq-form-modal" data-i18n="admin.cancel">Annuler</button>
