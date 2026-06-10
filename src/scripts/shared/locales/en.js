@@ -342,7 +342,6 @@ export default {
     set_footer_year: 'Copyright year (footer)',
     set_footer_year_ph: 'e.g. 2025 or 2024–2026',
     set_footer_year_help: 'Leave empty to show the current year automatically.',
-    set_myludo: 'MyLudo profile (public link)',
     set_pwd: 'New admin password (leave empty to keep it unchanged)',
     save_settings: 'Save settings',
 

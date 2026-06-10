@@ -177,10 +177,9 @@ function checkAdmin(provided) {
 
 // =====================  API PUBLIQUE  =====================================
 
-// Réglages publics utiles au front (profil MyLudo, identité, textes…).
+// Réglages publics utiles au front (identité, textes…).
 app.get('/api/public-settings', (req, res) => {
   res.json({
-    myludo_profile: setting('myludo_profile'),
     default_lang: setting('default_lang'),
     site_name: setting('site_name'),
     site_holder: setting('site_holder'),
@@ -947,7 +946,6 @@ app.get('/api/admin/settings', requireAdmin, (req, res) => {
 
 app.put('/api/admin/settings', requireAdmin, wrap(async (req, res) => {
   const allowed = [
-    'myludo_profile',
     'site_name',
     'site_holder',
     'site_description',

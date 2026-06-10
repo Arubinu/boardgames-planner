@@ -30,7 +30,7 @@ Le front-end est construit avec **Vite** (regroupement des modules JS) et **Sass
 - Importer la collection depuis un export **MyLudo** (CSV ou JSON). La **date de création** de chaque jeu est conservée d'un import à l'autre ; la date de modification est mise à jour.
 - Ajouter une image et un « apporté par » à chaque jeu (conservés lors des ré-imports), ou supprimer un jeu.
 - Régler l'**identité du site** : le **nom** et le **détenteur** (ex. « Soirées Jeux » / « MJC Estrablin »), utilisés pour la marque de la barre de navigation, les titres de page et les aperçus de partage ; ainsi que la description et l'image de partage (OpenGraph), le **titre d'accueil** (avec parties `[colorées]`) et le **texte du pied de page** (avec liens `[libellé](url)`).
-- Choisir la **langue par défaut du site** (ou la laisser sur *auto / navigateur*), le profil MyLudo et le mot de passe.
+- Choisir la **langue par défaut du site** (ou la laisser sur *auto / navigateur*) et le mot de passe.
 
 ---
 
@@ -67,7 +67,6 @@ services:
       #SITE_DESCRIPTION: Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.
       #OG_IMAGE: /assets/boardgames.webp
       #META_KEYWORDS: boardgames, jeux de société, dates, calendar, calendrier, ludothèque
-      #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
       #FOOTER_TEXT: "Des soirées conviviales pour partager la passion des jeux de société.\n\nCe site est un projet open-source que tu peux retrouver ici: [https://github.com/Arubinu/boardgames-planner](https://github.com/Arubinu/boardgames-planner)"
       #ICS_FILENAME: boardgames-planner.ics
     healthcheck:
@@ -126,7 +125,6 @@ Deux familles de variables, toutes prises en compte **à chaque démarrage** du 
 | `SITE_TITLE` | Titre d'accueil (hero) ; `[texte]` pour les portions colorées. |
 | `SITE_DESCRIPTION` | Description du site (aperçus de partage / SEO). |
 | `OG_IMAGE` | Image de partage Open Graph (URL ou chemin `/assets/…`). |
-| `MYLUDO_PROFILE` | Profil MyLudo public. |
 | `FOOTER_TEXT` | Texte du pied de page ; liens au format `[libellé](url)`. |
 | `ICS_FILENAME` | Nom du fichier de l'agenda `.ics` téléchargé. |
 
@@ -193,10 +191,9 @@ enregistrement.
      les existants, **sans toucher** aux images et « apporté par » que vous avez saisis.
 5. Cliquez sur **Importer**.
 
-> Le profil MyLudo public configuré par défaut est `christophe-t-81487`
-> (modifiable dans l'onglet Réglages). MyLudo ne fournit pas d'API d'images :
-> les liens pointent vers la fiche du jeu, et vous pouvez ajouter une image
-> personnalisée par jeu si vous le souhaitez.
+> MyLudo ne fournit pas d'API d'images : les liens pointent vers la fiche
+> du jeu, et vous pouvez ajouter une image personnalisée par jeu si vous le
+> souhaitez.
 
 ---
 

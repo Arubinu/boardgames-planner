@@ -346,7 +346,6 @@ export default {
     set_footer_year: 'Année du copyright (pied de page)',
     set_footer_year_ph: 'ex. 2025 ou 2024–2026',
     set_footer_year_help: "Laissez vide pour afficher automatiquement l'année courante.",
-    set_myludo: 'Profil MyLudo (lien public)',
     set_pwd: 'Nouveau mot de passe admin (laisser vide pour ne pas changer)',
     save_settings: 'Enregistrer les réglages',
 

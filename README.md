@@ -30,7 +30,7 @@ The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (sty
 - Import the collection from a **MyLudo** export (CSV or JSON). Each game's **creation date** is preserved across imports; the modification date is updated.
 - Add an image and a "brought by" note to each game (preserved across re-imports), or delete a game.
 - Configure the **site identity**: the **name** and **holder** (e.g. "Game Nights" / "MJC Estrablin"), used to build the nav brand, the page titles and the share previews; plus the description and share image (OpenGraph), the **home title** (with `[highlighted]` parts) and the **footer text** (with `[label](url)` links).
-- Set the **default site language** (or leave it on *auto / browser*), the MyLudo profile and the password.
+- Set the **default site language** (or leave it on *auto / browser*) and the password.
 
 ---
 
@@ -67,7 +67,6 @@ services:
       #SITE_DESCRIPTION: Board game night calendar, toy library, and practical information for the MJC Estrablin.
       #OG_IMAGE: /assets/boardgames.webp
       #META_KEYWORDS: boardgames, dates, calendar
-      #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
       #FOOTER_TEXT: "Friendly evenings to share a passion for board games.\n\nThis website is an open-source project that you can find here: [https://github.com/Arubinu/boardgames-planner](https://github.com/Arubinu/boardgames-planner)"
       #ICS_FILENAME: boardgames-planner.ics
     healthcheck:
@@ -126,7 +125,6 @@ Two families of variables, all taken into account **on every startup** of the co
 | `SITE_TITLE` | Home (hero) title; `[text]` for highlighted parts. |
 | `SITE_DESCRIPTION` | Site description (share previews / SEO). |
 | `OG_IMAGE` | Open Graph share image (URL or `/assets/…` path). |
-| `MYLUDO_PROFILE` | Public MyLudo profile. |
 | `FOOTER_TEXT` | Footer text; links in `[label](url)` format. |
 | `ICS_FILENAME` | Filename of the downloaded `.ics` calendar. |
 
@@ -192,9 +190,8 @@ comparison, and any password update is re-hashed before being saved.
      **without touching** the images and "brought by" notes you entered.
 5. Click **Import**.
 
-> The default public MyLudo profile is `christophe-t-81487` (editable in the
-> Settings tab). MyLudo does not provide an image API: links point to the game's
-> page, and you can add a custom image per game if you wish.
+> MyLudo does not provide an image API: links point to the game's page, and you
+> can add a custom image per game if you wish.
 
 ---
 

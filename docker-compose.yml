@@ -20,7 +20,6 @@ services:
       #SITE_DESCRIPTION: Calendrier des soirées jeux de société, ludothèque et infos pratiques de la MJC Estrablin.
       #OG_IMAGE: /assets/boardgames.webp
       #META_KEYWORDS: boardgames, jeux de société, dates, calendar, calendrier, ludothèque
-      #MYLUDO_PROFILE: https://www.myludo.fr/#!/profil/[...]
       #FOOTER_TEXT: "Des soirées conviviales pour partager la passion des jeux de société.\n\nCe site est un projet open-source que tu peux retrouver ici: [https://github.com/Arubinu/boardgames-planner](https://github.com/Arubinu/boardgames-planner)"
       #ICS_FILENAME: boardgames-planner.ics
     healthcheck:

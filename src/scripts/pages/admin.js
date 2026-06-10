@@ -800,7 +800,6 @@ async function loadSettings() {
     document.getElementById('set-footer-text').value = s.footer_text || '';
     document.getElementById('set-footer-year').value = s.footer_year || '';
     setSiteIdentity(s.site_name, s.site_holder);
-    document.getElementById('set-myludo').value = s.myludo_profile || '';
     // Champs « Infos pratiques » (onglet dédié).
     document.getElementById('ip-infos-title').value = s.infos_title || '';
     document.getElementById('ip-infos-sub').value = s.infos_sub || '';
@@ -832,7 +831,6 @@ async function saveSettings() {
     site_title: document.getElementById('set-site-title').value.trim(),
     footer_text: document.getElementById('set-footer-text').value.trim(),
     footer_year: document.getElementById('set-footer-year').value.trim(),
-    myludo_profile: document.getElementById('set-myludo').value.trim(),
   };
   const np = document.getElementById('set-pwd').value.trim();
   if (np) payload.admin_password = np;

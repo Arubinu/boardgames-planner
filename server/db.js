@@ -181,7 +181,6 @@ const ensureSetting = db.prepare(
   `INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO NOTHING`
 );
 ensureSetting.run('admin_password', 'admin');
-ensureSetting.run('myludo_profile', 'https://www.myludo.fr/#!/profil/christophe-t-81487');
 // Identité du site (réutilisée par la marque, les balises OpenGraph, le .ics).
 // Nom + Détenteur séparés ; recombinés en « Nom — Détenteur » au besoin.
 ensureSetting.run('site_name', 'Soirées Jeux');
@@ -223,7 +222,6 @@ const ENV_SETTINGS = [
   { env: 'SITE_DESCRIPTION', key: 'site_description' },
   { env: 'OG_IMAGE',         key: 'og_image' },
   { env: 'META_KEYWORDS',    key: 'meta_keywords' },
-  { env: 'MYLUDO_PROFILE',   key: 'myludo_profile' },
   { env: 'FOOTER_TEXT',      key: 'footer_text' },
   { env: 'ICS_FILENAME',     key: 'ics_filename' },
 ];
