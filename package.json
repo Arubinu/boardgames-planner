@@ -1,6 +1,6 @@
 {
   "name": "boardgames-planner",
-  "version": "1.0.0",
+  "version": "1.8.0",
   "description": "Site des soirées jeux de société de la MJC Estrablin : calendrier interactif, ludothèque MyLudo, multilingue (FR/EN) et administration.",
   "type": "module",
   "main": "server/index.js",
@@ -9,7 +9,9 @@
     "dev:server": "node --watch server/index.js",
     "build": "vite build",
     "start": "node server/index.js",
-    "seed": "node server/seed.js"
+    "seed": "node server/seed.js",
+    "test": "node --test \"test/*.test.mjs\"",
+    "clean": "rimraf node_modules package-lock.json"
   },
   "engines": {
     "node": ">=18"
@@ -23,7 +25,8 @@
     "express-static-gzip": "^3.0.1",
     "helmet": "^8.2.0",
     "leaflet": "^1.9.4",
-    "multer": "^2.1.1"
+    "multer": "^2.1.1",
+    "rimraf": "^5.0.0"
   },
   "devDependencies": {
     "sass": "^1.83.0",

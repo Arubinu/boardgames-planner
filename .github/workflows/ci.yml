@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Installe les dépendances de façon reproductible (échoue si package-lock
+      # n'est pas à jour) — attrape les "ça marche sur ma machine".
+      - run: npm ci
+
+      # Le build génère public/ (dont 404.html, assets pré-compressés) requis
+      # par certains tests d'intégration.
+      - run: npm run build
+
+      - run: npm test
