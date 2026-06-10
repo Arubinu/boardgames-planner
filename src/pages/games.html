@@ -54,6 +54,18 @@
               <option value="title" data-i18n="gamesPage.sort_title">Trier par titre (A→Z)</option>
               <option value="rating" data-i18n="gamesPage.sort_rating">Trier par note</option>
             </select>
+            <select id="filter-players" data-i18n-aria="gamesPage.players_aria" aria-label="Joueurs">
+              <option value="" data-i18n="gamesPage.players_all">Tous les joueurs</option>
+            </select>
+            <select id="filter-duration" data-i18n-aria="gamesPage.duration_aria" aria-label="Durée">
+              <option value="" data-i18n="gamesPage.duration_all">Toutes les durées</option>
+              <option value="short" data-i18n="gamesPage.duration_short">Rapide (≤ 30 min)</option>
+              <option value="medium" data-i18n="gamesPage.duration_medium">Moyen (30–60 min)</option>
+              <option value="long" data-i18n="gamesPage.duration_long">Long (+ de 60 min)</option>
+            </select>
+            <select id="filter-category" data-i18n-aria="gamesPage.category_aria" aria-label="Catégorie">
+              <option value="" data-i18n="gamesPage.category_all">Toutes les catégories</option>
+            </select>
           </div>
           <div class="filter-chips" style="margin-bottom: 1.5rem">
             <span class="chip active" data-type="all" data-i18n="gamesPage.chip_all">Tous</span>
