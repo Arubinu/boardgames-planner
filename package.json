@@ -11,7 +11,7 @@
     "start": "node server/index.js",
     "seed": "node server/seed.js",
     "test": "node --test \"test/*.test.mjs\"",
-    "clean": "rimraf node_modules package-lock.json"
+    "clean": "rimraf node_modules"
   },
   "engines": {
     "node": ">=18"
