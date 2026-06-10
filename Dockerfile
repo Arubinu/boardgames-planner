@@ -1,6 +1,7 @@
-# Image Node : node:20 inclut Python + build tools nécessaires à la
-# compilation des modules natifs (better-sqlite3, argon2).
-FROM node:20-bookworm-slim
+# Image Node 22 (alignée sur la CI et les tests). La variante "slim" n'inclut
+# pas les outils de compilation : on les ajoute pour les modules natifs
+# (better-sqlite3, argon2).
+FROM node:22-bookworm-slim
 
 # Outils de compilation pour les modules natifs (better-sqlite3, argon2).
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -10,9 +11,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Installe TOUTES les dépendances (y compris devDependencies : Vite + Sass
-# sont nécessaires pour construire le front). Bonne mise en cache des couches.
-COPY package.json ./
-RUN npm install
+# sont nécessaires pour construire le front). npm ci installe exactement le
+# package-lock.json -> build reproductible. Bonne mise en cache des couches.
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Copie les sources nécessaires au build front + au serveur.
 COPY vite.config.js ./

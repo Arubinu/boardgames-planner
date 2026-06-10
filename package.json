@@ -10,8 +10,7 @@
     "build": "vite build",
     "start": "node server/index.js",
     "seed": "node server/seed.js",
-    "test": "node --test \"test/*.test.mjs\"",
-    "clean": "rimraf node_modules"
+    "test": "node --test \"test/*.test.mjs\""
   },
   "engines": {
     "node": ">=18"
@@ -25,8 +24,7 @@
     "express-static-gzip": "^3.0.1",
     "helmet": "^8.2.0",
     "leaflet": "^1.9.4",
-    "multer": "^2.1.1",
-    "rimraf": "^5.0.0"
+    "multer": "^2.1.1"
   },
   "devDependencies": {
     "sass": "^1.83.0",
@@ -34,5 +32,11 @@
     "vite-plugin-compression2": "^2.5.3"
   },
   "author": "MJC Estrablin",
-  "license": "MIT"
+  "license": "MIT",
+  "allowScripts": {
+    "@parcel/watcher@2.5.6": true,
+    "argon2@0.44.0": true,
+    "better-sqlite3@11.10.0": true,
+    "esbuild@0.25.12": true
+  }
 }
