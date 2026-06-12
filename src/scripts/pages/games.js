@@ -94,8 +94,13 @@ function cardHtml(g) {
   const cats = (g.categories || '')
     .split(',')
     .map((s) => s.trim())
-    .filter(Boolean)
-    .slice(0, 2);
+    .filter(Boolean);
+  // Une seule pastille (1re catégorie) ; au survol, une bulle liste toutes les catégories.
+  const catPill = cats.length
+    ? `<span class="pill cat-pill"${
+        cats.length > 1 ? ` data-cats="${esc(cats.join(' · '))}"` : ''
+      }>${esc(cats[0])}${cats.length > 1 ? `<span class="cat-more">+${cats.length - 1}</span>` : ''}</span>`
+    : '';
   return `<div class="card game-card" data-game="${g.id}">
     ${gameThumb(g)}
     <div class="info">
@@ -105,7 +110,7 @@ function cardHtml(g) {
   )} ${t('game.min')} · ${esc(g.age || '')}</div>
       <div class="tags">
         ${g.rating > 0 ? `<span class="rating">★ ${g.rating.toFixed(1)}</span>` : ''}
-        ${cats.map((c) => `<span class="pill">${esc(c)}</span>`).join('')}
+        ${catPill}
       </div>
     </div>
   </div>`;

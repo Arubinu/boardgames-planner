@@ -33,9 +33,13 @@ export function openGameModal(game) {
       ${row(t('game.authors'), game.authors)}
       ${row(t('game.publishers'), game.publishers)}
       ${game.owner ? row(t('game.owner'), game.owner) : ''}
-      <a class="btn btn-primary" style="margin-top:1rem" href="${esc(
+      ${
         game.details_url
-      )}" target="_blank" rel="noopener">${esc(t('game.see_full'))}</a>
+          ? `<a class="btn btn-primary" style="margin-top:1rem" href="${esc(
+              game.details_url
+            )}" target="_blank" rel="noopener">${esc(t('game.see_full'))}</a>`
+          : ''
+      }
     </div>`;
   wireThumbFallbacks(body);
 }

@@ -123,9 +123,12 @@
           style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem"
         >
           <h2 class="font-display" style="margin: 0"><span data-i18n="admin.games_list_title">Jeux</span> (<span id="games-count">0</span>)</h2>
-          <input type="search" id="games-search" data-i18n-ph="admin.games_filter_ph" placeholder="Filtrer…" style="max-width: 240px" />
+          <div style="display: flex; gap: 0.6rem; align-items: center">
+            <input type="search" id="games-search" data-i18n-ph="admin.games_filter_ph" placeholder="Filtrer…" style="max-width: 240px" />
+            <button class="btn btn-primary" id="add-game-btn" data-i18n="admin.add_game">+ Ajouter un jeu</button>
+          </div>
         </div>
-        <div class="card card-pad"><div id="games-table"><div class="spinner"></div></div></div>
+        <div id="games-table"><div class="spinner"></div></div>
       </section>
 
       <!-- Onglet Lieux -->
@@ -283,24 +286,32 @@
         <h2 class="font-display" style="margin: 0 0 .3rem" data-i18n="admin.bk_export_title">Exporter</h2>
         <p class="help" data-i18n="admin.bk_export_help">Télécharge une sauvegarde complète de la base (réglages, jeux, lieux, évènements, infos pratiques, FAQ et documents d'adhésion) dans un fichier JSON.</p>
         <button class="btn btn-primary" id="bk-export-btn" data-i18n="admin.bk_export_btn">Exporter la base (JSON)</button>
+        <p class="help" data-i18n="admin.bk_images_export_help" style="margin-top: 1rem">Télécharge un ZIP de toutes les images de jeux téléversées, en complément de la sauvegarde JSON.</p>
+        <button class="btn" id="bk-images-export-btn" data-i18n="admin.bk_images_export_btn">Exporter les images (ZIP)</button>
 
         <hr style="border: none; border-top: 1px solid var(--border); margin: 2rem 0" />
 
         <h2 class="font-display" style="margin: 0 0 .3rem" data-i18n="admin.bk_import_title">Importer</h2>
         <p class="help" data-i18n="admin.bk_import_help">Sélectionne un fichier d'export, puis coche les éléments à remplacer. Seules les catégories cochées seront écrasées par le contenu du fichier ; les autres restent inchangées.</p>
         <div class="card card-pad">
-          <label class="field" for="bk-file"
-            ><span data-i18n="admin.bk_file">Fichier d'export (.json)</span>
-            <input type="file" id="bk-file" accept="application/json,.json" />
-          </label>
-          <fieldset id="bk-cats" style="border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin: .5rem 0">
+          <span class="field" style="display: block; margin-bottom: 0.3rem"
+            ><span data-i18n="admin.bk_file">Fichier d'export (.json)</span></span
+          >
+          <div class="dropzone" id="bk-dropzone" style="padding: 1.2rem">
+            <p style="font-size: 1.6rem; margin: 0.1rem">📄</p>
+            <p data-i18n-html="admin.bk_drop"><strong>Cliquez ou glissez un fichier</strong> (.json)</p>
+            <p class="help" id="bk-file-name"></p>
+          </div>
+          <input type="file" id="bk-file" accept="application/json,.json" style="display: none" />
+          <fieldset id="bk-cats" style="border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin: 1rem 0">
             <legend style="padding: 0 .4rem; font-weight: 600; font-size: .9rem" data-i18n="admin.bk_categories">Éléments à importer</legend>
             <span class="checkbox-line"><input type="checkbox" id="bk-all" /> <span data-i18n="admin.bk_select_all"><strong>Tout sélectionner</strong></span></span>
             <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="settings" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_settings">Réglages</span><span class="bk-count" data-count="settings"></span></span></span>
             <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="event_types" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_event_types">Types d'évènements</span><span class="bk-count" data-count="event_types"></span></span></span>
             <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="locations" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_locations">Lieux</span><span class="bk-count" data-count="locations"></span></span></span>
             <div class="bk-list" id="bk-list-locations"></div>
-            <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="games" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_games">Jeux</span><span class="bk-count" data-count="games"></span></span></span>
+            <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="games_manual" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_games_manual">Jeux hors collection</span><span class="bk-count" data-count="games_manual"></span></span></span>
+            <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="games_myludo" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_games_myludo">Jeux MyLudo</span><span class="bk-count" data-count="games_myludo"></span></span></span>
             <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="events" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_events">Évènements (et leurs jeux)</span><span class="bk-count" data-count="events"></span></span></span>
             <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="info_blocks" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_info_blocks">Blocs « Infos pratiques »</span><span class="bk-count" data-count="info_blocks"></span></span></span>
             <div class="bk-list" id="bk-list-info_blocks"></div>
@@ -308,6 +319,21 @@
             <span class="checkbox-line"><input type="checkbox" class="bk-cat" value="membership" /> <span class="bk-cat-label"><span data-i18n="admin.bk_cat_membership">Documents d'adhésion</span><span class="bk-count" data-count="membership"></span></span></span>
           </fieldset>
           <button class="btn btn-primary" id="bk-import-btn" data-i18n="admin.bk_import_btn">Importer la sélection</button>
+        </div>
+
+        <h2 class="font-display" style="margin: 2rem 0 .3rem" data-i18n="admin.bk_images_import_title">Importer les images</h2>
+        <p class="help" data-i18n="admin.bk_images_import_help">Importe un ZIP d'images (généré ci-dessus). Les fichiers sont restaurés tels quels dans le stockage ; ils correspondent aux <code>image_url</code> de la sauvegarde JSON, indépendamment des ID des jeux.</p>
+        <div class="card card-pad">
+          <span class="field" style="display: block; margin-bottom: 0.3rem"
+            ><span data-i18n="admin.bk_images_file">Archive d'images (.zip)</span></span
+          >
+          <div class="dropzone" id="bk-images-dropzone" style="padding: 1.2rem">
+            <p style="font-size: 1.6rem; margin: 0.1rem">🖼️</p>
+            <p data-i18n-html="admin.bk_images_drop"><strong>Cliquez ou glissez une archive</strong> (.zip)</p>
+            <p class="help" id="bk-images-file-name"></p>
+          </div>
+          <input type="file" id="bk-images-file" accept=".zip,application/zip" style="display: none" />
+          <button class="btn btn-primary" id="bk-images-import-btn" data-i18n="admin.bk_images_import_btn">Importer les images</button>
         </div>
       </section>
     </main>
@@ -407,17 +433,99 @@
     <div class="modal-backdrop" id="game-form-modal">
       <div class="modal">
         <div class="modal-head">
-          <h3 id="gf-title" data-i18n="admin.gf_title">Modifier un jeu</h3>
+          <h3 id="gf-form-title">Jeu</h3>
           <button class="modal-close" data-close-modal="game-form-modal" data-i18n-aria="modal.close" aria-label="Fermer">✕</button>
         </div>
         <input type="hidden" id="gf-id" />
-        <label class="field" for="gf-image"
-          ><span data-i18n="admin.gf_image">URL d'image (optionnel)</span><input id="gf-image" data-i18n-ph="admin.gf_image_ph" placeholder="https://..."
+        <input type="hidden" id="gf-source" />
+
+        <!-- Champs hors-collection : masqués lors de l'édition d'un jeu MyLudo -->
+        <div id="gf-manual-fields">
+          <label class="field" for="gf-name"
+            ><span data-i18n="admin.gf_name">Titre</span><input id="gf-name"
+          /></label>
+          <label class="field" for="gf-subtitle"
+            ><span data-i18n="admin.gf_subtitle">Sous-titre</span><input id="gf-subtitle"
+          /></label>
+          <label class="field" for="gf-type"
+            ><span data-i18n="admin.gf_type">Type</span>
+            <select id="gf-type">
+              <option value="basegame" data-i18n="admin.gf_type_base">Jeu de base</option>
+              <option value="extension" data-i18n="admin.gf_type_ext">Extension</option>
+            </select>
+          </label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem">
+            <label class="field" for="gf-players"
+              ><span data-i18n="admin.gf_players">Joueurs</span><input id="gf-players" placeholder="2 — 4"
+            /></label>
+            <label class="field" for="gf-duration"
+              ><span data-i18n="admin.gf_duration">Durée (min)</span><input id="gf-duration" placeholder="30 — 60"
+            /></label>
+            <label class="field" for="gf-age"
+              ><span data-i18n="admin.gf_age">Âge</span><input id="gf-age" placeholder="8+"
+            /></label>
+            <label class="field" for="gf-rating"
+              ><span data-i18n="admin.gf_rating">Note (0–10)</span
+              ><input id="gf-rating" type="number" min="0" max="10" step="0.1"
+            /></label>
+          </div>
+          <label class="field" for="gf-categories"
+            ><span data-i18n="admin.gf_categories">Catégories</span
+            ><input id="gf-categories" data-i18n-ph="admin.gf_csv_ph" placeholder="séparées par des virgules"
+          /></label>
+          <label class="field" for="gf-themes"
+            ><span data-i18n="admin.gf_themes">Thèmes</span
+            ><input id="gf-themes" data-i18n-ph="admin.gf_csv_ph"
+          /></label>
+          <label class="field" for="gf-mechanisms"
+            ><span data-i18n="admin.gf_mechanisms">Mécanismes</span
+            ><input id="gf-mechanisms" data-i18n-ph="admin.gf_csv_ph"
+          /></label>
+          <label class="field" for="gf-authors"
+            ><span data-i18n="admin.gf_authors">Auteurs</span
+            ><input id="gf-authors" data-i18n-ph="admin.gf_csv_ph"
+          /></label>
+          <label class="field" for="gf-publishers"
+            ><span data-i18n="admin.gf_publishers">Éditeurs</span
+            ><input id="gf-publishers" data-i18n-ph="admin.gf_csv_ph"
+          /></label>
+          <label class="field" for="gf-details"
+            ><span data-i18n="admin.gf_details">Lien externe (optionnel)</span
+            ><input id="gf-details" placeholder="https://..."
+          /></label>
+        </div>
+
+        <!-- Image de couverture : URL + zone de dépôt, ou aperçu si une image est présente -->
+        <div style="font-weight: 600; margin: 0.2rem 0 0.3rem">
+          <span data-i18n="admin.gf_image">Image de couverture</span>
+        </div>
+        <div id="gf-image-empty">
+          <input id="gf-image" data-i18n-ph="admin.gf_image_ph" placeholder="https://..." style="width: 100%" />
+          <div class="dropzone" id="gf-dropzone" style="margin-top: 0.6rem; padding: 1.2rem">
+            <p style="font-size: 1.6rem; margin: 0.1rem">🖼️</p>
+            <p data-i18n-html="admin.gf_image_drop"><strong>Cliquez ou glissez une image</strong> (JPEG, PNG, WebP…)</p>
+          </div>
+          <input id="gf-image-file" type="file" accept="image/*" style="display: none" />
+        </div>
+        <div id="gf-image-set" style="display: none; text-align: center">
+          <div class="gf-image-frame">
+            <img id="gf-image-preview" alt="" />
+            <button
+              type="button"
+              class="gf-image-remove"
+              id="gf-image-remove"
+              data-i18n-aria="admin.gf_image_remove"
+              aria-label="Retirer l'image"
+              title="Retirer l'image"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <label class="field" for="gf-owner" style="margin-top: 0.8rem"
+          ><span data-i18n="admin.gf_owner">Apporté par / propriétaire</span><input id="gf-owner"
         /></label>
-        <p class="help" data-i18n="admin.gf_image_help">
-          Collez l'adresse d'une image de couverture.
-        </p>
-        <label class="field" for="gf-owner"><span data-i18n="admin.gf_owner">Apporté par / propriétaire</span><input id="gf-owner" /></label>
         <div style="display: flex; justify-content: flex-end; gap: 0.6rem">
           <button class="btn btn-ghost" data-close-modal="game-form-modal" data-i18n="admin.cancel">Annuler</button>
           <button class="btn btn-primary" id="save-game-btn" data-i18n="admin.save">Enregistrer</button>

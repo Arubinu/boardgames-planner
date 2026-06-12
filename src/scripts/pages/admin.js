@@ -191,6 +191,50 @@ function confirmDelete(kind, id, label) {
   openModal('confirm-modal');
 }
 
+async function doImagesExport() {
+  try {
+    const r = await fetch('/api/admin/images-export', { headers: { 'x-admin-password': PWD } });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.statusText);
+    const blob = await r.blob();
+    const cd = r.headers.get('Content-Disposition') || '';
+    const m = cd.match(/filename="([^"]+)"/);
+    const name = m ? m[1] : 'boardgames-images.zip';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast(t('admin.bk_exported'));
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+async function doImagesImport() {
+  const input = document.getElementById('bk-images-file');
+  const file = input.files && input.files[0];
+  if (!file) return toast(t('admin.bk_images_no_file'), true);
+  const fd = new FormData();
+  fd.append('images', file);
+  try {
+    const r = await fetch('/api/admin/images-import', {
+      method: 'POST',
+      headers: { 'x-admin-password': PWD },
+      body: fd,
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || r.statusText);
+    input.value = '';
+    document.getElementById('bk-images-file-name').textContent = '';
+    toast(t('admin.bk_images_imported', { count: data.imported || 0 }));
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
 // --- Authentification -----------------------------------------------------
 async function doLogin() {
   const pwd = document.getElementById('login-pwd').value;
@@ -420,72 +464,269 @@ function fmtDateTime(s) {
   if (isNaN(d)) return esc(s);
   return d.toLocaleDateString(getLocale(), { day: '2-digit', month: '2-digit', year: '2-digit' });
 }
+function gameRowHtml(g) {
+  const link = g.details_url
+    ? `<a class="btn btn-ghost btn-icon" href="${esc(g.details_url)}" title="${t(
+        'admin.details'
+      )}" aria-label="${t('admin.details')}" target="_blank" rel="noopener"><img src="/assets/icons/link.svg" alt="" /></a>`
+    : '';
+  return `<tr>
+    <td data-label="${t('admin.th_game')}"><strong>${esc(g.title)}</strong>${
+      g.type === 'extension' ? ` <span class="badge badge-petite">${t('game.ext_short')}</span>` : ''
+    }<br><span class="muted" style="font-size:.8rem">${esc(g.players || '')} · ${esc(g.duration || '')} ${t(
+    'game.min'
+  )}</span></td>
+    <td data-label="${t('admin.th_rating')}">${g.rating > 0 ? '★ ' + g.rating.toFixed(1) : t('admin.dash')}</td>
+    <td data-label="${t('admin.th_image')}">${g.image_url ? '🖼️' : t('admin.dash')}</td>
+    <td data-label="${t('admin.th_owner')}">${esc(g.owner || t('admin.dash'))}</td>
+    <td data-label="${t('admin.th_dates')}"><span class="muted" style="font-size:.8rem">${fmtDateTime(
+      g.created_at
+    )}<br>${fmtDateTime(g.updated_at)}</span></td>
+    <td class="cell-actions"><div class="row-actions">
+      <button class="btn btn-ghost btn-icon" data-edit-game="${g.id}" title="${t('admin.edit')}" aria-label="${t(
+    'admin.edit'
+  )}"><img src="/assets/icons/edit.svg" alt="" /></button>
+      ${link}
+      <button class="btn btn-ghost btn-icon" data-del-game="${g.id}" title="${t(
+    'admin.delete'
+  )}" data-label-text="${esc(g.title)}"><img src="/assets/icons/delete.svg" alt="" /></button>
+    </div></td></tr>`;
+}
+
+function gamesTableHtml(list, emptyKey) {
+  if (!list.length) return `<div class="empty">${t(emptyKey || 'admin.no_games')}</div>`;
+  return `<table class="responsive"><thead><tr><th>${t('admin.th_game')}</th><th>${t(
+    'admin.th_rating'
+  )}</th><th>${t('admin.th_image')}</th><th>${t('admin.th_owner')}</th><th>${t(
+    'admin.th_dates'
+  )}</th><th></th></tr></thead><tbody>${list.map(gameRowHtml).join('')}</tbody></table>`;
+}
+
 function renderGamesTable() {
   const q = document.getElementById('games-search').value.trim().toLowerCase();
-  const list = GAMES.filter((g) => !q || g.title.toLowerCase().includes(q)).slice(0, 300);
-  const rows = list
-    .map(
-      (g) => `<tr>
-      <td data-label="${t('admin.th_game')}"><strong>${esc(g.title)}</strong>${
-        g.type === 'extension' ? ` <span class="badge badge-petite">${t('game.ext_short')}</span>` : ''
-      }<br><span class="muted" style="font-size:.8rem">${esc(g.players || '')} · ${esc(
-        g.duration || ''
-      )} ${t('game.min')}</span></td>
-      <td data-label="${t('admin.th_rating')}">${g.rating > 0 ? '★ ' + g.rating.toFixed(1) : t('admin.dash')}</td>
-      <td data-label="${t('admin.th_image')}">${g.image_url ? '🖼️' : t('admin.dash')}</td>
-      <td data-label="${t('admin.th_owner')}">${esc(g.owner || t('admin.dash'))}</td>
-      <td data-label="${t('admin.th_dates')}"><span class="muted" style="font-size:.8rem">${fmtDateTime(
-        g.created_at
-      )}<br>${fmtDateTime(g.updated_at)}</span></td>
-      <td class="cell-actions"><div class="row-actions">
-        <button class="btn btn-ghost btn-icon" data-edit-game="${g.id}"
-          title="${t('admin.edit')}" aria-label="${t('admin.edit')}">
-          <img src="/assets/icons/edit.svg" alt="" />
-        </button>
-        <a class="btn btn-ghost btn-icon" href="${esc(g.details_url)}"
-          title="${t('admin.details')}" aria-label="${t('admin.details')}"
-          target="_blank" rel="noopener">
-          <img src="/assets/icons/link.svg" alt="" />
-        </a>
-        <button class="btn btn-ghost btn-icon" data-del-game="${g.id}"
-          title="${t('admin.delete')}" data-label-text="${esc(g.title)}">
-          <img src="/assets/icons/delete.svg" alt="" />
-        </button>
-      </div></td></tr>`
-    )
-    .join('');
-  document.getElementById('games-table').innerHTML = GAMES.length
-    ? `<table class="responsive"><thead><tr><th>${t('admin.th_game')}</th><th>${t(
-        'admin.th_rating'
-      )}</th><th>${t('admin.th_image')}</th><th>${t('admin.th_owner')}</th><th>${t(
-        'admin.th_dates'
-      )}</th><th></th></tr></thead><tbody>${rows}</tbody></table>` +
-      (list.length < GAMES.length && !q
-        ? `<p class="help center">${t('admin.games_limited')}</p>`
-        : '')
-    : `<div class="empty">${t('admin.no_games')}</div>`;
+  const match = (g) => !q || g.title.toLowerCase().includes(q);
+  const manualAll = GAMES.filter((g) => g.source === 'manual');
+  const myludoAll = GAMES.filter((g) => g.source !== 'manual');
+  const manual = manualAll.filter(match);
+  const myludo = myludoAll.filter(match).slice(0, 300);
+  // La liste hors collection est affichée AVANT la liste MyLudo.
+  const group = (titleKey, count, tableHtml) =>
+    `<div class="card card-pad game-group"><h3 class="font-display" style="margin: 0 0 0.8rem">${t(
+      titleKey
+    )} (${count})</h3>${tableHtml}</div>`;
+  document.getElementById('games-table').innerHTML =
+    group('admin.games_manual_title', manualAll.length, gamesTableHtml(manual, 'admin.no_games_manual')) +
+    group('admin.games_myludo_title', myludoAll.length, gamesTableHtml(myludo, 'admin.no_games')) +
+    (myludo.length < myludoAll.length && !q
+      ? `<p class="help center" style="margin-top: 1rem">${t('admin.games_limited')}</p>`
+      : '');
 }
+
+// --- Widget image : URL ou téléversement -------------------------------------
+function renderImageControl() {
+  const url = document.getElementById('gf-image').value.trim();
+  document.getElementById('gf-image-empty').style.display = url ? 'none' : '';
+  document.getElementById('gf-image-set').style.display = url ? '' : 'none';
+  if (url) document.getElementById('gf-image-preview').src = url;
+}
+function setGameImage(url) {
+  document.getElementById('gf-image').value = url || '';
+  document.getElementById('gf-image-file').value = '';
+  renderImageControl();
+}
+async function onGameImageFile(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.set('image', file);
+  try {
+    const r = await fetch('/api/admin/upload-image', {
+      method: 'POST',
+      headers: { 'x-admin-password': PWD },
+      body: fd,
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Upload');
+    setGameImage(data.url);
+    toast(t('admin.image_uploaded'));
+  } catch (err) {
+    toast(err.message, true);
+  }
+}
+
+// --- Formulaire jeu : création (manuel) + édition --------------------------
+function fillGameForm(g) {
+  const set = (id, v) => (document.getElementById(id).value = v ?? '');
+  set('gf-id', g.id == null ? '' : g.id);
+  set('gf-source', g.source || 'manual');
+  set('gf-name', g.title || '');
+  set('gf-subtitle', g.subtitle || '');
+  document.getElementById('gf-type').value = g.type === 'extension' ? 'extension' : 'basegame';
+  set('gf-players', g.players || '');
+  set('gf-duration', g.duration || '');
+  set('gf-age', g.age || '');
+  set('gf-rating', g.rating ? g.rating : '');
+  set('gf-categories', g.categories || '');
+  set('gf-themes', g.themes || '');
+  set('gf-mechanisms', g.mechanisms || '');
+  set('gf-authors', g.authors || '');
+  set('gf-publishers', g.publishers || '');
+  set('gf-details', g.details_url || '');
+  set('gf-owner', g.owner || '');
+  setGameImage(g.image_url || '');
+}
+
 function openGameForm(id) {
-  const g = GAMES.find((x) => x.id === id);
+  const creating = id == null;
+  const g = creating ? { source: 'manual' } : GAMES.find((x) => x.id === id);
   if (!g) return;
-  document.getElementById('gf-title').textContent = g.title;
-  document.getElementById('gf-id').value = g.id;
-  document.getElementById('gf-image').value = g.image_url || '';
-  document.getElementById('gf-owner').value = g.owner || '';
+  fillGameForm(g);
+  const isManual = (g.source || 'manual') === 'manual';
+  document.getElementById('gf-manual-fields').style.display = isManual ? '' : 'none';
+  document.getElementById('gf-form-title').textContent = creating
+    ? t('admin.gf_add_title')
+    : isManual
+    ? t('admin.gf_edit_title')
+    : t('admin.gf_myludo_title');
   openModal('game-form-modal');
 }
+
+function collectManualFields() {
+  const val = (id) => document.getElementById(id).value.trim();
+  return {
+    title: val('gf-name'),
+    subtitle: val('gf-subtitle'),
+    type: document.getElementById('gf-type').value,
+    players: val('gf-players'),
+    duration: val('gf-duration'),
+    age: val('gf-age'),
+    rating: document.getElementById('gf-rating').value,
+    categories: val('gf-categories'),
+    themes: val('gf-themes'),
+    mechanisms: val('gf-mechanisms'),
+    authors: val('gf-authors'),
+    publishers: val('gf-publishers'),
+    details_url: val('gf-details'),
+    image_url: val('gf-image'),
+    owner: val('gf-owner'),
+  };
+}
+
+// Valeurs distinctes déjà saisies pour un champ CSV, sur l'ensemble de la collection.
+function distinctValues(field) {
+  const set = new Set();
+  for (const g of GAMES) {
+    String(g[field] || '')
+      .split(',')
+      .forEach((s) => {
+        const v = s.trim();
+        if (v) set.add(v);
+      });
+  }
+  return [...set].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+}
+
+// Autocomplétion façon « tags » sur un champ séparé par des virgules
+function attachTagSuggest(input, getOptions) {
+  if (!input) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'ac-wrap';
+  input.parentNode.insertBefore(wrap, input);
+  wrap.appendChild(input);
+  const menu = document.createElement('div');
+  menu.className = 'ac-menu';
+  menu.hidden = true;
+  wrap.appendChild(menu);
+
+  let items = [];
+  let active = -1;
+  const tokenStart = () => input.value.lastIndexOf(',') + 1;
+  const currentText = () => input.value.slice(tokenStart()).trim().toLowerCase();
+  const taken = () =>
+    new Set(
+      input.value
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean)
+    );
+
+  function render() {
+    const q = currentText();
+    const used = taken();
+    items = getOptions()
+      .filter((o) => !used.has(o.toLowerCase()) && (!q || o.toLowerCase().includes(q)))
+      .slice(0, 8);
+    if (!items.length) return hide();
+    if (active >= items.length) active = -1;
+    menu.innerHTML = items
+      .map((o, i) => `<div class="ac-item${i === active ? ' active' : ''}" data-i="${i}">${esc(o)}</div>`)
+      .join('');
+    menu.hidden = false;
+  }
+  function hide() {
+    menu.hidden = true;
+    active = -1;
+  }
+  function choose(i) {
+    const o = items[i];
+    if (o == null) return;
+    const parts = input.value.split(',');
+    parts[parts.length - 1] = o;
+    input.value = parts.map((s) => s.trim()).filter(Boolean).join(', ') + ', ';
+    active = -1;
+    render();
+  }
+
+  input.addEventListener('input', () => {
+    active = -1;
+    render();
+  });
+  input.addEventListener('focus', render);
+  input.addEventListener('blur', hide);
+  input.addEventListener('keydown', (e) => {
+    if (menu.hidden) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      active = (active + 1) % items.length;
+      render();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      active = (active - 1 + items.length) % items.length;
+      render();
+    } else if (e.key === 'Enter' && active >= 0) {
+      e.preventDefault();
+      choose(active);
+    } else if (e.key === 'Escape') {
+      hide();
+    }
+  });
+  menu.addEventListener('mousedown', (e) => {
+    const item = e.target.closest('.ac-item');
+    if (!item) return;
+    e.preventDefault(); // conserve le focus de l'input
+    choose(Number(item.dataset.i));
+  });
+}
+
 async function saveGame() {
   const id = document.getElementById('gf-id').value;
+  const source = document.getElementById('gf-source').value;
   try {
-    await API.send(
-      '/api/admin/games/' + id,
-      'PUT',
-      {
-        image_url: document.getElementById('gf-image').value.trim(),
-        owner: document.getElementById('gf-owner').value.trim(),
-      },
-      PWD
-    );
+    if (!id) {
+      await API.send('/api/admin/games', 'POST', collectManualFields(), PWD);
+    } else if (source === 'manual') {
+      await API.send('/api/admin/games/' + id, 'PUT', collectManualFields(), PWD);
+    } else {
+      await API.send(
+        '/api/admin/games/' + id,
+        'PUT',
+        {
+          image_url: document.getElementById('gf-image').value.trim(),
+          owner: document.getElementById('gf-owner').value.trim(),
+        },
+        PWD
+      );
+    }
     closeModal('game-form-modal');
     toast(t('admin.saved_game'));
     loadGames();
@@ -495,6 +736,32 @@ async function saveGame() {
 }
 
 // --- Import ---------------------------------------------------------------
+// Zone de clic/dépôt réutilisable : relie un conteneur visuel à un <input file>.
+function wireDropzone(zoneId, inputId, onFile) {
+  const dz = document.getElementById(zoneId);
+  const input = document.getElementById(inputId);
+  if (!dz || !input) return;
+  dz.addEventListener('click', () => input.click());
+  ['dragover', 'dragenter'].forEach((ev) =>
+    dz.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dz.classList.add('drag');
+    })
+  );
+  ['dragleave', 'drop'].forEach((ev) =>
+    dz.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dz.classList.remove('drag');
+    })
+  );
+  dz.addEventListener('drop', (e) => {
+    if (e.dataTransfer.files[0]) {
+      input.files = e.dataTransfer.files;
+      onFile(input);
+    }
+  });
+  input.addEventListener('change', (e) => onFile(e.target));
+}
 function fileChosen(input) {
   pendingFile = input.files[0] || null;
   document.getElementById('file-name').textContent = pendingFile
@@ -1097,6 +1364,19 @@ const BK_COUNT_KEYS = {
   membership: 'membership_files',
 };
 
+function bkFileChosen(input) {
+  const f = input.files && input.files[0];
+  document.getElementById('bk-file-name').textContent = f
+    ? t('admin.file_prefix', { name: f.name })
+    : '';
+  previewBackup();
+}
+function bkImagesFileChosen(input) {
+  const f = input.files && input.files[0];
+  document.getElementById('bk-images-file-name').textContent = f
+    ? t('admin.file_prefix', { name: f.name })
+    : '';
+}
 function clearBackupPreview() {
   document.querySelectorAll('.bk-count').forEach((el) => (el.textContent = ''));
   ['bk-list-locations', 'bk-list-info_blocks'].forEach((id) => {
@@ -1135,6 +1415,14 @@ async function previewBackup() {
   });
   renderBkList('bk-list-locations', (d.locations || []).map((l) => l.name));
   renderBkList('bk-list-info_blocks', (d.info_blocks || []).map((b) => b.title));
+  // Les jeux sont une seule liste dans la sauvegarde : on compte par provenance.
+  const bkGames = Array.isArray(d.games) ? d.games : [];
+  const setBkCount = (cat, n) => {
+    const el = document.querySelector(`.bk-count[data-count="${cat}"]`);
+    if (el) el.textContent = ` (${n})`;
+  };
+  setBkCount('games_manual', bkGames.filter((g) => (g.source || 'myludo') === 'manual').length);
+  setBkCount('games_myludo', bkGames.filter((g) => (g.source || 'myludo') !== 'manual').length);
 }
 
 async function doExport() {
@@ -1186,6 +1474,7 @@ function doDbImport() {
       closeModal('confirm-modal');
       // Réinitialise le formulaire d'import.
       fileInput.value = '';
+      document.getElementById('bk-file-name').textContent = '';
       clearBackupPreview();
       document.querySelectorAll('.bk-cat').forEach((c) => (c.checked = false));
       const allBox = document.getElementById('bk-all');
@@ -1306,7 +1595,10 @@ function wireHandlers() {
   // Sauvegarde (export / import).
   document.getElementById('bk-export-btn')?.addEventListener('click', doExport);
   document.getElementById('bk-import-btn')?.addEventListener('click', doDbImport);
-  document.getElementById('bk-file')?.addEventListener('change', previewBackup);
+  document.getElementById('bk-images-export-btn')?.addEventListener('click', doImagesExport);
+  document.getElementById('bk-images-import-btn')?.addEventListener('click', doImagesImport);
+  wireDropzone('bk-dropzone', 'bk-file', bkFileChosen);
+  wireDropzone('bk-images-dropzone', 'bk-images-file', bkImagesFileChosen);
   document.getElementById('bk-all')?.addEventListener('change', (e) => {
     document.querySelectorAll('.bk-cat').forEach((c) => (c.checked = e.target.checked));
   });
@@ -1321,6 +1613,17 @@ function wireHandlers() {
   document.getElementById('save-event-btn').addEventListener('click', saveEvent);
   document.getElementById('save-location-btn').addEventListener('click', saveLocation);
   document.getElementById('save-game-btn').addEventListener('click', saveGame);
+  document.getElementById('add-game-btn').addEventListener('click', () => openGameForm(null));
+  document.getElementById('gf-image').addEventListener('change', renderImageControl);
+  document.getElementById('gf-image-remove').addEventListener('click', () => setGameImage(''));
+  wireDropzone('gf-dropzone', 'gf-image-file', onGameImageFile);
+  [
+    ['gf-categories', 'categories'],
+    ['gf-themes', 'themes'],
+    ['gf-mechanisms', 'mechanisms'],
+    ['gf-authors', 'authors'],
+    ['gf-publishers', 'publishers'],
+  ].forEach(([id, field]) => attachTagSuggest(document.getElementById(id), () => distinctValues(field)));
   document.getElementById('settings-form').addEventListener('submit', (e) => {
     e.preventDefault();
     saveSettings();
@@ -1342,29 +1645,8 @@ function wireHandlers() {
     document.getElementById('gp-count').textContent = pickerSelected.size;
   });
 
-  // Zone de dépôt d'import.
-  const dz = document.getElementById('dropzone');
-  dz.addEventListener('click', () => document.getElementById('file-input').click());
-  ['dragover', 'dragenter'].forEach((ev) =>
-    dz.addEventListener(ev, (e) => {
-      e.preventDefault();
-      dz.classList.add('drag');
-    })
-  );
-  ['dragleave', 'drop'].forEach((ev) =>
-    dz.addEventListener(ev, (e) => {
-      e.preventDefault();
-      dz.classList.remove('drag');
-    })
-  );
-  dz.addEventListener('drop', (e) => {
-    const f = e.dataTransfer.files[0];
-    if (f) {
-      document.getElementById('file-input').files = e.dataTransfer.files;
-      fileChosen(document.getElementById('file-input'));
-    }
-  });
-  document.getElementById('file-input').addEventListener('change', (e) => fileChosen(e.target));
+  // Zone de dépôt d'import MyLudo.
+  wireDropzone('dropzone', 'file-input', fileChosen);
 
   // Délégation pour les tableaux (générés dynamiquement).
   document.getElementById('dashboard').addEventListener('click', (e) => {

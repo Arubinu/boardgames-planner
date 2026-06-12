@@ -4,6 +4,8 @@ import express from 'express';
 import compression from 'compression';
 import expressStaticGzip from 'express-static-gzip';
 import multer from 'multer';
+import AdmZip from 'adm-zip';
+import sharp from 'sharp';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { fileURLToPath } from 'url';
@@ -23,6 +25,8 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', 'data');
 const MEMBERSHIP_DIR = path.join(DATA_DIR, 'uploads', 'membership');
 fs.mkdirSync(MEMBERSHIP_DIR, { recursive: true });
+const GAME_IMG_DIR = path.join(DATA_DIR, 'uploads', 'games');
+fs.mkdirSync(GAME_IMG_DIR, { recursive: true });
 
 // Formats acceptés pour le(s) document(s) d'adhésion (extension → type MIME).
 const MEMBERSHIP_TYPES = {
@@ -85,6 +89,7 @@ const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).cat
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 // Import de base : le fichier JSON peut être volumineux (documents en base64).
 const importUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 64 * 1024 * 1024 } });
+const imagesUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 256 * 1024 * 1024 } });
 
 // --- Helpers réglages -----------------------------------------------------
 const getSetting = db.prepare('SELECT value FROM settings WHERE key = ?');
@@ -583,13 +588,76 @@ const setEventGames = db.transaction((eventId, gameIds) => {
   for (const gid of gameIds) ins.run(eventId, gid);
 });
 
-// --- Jeux : édition manuelle (image / propriétaire) ---
+// --- Jeux hors collection (création) + édition ---
+// Les jeux manuels portent source='manual' et un id NÉGATIF, pour ne jamais
+// entrer en conflit avec les ID MyLudo (positifs) ni être touchés par l'import.
+const normRange = (s) => String(s || '').replace(/\s*[-‐‑‒–—―]\s*/g, ' — ').trim();
+app.post('/api/admin/games', requireAdmin, (req, res) => {
+  const b = req.body || {};
+  const title = String(b.title || '').trim();
+  if (!title) return res.status(400).json({ error: 'Titre requis' });
+  const id = Math.min(db.prepare('SELECT MIN(id) AS m FROM games').get().m ?? 0, 0) - 1;
+  const v = {
+    id,
+    title,
+    subtitle: String(b.subtitle || '').trim(),
+    type: b.type === 'extension' ? 'extension' : 'basegame',
+    players: normRange(b.players),
+    duration: normRange(b.duration),
+    age: String(b.age || '').trim(),
+    categories: String(b.categories || '').trim(),
+    themes: String(b.themes || '').trim(),
+    mechanisms: String(b.mechanisms || '').trim(),
+    authors: String(b.authors || '').trim(),
+    publishers: String(b.publishers || '').trim(),
+    rating: Number(b.rating) || 0,
+    image_url: String(b.image_url || '').trim(),
+    details_url: String(b.details_url || '').trim(),
+    owner: String(b.owner || '').trim(),
+  };
+  db.prepare(`INSERT INTO games
+      (id, source, title, subtitle, type, players, duration, age, categories, themes,
+       mechanisms, authors, publishers, rating, image_url, details_url, owner)
+    VALUES
+      (@id, 'manual', @title, @subtitle, @type, @players, @duration, @age, @categories, @themes,
+       @mechanisms, @authors, @publishers, @rating, @image_url, @details_url, @owner)`).run(v);
+  res.json(db.prepare('SELECT * FROM games WHERE id = ?').get(id));
+});
+
 app.put('/api/admin/games/:id', requireAdmin, (req, res) => {
   const b = req.body || {};
   const existing = db.prepare('SELECT * FROM games WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Jeu introuvable' });
-  db.prepare('UPDATE games SET image_url=?, owner=?, updated_at=datetime(\'now\') WHERE id=?')
-    .run(b.image_url ?? existing.image_url, b.owner ?? existing.owner, req.params.id);
+  if (existing.source === 'manual') {
+    // Jeu hors collection : édition complète de tous les champs.
+    const v = {
+      id: req.params.id,
+      title: String(b.title ?? existing.title).trim() || existing.title,
+      subtitle: String(b.subtitle ?? existing.subtitle).trim(),
+      type: (b.type ?? existing.type) === 'extension' ? 'extension' : 'basegame',
+      players: normRange(b.players ?? existing.players),
+      duration: normRange(b.duration ?? existing.duration),
+      age: String(b.age ?? existing.age).trim(),
+      categories: String(b.categories ?? existing.categories).trim(),
+      themes: String(b.themes ?? existing.themes).trim(),
+      mechanisms: String(b.mechanisms ?? existing.mechanisms).trim(),
+      authors: String(b.authors ?? existing.authors).trim(),
+      publishers: String(b.publishers ?? existing.publishers).trim(),
+      rating: b.rating != null ? Number(b.rating) || 0 : existing.rating,
+      image_url: String(b.image_url ?? existing.image_url).trim(),
+      details_url: String(b.details_url ?? existing.details_url).trim(),
+      owner: String(b.owner ?? existing.owner).trim(),
+    };
+    db.prepare(`UPDATE games SET title=@title, subtitle=@subtitle, type=@type, players=@players,
+        duration=@duration, age=@age, categories=@categories, themes=@themes,
+        mechanisms=@mechanisms, authors=@authors, publishers=@publishers, rating=@rating,
+        image_url=@image_url, details_url=@details_url, owner=@owner,
+        updated_at=datetime('now') WHERE id=@id`).run(v);
+  } else {
+    // Jeu MyLudo : seules l'image et le « apporté par » sont modifiables
+    db.prepare("UPDATE games SET image_url=?, owner=?, updated_at=datetime('now') WHERE id=?")
+      .run(b.image_url ?? existing.image_url, b.owner ?? existing.owner, req.params.id);
+  }
   res.json(db.prepare('SELECT * FROM games WHERE id = ?').get(req.params.id));
 });
 
@@ -597,6 +665,66 @@ app.delete('/api/admin/games/:id', requireAdmin, (req, res) => {
   db.prepare('DELETE FROM games WHERE id = ?').run(req.params.id);
   res.json({ ok: true });
 });
+
+// --- Upload d'une image de couverture -> renvoie son URL (/uploads/games/...) ---
+const IMG_EXT = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+  'image/avif': 'avif',
+};
+app.post('/api/admin/upload-image', requireAdmin, upload.single('image'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Aucune image fournie.' });
+  if (!IMG_EXT[req.file.mimetype])
+    return res.status(400).json({ error: 'Format non supporté (JPEG, PNG, WebP, GIF, AVIF).' });
+  let webp;
+  try {
+    webp = await sharp(req.file.buffer, { animated: true }).webp({ quality: 80 }).toBuffer();
+  } catch {
+    return res.status(400).json({ error: 'Image illisible ou corrompue.' });
+  }
+  const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+  fs.writeFileSync(path.join(GAME_IMG_DIR, name), webp);
+  res.json({ url: `/uploads/games/${name}` });
+});
+
+// --- Export / import des images de jeux (ZIP), en complément de la sauvegarde JSON ---
+app.get('/api/admin/images-export', requireAdmin, (req, res) => {
+  const zip = new AdmZip();
+  for (const f of fs.readdirSync(GAME_IMG_DIR)) {
+    const full = path.join(GAME_IMG_DIR, f);
+    if (fs.statSync(full).isFile()) zip.addLocalFile(full);
+  }
+  const name = `boardgames-images-${new Date().toISOString().slice(0, 10)}.zip`;
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', `attachment; filename="${name}"`);
+  res.send(zip.toBuffer());
+});
+
+const IMG_IMPORT_EXT = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif']);
+app.post('/api/admin/images-import', requireAdmin, imagesUpload.single('images'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Aucun fichier ZIP fourni.' });
+  let zip;
+  try {
+    zip = new AdmZip(req.file.buffer);
+  } catch {
+    return res.status(400).json({ error: 'Archive ZIP illisible.' });
+  }
+  let imported = 0;
+  for (const entry of zip.getEntries()) {
+    if (entry.isDirectory) continue;
+    const base = path.basename(entry.entryName); // anti-traversal
+    const ext = path.extname(base).slice(1).toLowerCase();
+    if (!base || !IMG_IMPORT_EXT.has(ext)) continue;
+    fs.writeFileSync(path.join(GAME_IMG_DIR, base), entry.getData());
+    imported++;
+  }
+  res.json({ ok: true, imported });
+});
+
+// Sert les images de jeux téléversées (stockées dans le volume DATA_DIR).
+app.use('/uploads/games', express.static(GAME_IMG_DIR, { maxAge: '7d' }));
 
 // --- Import MyLudo (CSV ou JSON) ---
 // Conserve les images/propriétaires déjà saisis manuellement (merge sur l'ID).
@@ -607,13 +735,13 @@ const importGames = db.transaction((games, mode) => {
   for (const row of db.prepare('SELECT id, image_url, owner, created_at FROM games').all()) {
     previous.set(row.id, row);
   }
-  if (mode === 'replace') db.prepare('DELETE FROM games').run();
+  if (mode === 'replace') db.prepare("DELETE FROM games WHERE source = 'myludo'").run();
   const upsert = db.prepare(`
     INSERT INTO games
-      (id, title, subtitle, type, players, duration, age, categories, themes,
+      (id, source, title, subtitle, type, players, duration, age, categories, themes,
        mechanisms, authors, publishers, rating, details_url, owner, image_url, created_at, updated_at)
     VALUES
-      (@id, @title, @subtitle, @type, @players, @duration, @age, @categories, @themes,
+      (@id, 'myludo', @title, @subtitle, @type, @players, @duration, @age, @categories, @themes,
        @mechanisms, @authors, @publishers, @rating, @details_url, @owner, @image_url, @created_at, datetime('now'))
     ON CONFLICT(id) DO UPDATE SET
       title=excluded.title, subtitle=excluded.subtitle, type=excluded.type,
@@ -795,7 +923,7 @@ const TABLE_COLUMNS = {
   settings: ['key', 'value'],
   event_types: ['id', 'key', 'label', 'sub', 'color', 'signup', 'sort_order'],
   locations: ['id', 'name', 'address', 'coords', 'maps_url', 'description', 'archived', 'created_at'],
-  games: ['id', 'title', 'subtitle', 'type', 'players', 'duration', 'age', 'categories', 'themes', 'mechanisms', 'authors', 'publishers', 'rating', 'image_url', 'details_url', 'owner', 'created_at', 'updated_at'],
+  games: ['id', 'source', 'title', 'subtitle', 'type', 'players', 'duration', 'age', 'categories', 'themes', 'mechanisms', 'authors', 'publishers', 'rating', 'image_url', 'details_url', 'owner', 'created_at', 'updated_at'],
   events: ['id', 'title', 'date', 'start_time', 'end_time', 'type', 'location_id', 'description', 'created_at'],
   event_games: ['event_id', 'game_id'],
   info_blocks: ['id', 'kind', 'icon', 'title', 'body', 'sort_order'],
@@ -808,7 +936,8 @@ const IMPORT_CATEGORIES = {
   settings: ['settings'],
   event_types: ['event_types'],
   locations: ['locations'],
-  games: ['games'],
+  games_myludo: ['games'],
+  games_manual: ['games'],
   events: ['events', 'event_games'],
   info_blocks: ['info_blocks'],
   faq: ['faq'],
@@ -851,6 +980,22 @@ function importRows(table, rows) {
     if (!keys.length) continue;
     db.prepare(
       `INSERT INTO ${table} (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`
+    ).run(...keys.map((k) => row[k]));
+  }
+}
+
+// Restaure les jeux d'une seule provenance (MyLudo ou hors collection)
+function importGamesBySource(rows, source) {
+  if (!Array.isArray(rows)) return;
+  const cols = TABLE_COLUMNS.games;
+  db.prepare('DELETE FROM games WHERE source = ?').run(source);
+  for (const row of rows) {
+    if (!row || typeof row !== 'object') continue;
+    if ((row.source || 'myludo') !== source) continue;
+    const keys = cols.filter((c) => Object.prototype.hasOwnProperty.call(row, c));
+    if (!keys.length) continue;
+    db.prepare(
+      `INSERT INTO games (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`
     ).run(...keys.map((k) => row[k]));
   }
 }
@@ -913,6 +1058,8 @@ app.post('/api/admin/db-import', requireAdmin, importUpload.single('backup'), (r
       for (const cat of cats) {
         if (cat === 'settings') importSettings(data.settings);
         else if (cat === 'membership') importMembership(data.membership_files);
+        else if (cat === 'games_myludo') importGamesBySource(data.games, 'myludo');
+        else if (cat === 'games_manual') importGamesBySource(data.games, 'manual');
         else if (cat === 'events') {
           importRows('events', data.events);
           importRows('event_games', data.event_games);

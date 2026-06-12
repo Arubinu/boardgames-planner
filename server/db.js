@@ -150,6 +150,7 @@ function addColumnIfMissing(table, column, definition) {
 addColumnIfMissing('locations', 'archived', 'INTEGER DEFAULT 0');
 addColumnIfMissing('locations', 'coords', "TEXT DEFAULT ''");
 addColumnIfMissing('games', 'created_at', "TEXT DEFAULT ''");
+addColumnIfMissing('games', 'source', "TEXT DEFAULT 'myludo'");
 // Pour les jeux existants sans date de création, on initialise avec updated_at.
 try { db.exec("UPDATE games SET created_at = updated_at WHERE created_at IS NULL OR created_at = ''"); } catch (e) {}
 
