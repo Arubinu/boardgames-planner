@@ -1,6 +1,6 @@
 {
   "name": "boardgames-planner",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Site des soirées jeux de société de la MJC Estrablin : calendrier interactif, ludothèque MyLudo, multilingue (FR/EN) et administration.",
   "type": "module",
   "main": "server/index.js",

@@ -28,6 +28,7 @@ The front-end is built with **Vite** (JS module bundling) and **Sass/SCSS** (sty
 - Manage **event types** from a dedicated tab: label, mention ("sign-up required"…), **color** and whether sign-up is required. Types feed the event form, the calendar and the badges.
 - Manage the list of venues (quick selection when creating a date). Each venue is **located by clicking on a Leaflet map** (OpenStreetMap): the coordinates are saved and the Google Maps link is derived automatically (no URL to paste). "Deleting" a venue **archives** it: it disappears from the public site but can be unarchived.
 - Import the collection from a **MyLudo** export (CSV or JSON). Each game's **creation date** is preserved across imports; the modification date is updated.
+- **Off-collection games** (created manually): they **survive imports** (never overwritten or deleted) and appear in the library like imported games.
 - Add an image and a "brought by" note to each game (preserved across re-imports), or delete a game.
 - Configure the **site identity**: the **name** and **holder** (e.g. "Game Nights" / "MJC Estrablin"), used to build the nav brand, the page titles and the share previews; plus the description and share image (OpenGraph), the **home title** (with `[highlighted]` parts) and the **footer text** (with `[label](url)` links).
 - Set the **default site language** (or leave it on *auto / browser*) and the password.
